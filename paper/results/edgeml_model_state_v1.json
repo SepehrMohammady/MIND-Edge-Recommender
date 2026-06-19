@@ -1,0 +1,47 @@
+{
+  "schema": "edgeml_model_state_v1",
+  "topicWeights": {
+    "news": 0.313074,
+    "sports": 0.141549,
+    "lifestyle": 0.104086,
+    "finance": 0.07719,
+    "tv": 0.071353,
+    "foodanddrink": 0.053206,
+    "health": 0.045074,
+    "autos": 0.034815,
+    "movies": 0.034705,
+    "entertainment": 0.032943,
+    "travel": 0.032285,
+    "music": 0.027665,
+    "video": 0.019851,
+    "weather": 0.012162,
+    "kids": 3.1e-05,
+    "middleeast": 1.3e-05,
+    "northamerica": 0.0
+  },
+  "contentEncoder": {
+    "format": "onnx",
+    "path": "content_encoder.onnx",
+    "inputBytes": 128,
+    "embedDim": 384,
+    "matryoshkaDim": 64
+  },
+  "languages": [
+    "en",
+    "zho",
+    "fin",
+    "grn",
+    "hat",
+    "ind",
+    "jpn",
+    "kat",
+    "ron",
+    "som",
+    "swh",
+    "tam",
+    "tha",
+    "tur",
+    "vie"
+  ],
+  "notes": "byte-level encoder; one model serves all languages."
+}

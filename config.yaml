@@ -1,0 +1,104 @@
+# =============================================================================
+# FeedWell-Edge :: central experiment configuration
+# Every knob lives here and is overridable from the notebook, e.g.:
+#     from src.config import load_config
+#     cfg = load_config(); cfg["train"]["epochs"] = 5
+# =============================================================================
+
+seed: 42
+
+paths:
+  data_dir: data           # downloaded datasets
+  artifacts_dir: artifacts # exported models, JSON priors, results tables
+  logs_dir: logs
+
+# ---------------------------------------------------------------------------
+# Datasets
+# ---------------------------------------------------------------------------
+data:
+  mind_size: small         # small | large  (start small for fast iteration)
+  # All 14 xMIND languages, using the HF on-disk codes (HF uses 'zho' for
+  # Mandarin where the GitHub download.py uses 'cmn'). Files live at
+  # data/xmind/<size>/data/<lang>/<split>.parquet.gzip
+  xmind_langs: [zho, fin, grn, hat, ind, jpn, kat, ron, som, swh, tam, tha, tur, vie]
+  max_history: 50          # clicked-news kept per user history
+  max_title_bytes: 128     # byte-level student input length (UTF-8 bytes)
+  neg_ratio: 4             # negative samples per positive (NRMS-style training)
+
+# ---------------------------------------------------------------------------
+# Frozen multilingual TEACHER (runs offline only, never shipped on-device)
+# ---------------------------------------------------------------------------
+teacher:
+  model: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+  embed_dim: 384
+  batch_size: 256
+
+# ---------------------------------------------------------------------------
+# Deployed STUDENT content encoder (byte-level char-CNN)
+# ---------------------------------------------------------------------------
+student:
+  type: byte_cnn          # byte_cnn | hashed_ngram (fallback)
+  byte_embed_dim: 64      # 256-symbol UTF-8 alphabet -> shared by all 14 langs
+  channels: 128
+  depth: 3                # depthwise-separable 1D conv blocks
+  out_dim: 384            # distillation target dim (matches teacher)
+  matryoshka_dim: 64      # truncated dim usable on-device
+
+# ---------------------------------------------------------------------------
+# NAS  (architecture axis: nas -> micro_nas -> binarized_micro_nas)
+# ---------------------------------------------------------------------------
+nas:
+  method: evolutionary    # evolutionary supernet search (NAS-BNN style)
+  search_space:
+    channels: [32, 64, 96, 128, 192, 256]
+    depth: [1, 2, 3, 4, 5]
+    out_dim: [64, 128, 256, 384]
+  population: 50
+  generations: 20
+  # Hard constraints for the Micro-NAS arms. Deliberately TIGHTER than the
+  # STM32H7 ceiling (2 MB / 1 MB) so the constraints actually bind at this tiny
+  # text-encoder scale and the architecture axis (NAS vs Micro-NAS) separates.
+  constraints:
+    flash_kb: 256         # aggressive on-device budget
+    ram_kb: 128
+    max_macs: 2000000     # 2 MMac latency proxy
+
+# ---------------------------------------------------------------------------
+# Precision axis
+# ---------------------------------------------------------------------------
+quant:
+  int8: {method: qat}     # ptq | qat
+  binary: {keep_first_last_fp: true}  # XNOR-Net practice: don't binarize first/last
+
+# ---------------------------------------------------------------------------
+# Training
+# ---------------------------------------------------------------------------
+train:
+  device: cuda            # falls back to cpu automatically
+  epochs: 10
+  batch_size: 64
+  lr: 0.0001
+  distill_epochs: 15
+  distill_lr: 0.001
+
+# ---------------------------------------------------------------------------
+# Evaluation
+# ---------------------------------------------------------------------------
+eval:
+  metrics: [auc, mrr, ndcg@5, ndcg@10]
+  langs: all              # evaluate all 14 xMIND langs (cross-lingual transfer)
+
+# ---------------------------------------------------------------------------
+# Deployment targets (for the footprint/energy matrix)
+# ---------------------------------------------------------------------------
+targets:
+  laptop:  {flash_kb: null, ram_kb: null, energy: nvml}
+  pi5:     {flash_kb: null, ram_kb: null, energy: ina219}
+  stm32h7: {flash_kb: 2048, ram_kb: 1024, energy: analytical}
+
+# Horowitz ISSCC-2014 (45nm) per-op energy in pJ (relative proxy; label as such)
+energy_pj:
+  fp32_mac: 4.6
+  int8_mac: 0.23
+  binary_op: 0.0072      # ~ (fp32_mac / 64) XNOR+popcount proxy
+  sram_read_32b: 5.0

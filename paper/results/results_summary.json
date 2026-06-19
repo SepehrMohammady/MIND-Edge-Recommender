@@ -1,0 +1,262 @@
+{
+  "best_arch": {
+    "nas": {
+      "channels": 256,
+      "depth": 4,
+      "out_dim": 384
+    },
+    "micro_nas": {
+      "channels": 64,
+      "depth": 5,
+      "out_dim": 384
+    },
+    "binarized_micro_nas": {
+      "channels": 96,
+      "depth": 2,
+      "out_dim": 384
+    }
+  },
+  "baseline": {
+    "arm": "NRMS (baseline)",
+    "precision": "fp32",
+    "auc": 0.6074,
+    "mrr": 0.3218,
+    "ndcg@10": 0.3635
+  },
+  "matrix": [
+    {
+      "arm": "nas",
+      "precision": "fp32",
+      "channels": 256,
+      "depth": 4,
+      "out_dim": 384,
+      "auc": 0.6327,
+      "mrr": 0.3261,
+      "ndcg@10": 0.3749,
+      "size_kb": 1566.75,
+      "ram_kb": 128.0,
+      "macs": 36667392,
+      "energy_uj": 168.67
+    },
+    {
+      "arm": "nas",
+      "precision": "int8",
+      "channels": 256,
+      "depth": 4,
+      "out_dim": 384,
+      "auc": 0.6471,
+      "mrr": 0.3379,
+      "ndcg@10": 0.3866,
+      "size_kb": 789.75,
+      "ram_kb": 32.0,
+      "macs": 2719744,
+      "energy_uj": 4.6518
+    },
+    {
+      "arm": "nas",
+      "precision": "binary",
+      "channels": 256,
+      "depth": 4,
+      "out_dim": 384,
+      "auc": 0.5878,
+      "mrr": 0.2971,
+      "ndcg@10": 0.3423,
+      "size_kb": 563.12,
+      "ram_kb": 32.0,
+      "macs": 2719744,
+      "energy_uj": 4.2511
+    },
+    {
+      "arm": "micro_nas",
+      "precision": "fp32",
+      "channels": 64,
+      "depth": 5,
+      "out_dim": 384,
+      "auc": 0.6045,
+      "mrr": 0.3073,
+      "ndcg@10": 0.3519,
+      "size_kb": 266.75,
+      "ram_kb": 32.0,
+      "macs": 3457024,
+      "energy_uj": 15.9023
+    },
+    {
+      "arm": "micro_nas",
+      "precision": "int8",
+      "channels": 64,
+      "depth": 5,
+      "out_dim": 384,
+      "auc": 0.61,
+      "mrr": 0.3144,
+      "ndcg@10": 0.3595,
+      "size_kb": 203.94,
+      "ram_kb": 8.0,
+      "macs": 712704,
+      "energy_uj": 2.3006
+    },
+    {
+      "arm": "micro_nas",
+      "precision": "binary",
+      "channels": 64,
+      "depth": 5,
+      "out_dim": 384,
+      "auc": 0.521,
+      "mrr": 0.2511,
+      "ndcg@10": 0.2938,
+      "size_kb": 185.62,
+      "ram_kb": 8.0,
+      "macs": 712704,
+      "energy_uj": 2.2507
+    },
+    {
+      "arm": "binarized_micro_nas",
+      "precision": "fp32",
+      "channels": 96,
+      "depth": 2,
+      "out_dim": 384,
+      "auc": 0.5934,
+      "mrr": 0.2901,
+      "ndcg@10": 0.3362,
+      "size_kb": 311.38,
+      "ram_kb": 48.0,
+      "macs": 3354624,
+      "energy_uj": 15.4313
+    },
+    {
+      "arm": "binarized_micro_nas",
+      "precision": "int8",
+      "channels": 96,
+      "depth": 2,
+      "out_dim": 384,
+      "auc": 0.6009,
+      "mrr": 0.2947,
+      "ndcg@10": 0.3437,
+      "size_kb": 255.69,
+      "ram_kb": 12.0,
+      "macs": 921600,
+      "energy_uj": 3.279
+    },
+    {
+      "arm": "binarized_micro_nas",
+      "precision": "binary",
+      "channels": 96,
+      "depth": 2,
+      "out_dim": 384,
+      "auc": 0.546,
+      "mrr": 0.2725,
+      "ndcg@10": 0.317,
+      "size_kb": 239.45,
+      "ram_kb": 12.0,
+      "macs": 921600,
+      "energy_uj": 3.23
+    }
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "auc": 0.6045,
+      "mrr": 0.3073,
+      "ndcg@5": 0.2859,
+      "ndcg@10": 0.3519
+    },
+    {
+      "lang": "zho",
+      "auc": 0.5205,
+      "mrr": 0.2511,
+      "ndcg@5": 0.2346,
+      "ndcg@10": 0.2977
+    },
+    {
+      "lang": "fin",
+      "auc": 0.4951,
+      "mrr": 0.2254,
+      "ndcg@5": 0.2077,
+      "ndcg@10": 0.2722
+    },
+    {
+      "lang": "grn",
+      "auc": 0.5327,
+      "mrr": 0.2587,
+      "ndcg@5": 0.2466,
+      "ndcg@10": 0.3061
+    },
+    {
+      "lang": "hat",
+      "auc": 0.5555,
+      "mrr": 0.2634,
+      "ndcg@5": 0.2497,
+      "ndcg@10": 0.3119
+    },
+    {
+      "lang": "ind",
+      "auc": 0.5371,
+      "mrr": 0.2934,
+      "ndcg@5": 0.2718,
+      "ndcg@10": 0.3293
+    },
+    {
+      "lang": "jpn",
+      "auc": 0.5507,
+      "mrr": 0.2589,
+      "ndcg@5": 0.2451,
+      "ndcg@10": 0.3094
+    },
+    {
+      "lang": "kat",
+      "auc": 0.4911,
+      "mrr": 0.2635,
+      "ndcg@5": 0.2346,
+      "ndcg@10": 0.2957
+    },
+    {
+      "lang": "ron",
+      "auc": 0.532,
+      "mrr": 0.2536,
+      "ndcg@5": 0.2369,
+      "ndcg@10": 0.2996
+    },
+    {
+      "lang": "som",
+      "auc": 0.514,
+      "mrr": 0.2354,
+      "ndcg@5": 0.2151,
+      "ndcg@10": 0.2811
+    },
+    {
+      "lang": "swh",
+      "auc": 0.5208,
+      "mrr": 0.2433,
+      "ndcg@5": 0.2297,
+      "ndcg@10": 0.2891
+    },
+    {
+      "lang": "tam",
+      "auc": 0.5037,
+      "mrr": 0.2438,
+      "ndcg@5": 0.2293,
+      "ndcg@10": 0.288
+    },
+    {
+      "lang": "tha",
+      "auc": 0.5042,
+      "mrr": 0.2373,
+      "ndcg@5": 0.2163,
+      "ndcg@10": 0.2811
+    },
+    {
+      "lang": "tur",
+      "auc": 0.5295,
+      "mrr": 0.2665,
+      "ndcg@5": 0.2535,
+      "ndcg@10": 0.3112
+    },
+    {
+      "lang": "vie",
+      "auc": 0.5228,
+      "mrr": 0.2542,
+      "ndcg@5": 0.2395,
+      "ndcg@10": 0.2981
+    }
+  ],
+  "runtime_min": 494.4
+}

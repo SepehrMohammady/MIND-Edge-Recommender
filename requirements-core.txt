@@ -1,0 +1,9 @@
+# Lightweight deps needed only to DOWNLOAD + PEEK at the datasets.
+# Installed first so data lands on disk before the heavy torch stack.
+huggingface_hub>=0.25
+requests
+tqdm
+numpy
+pandas
+pyarrow
+pyyaml

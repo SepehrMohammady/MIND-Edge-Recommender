@@ -1,0 +1,36 @@
+# Full ML stack. Install AFTER requirements-core.txt and AFTER torch.
+# torch/torchvision/torchaudio are installed separately from the CUDA 13.0
+# (cu130) index in scripts/setup_env.ps1 because the RTX 5070 (Blackwell,
+# sm_120) needs the cu130 wheels (PyTorch 2.12 deprecated cu128).
+
+# --- Text encoders / datasets ---
+transformers>=4.44
+sentence-transformers>=3.0
+datasets>=2.20
+tokenizers
+
+# --- Metrics / science ---
+scikit-learn
+scipy
+matplotlib
+
+# --- Quantization / BNN ---
+# (Quantization is implemented natively with custom STE layers in
+#  src/quantize.py -- no brevitas dependency, avoids a numpy pin conflict.)
+
+# --- Footprint / profiling ---
+thop                    # MAC + param counting
+fvcore                  # FLOP analysis (handles attention better)
+
+# --- Export / edge runtimes ---
+onnx>=1.16
+onnxscript              # required by the torch 2.12 ONNX exporter
+onnxruntime>=1.27       # also the Raspberry Pi 5 (aarch64) inference runtime
+
+# --- Energy measurement (laptop GPU) ---
+nvidia-ml-py            # NVML power draw on the RTX 5070 (successor to pynvml)
+codecarbon              # orchestrated energy/CO2 logging
+
+# --- Notebook ---
+jupyter
+ipykernel
