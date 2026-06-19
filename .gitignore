@@ -1,0 +1,23 @@
+# Environments
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data & large artifacts (downloaded / generated, never committed)
+data/
+artifacts/
+hf_cache/
+*.onnx
+*.tflite
+*.pt
+*.pth
+*.ckpt
+
+# Logs / scratch
+logs/
+*.log
+.DS_Store
