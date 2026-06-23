@@ -70,8 +70,9 @@ the user model never leaves the phone or edge node. Two obstacles dominate.
 (i)~\textbf{Cold start}: a per-user model initialized from zero gives poor early
 recommendations. (ii)~\textbf{The memory wall}: state-of-the-art news
 recommenders such as NRMS~\cite{wu2019nrms} and NAML encode article titles with
-a word-embedding matrix (e.g., GloVe-300d over a 30k--100k vocabulary $=$
-37--120\,MB in FP32), which cannot fit a microcontroller's flash; multiplying
+a word-embedding matrix (e.g., GloVe-300d~\cite{pennington2014glove} over a
+30k--100k vocabulary $=$ 37--120\,MB in FP32), which cannot fit a
+microcontroller's flash; multiplying
 this per language for a multilingual app is hopeless.
 
 We target both. We pretrain, \textit{fully offline}, a population cold-start
@@ -90,16 +91,52 @@ on flash, RAM, and energy across three deployment tiers. This extends our
 group's prior NAS-for-BNN work~\cite{pighetti2026nasbnn} from vision
 (WakeVision) to multilingual text recommendation.
 
+\paragraph{Contributions.}
+(1)~A \emph{language-agnostic byte-level} news encoder, distilled from a frozen
+multilingual teacher~\cite{reimers2020multilingual,wang2020minilm}, that removes
+the word-embedding memory wall and serves 14~xMIND languages plus English with a
+single sub-2\,MB model. (2)~A systematic
+\emph{architecture\,$\times$\,precision} benchmark (NAS / Micro-NAS /
+binarized-$\mu$NAS at FP32/INT8/Binary) reporting ranking quality against flash,
+RAM, and energy on a laptop\,$\to$\,Pi\,5\,$\to$\,STM32H7 path. (3)~A distillation
+ablation isolating the gain of distilled initialisation ($+3.3$ AUC at the
+Micro-NAS scale), with released cold-start prior and content encoder for deployment.
+
+\paragraph{Novelty.}
+To our knowledge this is the first byte-level, vocabulary-free news recommender
+studied under a \emph{joint} architecture-search and precision sweep for
+microcontroller-class targets: prior on-device NAS/BNN work targets vision
+(e.g.~\cite{lin2020mcunet,nasbnn2024,pighetti2026nasbnn}), and existing
+multilingual news recommenders~\cite{iana2024xmind} are server-scale with
+per-language sub-word vocabularies.
+
 
 %---------------------------------------------------------------
 \section{Related Work}
 %---------------------------------------------------------------
 
 \noindent\textbf{Neural news recommendation.}
-NRMS~\cite{wu2019nrms}, NAML, and LSTUR established attention-based title
-encoders and user encoders on MIND~\cite{wu2020mind}; the standard task is
-impression-level click ranking (AUC/MRR/nDCG). All rely on large word-embedding
-tables, the very component we remove.
+NRMS~\cite{wu2019nrms}, NAML~\cite{wu2019naml}, LSTUR~\cite{an2019lstur},
+NPA~\cite{wu2019npa}, and DKN~\cite{wang2018dkn} established attention- and
+knowledge-based title/user encoders on MIND~\cite{wu2020mind}; the standard task
+is impression-level click ranking (AUC/MRR/nDCG), with published large-test AUC
+in Table~\ref{tab:sota}. All rely on large word-embedding (or entity) tables, the
+very component we remove.
+
+\begin{table}[t]
+\caption{Published MIND (large, test) AUC of standard neural baselines (numbers
+from~\cite{wu2020mind}). Context only: our study is on MINDsmall dev, so these are
+an external upper-bound reference, not a same-split comparison.}
+\label{tab:sota}
+\centering\footnotesize
+\begin{tabular}{lccccc}
+\toprule
+ & DKN~\cite{wang2018dkn} & NPA~\cite{wu2019npa} & NAML~\cite{wu2019naml} & LSTUR~\cite{an2019lstur} & NRMS~\cite{wu2019nrms} \\
+\midrule
+AUC & 0.646 & 0.667 & 0.669 & 0.677 & 0.678 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \noindent\textbf{Tokenization-free / compact encoders.}
 Byte- and character-level models~\cite{clark2022canine} and feature
@@ -128,20 +165,22 @@ articles, score candidates. Metrics: AUC, MRR, nDCG@5, nDCG@10.
 
 \subsection{Language-Agnostic Content Encoder (Teacher $\to$ Student)}
 
-A frozen \texttt{paraphrase-multilingual-MiniLM-L12-v2} teacher produces a
-384-d \emph{anchor} embedding for each article's English title. Since xMIND
-titles are parallel translations, every language's translation is distilled to
-the \textbf{same} anchor~\cite{reimers2020multilingual}. The student is a
-\textbf{byte-level char-CNN}: an embedding over 256 UTF-8 byte values,
-depthwise-separable 1-D conv blocks, masked mean pooling, and a linear head,
-trained with a Matryoshka cosine loss so a truncated prefix is usable
-on-device. No per-language vocabulary exists.
+A frozen \texttt{paraphrase-multilingual-MiniLM-L12-v2}
+teacher~\cite{wang2020minilm,reimers2019sbert} produces a 384-d \emph{anchor}
+embedding for each article's English title. Since xMIND titles are parallel
+translations, every language's translation is distilled to the \textbf{same}
+anchor~\cite{reimers2020multilingual}. The student is a \textbf{byte-level
+char-CNN}: an embedding over 256 UTF-8 byte values, depthwise-separable 1-D conv
+blocks~\cite{howard2017mobilenets}, masked mean pooling, and a linear head,
+trained with a Matryoshka~\cite{kusupati2022matryoshka} cosine loss so a
+truncated prefix is usable on-device. No per-language vocabulary exists.
 
 \subsection{Recommender}
 
 News vectors from the student feed an additive-attention user encoder over click
 history; scores are user\,$\cdot$\,candidate dot products, trained NRMS-style
-with one positive and $K$ negatives (softmax cross-entropy).
+with one positive and $K$ negatives (softmax cross-entropy), optimised with
+AdamW~\cite{loshchilov2019adamw}.
 
 \subsection{Architecture Search (Three Arms)}
 
@@ -204,10 +243,34 @@ same MINDsmall split as our models}, so the accuracy comparison is like-for-like
 the published MINDlarge-test NRMS (AUC~0.6776)~\cite{wu2020mind} is cited only as
 an external reference, not a same-split comparison. Fixed seed; SHA256-pinned data.
 
-\noindent\textbf{Hardware / stack.}
-RTX~5070 Blackwell GPU (PyTorch~2.12 cu130, CUDA~13.0); Raspberry~Pi~5 (onnxruntime
-aarch64); STM32H7 (X-CUBE-AI; binary numbers analytical,
-see Sect.~\ref{sec:limitations}). Full pipeline driven from one notebook.
+\noindent\textbf{Hardware \& measurement.}
+All training and architecture search run on a single laptop: Intel Core
+Ultra~9 275HX (24 cores), 32\,GB RAM, NVIDIA GeForce RTX~5070 Laptop GPU
+(Blackwell, compute capability~12.0, 8\,GB), Windows~11, Python~3.13,
+PyTorch~2.12.1 (CUDA~13.0). The edge targets are a Raspberry~Pi~5 (Broadcom
+BCM2712, quad Arm Cortex-A76 @2.4\,GHz; onnxruntime aarch64) and an STM32H743
+(Arm Cortex-M7 @480\,MHz, 2\,MB flash, 1\,MB SRAM; ST X-CUBE-AI), summarised in
+Table~\ref{tab:hw}. GPU power is sampled via NVML; MAC counts via \texttt{thop};
+the architecture-agnostic energy proxy uses Horowitz 45\,nm
+figures~\cite{horowitz2014}; physical Pi/MCU power uses an INA219 shunt. Binary
+MCU numbers are analytical (Sect.~\ref{sec:limitations}). The full pipeline is
+driven from a single notebook.
+
+\begin{table}[t]
+\caption{Deployment and measurement platforms.}
+\label{tab:hw}
+\centering\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lll}
+\toprule
+Platform & Key spec & Latency / energy method \\
+\midrule
+Laptop (train + search) & RTX~5070 Laptop GPU, Core Ultra~9 275HX, 32\,GB & CUDA-synced timing; NVML power \\
+Raspberry~Pi~5          & BCM2712, Cortex-A76 $\times$4 @2.4\,GHz        & onnxruntime; INA219 shunt \\
+STM32H743               & Cortex-M7 @480\,MHz, 2\,MB flash / 1\,MB SRAM  & X-CUBE-AI cycles; analytical (binary) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 
 %---------------------------------------------------------------
@@ -337,8 +400,8 @@ vs.\ energy. INT8 points dominate: Micro-NAS\,/\,INT8 (0.610 AUC, 204\,KB,
 (0.647, 790\,KB). Binary points sit lower-left (smallest, lowest energy) but pay
 an accuracy cost; on Cortex-M7 (no POPCOUNT), their energy advantage over INT8 is
 small, so they are footprint-motivated rather than speed-motivated. The full study
-(3 arms $\times$ 3 precisions + NRMS + 15-language eval) ran in 8.2\,h on a
-single RTX~5070 Blackwell GPU.
+(3 arms $\times$ 3 precisions + NRMS + 15-language eval) ran in 8.2\,h on the
+single laptop of Table~\ref{tab:hw}.
 
 \begin{figure}[t]
   \centering
