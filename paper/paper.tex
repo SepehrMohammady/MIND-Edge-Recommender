@@ -150,8 +150,9 @@ feasibility, via an evolutionary supernet-free search:
 %
 \begin{itemize}
   \item \textbf{NAS}---FP32, loose (no MCU constraint); accuracy ceiling.
-  \item \textbf{Micro-NAS}---INT8, hard STM32H7 constraints
-        (flash $\le$~2\,MB, RAM $\le$~512\,KB, MACs $\le$~5\,M).
+  \item \textbf{Micro-NAS}---INT8, hard constraints (flash $\le$~256\,KB,
+        RAM $\le$~128\,KB, MACs $\le$~2\,M; deliberately tighter than the
+        STM32H7 ceiling so they bind at this small text-encoder scale).
   \item \textbf{Binarized Micro-NAS}---Binary, same hard constraints.
 \end{itemize}
 %
@@ -266,12 +267,46 @@ tracking NLLB translation quality.
 
 \subsection{Baseline Comparison}
 
-Reproduced NRMS (FP32, word-embedding) MINDsmall-dev AUC \textbf{0.607}
-(MRR 0.322, nDCG@10 0.364); external MINDlarge-test ceiling AUC
-0.6776~\cite{wu2020mind}. The byte-level student \textbf{matches NRMS at
-204\,KB (INT8 Micro-NAS, AUC~0.610)} and \textbf{exceeds it at 790\,KB (INT8
-NAS, AUC~0.647)}, with no vocabulary table and 14-language coverage vs.\
-NRMS's English-only word embeddings.
+Our reproduced NRMS (word-embedding title encoder, 256-d, MINDsmall vocabulary of
+25{,}355 words) has \textbf{7.08\,M parameters---91.6\% in the embedding
+table---i.e.\ ${\sim}27$\,MB FP32 / 6.8\,MB INT8}. It reaches MINDsmall-dev AUC
+\textbf{0.607} (MRR 0.322, nDCG@10 0.364); the published MINDlarge-test ceiling is
+AUC 0.6776~\cite{wu2020mind}.
+
+\noindent\textbf{Fairness.} \emph{(i)~Accuracy is like-for-like}: NRMS and our
+models use the identical MINDsmall split, impressions, and metric. The byte
+student \textbf{matches NRMS at 204\,KB} (INT8 Micro-NAS, 0.610) and
+\textbf{exceeds it at 790\,KB} (INT8 NAS, 0.647). \emph{(ii)~Footprint is reported
+honestly}: NRMS is not an edge model, so even at INT8 it is \textbf{6.8\,MB---33$\times$
+our 204\,KB encoder and still beyond the STM32H7 budget}. The gap is intrinsic to
+per-language word-embedding tables; the size axis in Fig.~\ref{fig:pareto} is
+therefore logarithmic.
+
+\noindent\textbf{Ablation: does distillation help?} At the fixed Micro-NAS
+architecture (64-5-384; MINDsmall dev; 10 epochs; identical seed/data) we compare
+the news encoder trained from scratch on clicks against one initialised from the
+distilled student then fine-tuned (Table~\ref{tab:ablation}).
+
+\begin{table}[t]
+\caption{Distillation ablation at the Micro-NAS architecture (64-5-384, MINDsmall
+dev). Distilled initialisation adds $+3.3$ AUC points at no extra inference cost.}
+\label{tab:ablation}
+\centering
+\footnotesize
+\begin{tabular}{lccc}
+\toprule
+Encoder init & AUC & MRR & nDCG@10\\
+\midrule
+scratch (no distillation) & 0.600 & 0.293 & 0.343\\
+distilled-init            & \textbf{0.633} & \textbf{0.345} & \textbf{0.390}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Distillation lifts the tiny 64-5-384 model to 0.633---nearly closing the gap to the
+unconstrained NAS encoder (0.647) and clearly beating the from-scratch model---so
+the teacher distillation, not raw capacity, makes the on-device model competitive.
+This motivates shipping the distilled-init encoder as the deployed model.
 
 \subsection{Footprint / Energy Trade-off}
 
