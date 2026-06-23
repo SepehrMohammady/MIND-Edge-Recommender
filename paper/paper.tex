@@ -7,7 +7,9 @@
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{tabularx}
 \usepackage{amsmath}
+\setlength{\emergencystretch}{3em}   % avoid minor overfull lines
 \usepackage{xspace}
 %
 % Convenience macros
@@ -33,23 +35,23 @@
 %
 %---------------------------------------------------------------
 \begin{abstract}
-On-device news recommendation promises privacy---no behavioural data leaves
-the device---but faces a cold-start problem and a hard memory wall: classic
+On-device news recommendation promises privacy, since no behavioural data
+leaves the device, but it faces a cold-start problem and a hard memory wall: classic
 neural news recommenders carry a word-embedding table of tens to hundreds of
 megabytes, far beyond a microcontroller's flash. We present a tiny,
 \textbf{language-agnostic} news encoder that distils a frozen multilingual
 sentence-transformer teacher into a \textbf{byte-level char-CNN student}
 whose entire vocabulary is the 256 UTF-8 byte values, eliminating
 per-language tables and serving all 14 languages of xMIND with one model
-under 2\,MB. We study three architecture-search regimes---\textbf{NAS},
-\textbf{Micro-NAS} (MCU-constrained), and \textbf{binarized Micro-NAS}---across
+under 2\,MB. We study three architecture-search regimes (\textbf{NAS},
+\textbf{Micro-NAS} (MCU-constrained), and \textbf{binarized Micro-NAS}) across
 three precisions (\textbf{FP32\,/\,INT8\,/\,Binary}), reporting a full matrix
 of ranking quality (AUC, MRR, nDCG@5/10 on MIND) against \textbf{flash
 footprint, RAM, and energy} targeting an
-RTX~5070\,$\to$\,Raspberry~Pi~5\,$\to$\,STM32H7 path (measured on the laptop;
-on-device boards are future work). INT8 Micro-NAS reaches \textbf{0.610} AUC at \textbf{204\,KB}---matching
+RTX~5070 $\to$ Raspberry~Pi~5 $\to$ STM32H7 path (laptop-measured; on-device
+boards are future work). INT8 Micro-NAS reaches \textbf{0.610} AUC at \textbf{204\,KB}, matching
 a full NRMS word-embedding baseline (0.607) at a fraction of the
-size---while unconstrained INT8 NAS reaches \textbf{0.647} AUC at 790\,KB
+size, while unconstrained INT8 NAS reaches \textbf{0.647} AUC at 790\,KB
 (+0.04 over NRMS, with no vocabulary table and full multilingual coverage);
 binarization cuts the footprint to \textbf{186--239\,KB} at 0.52--0.55 AUC.
 We release the full pipeline and exportable cold-start prior and content
@@ -82,8 +84,8 @@ multilingual extension xMIND~\cite{iana2024xmind}, then compress to the edge.
 The encoder is a \textbf{byte-level char-CNN} distilled
 \cite{reimers2020multilingual} from a frozen multilingual teacher: because its
 only symbols are the 256 UTF-8 bytes, a \textit{single} model handles all
-14~xMIND languages with no per-language table, directly dissolving the memory
-wall and enabling cheap all-language evaluation.
+14~xMIND languages with no per-language table, which removes the memory wall and
+makes all-language evaluation inexpensive.
 
 Our contribution is a systematic \textbf{architecture\,$\times$\,precision}
 study for this encoder: NAS, Micro-NAS (with hard STM32H7 flash/RAM/MAC
@@ -121,8 +123,8 @@ NRMS~\cite{wu2019nrms}, NAML~\cite{wu2019naml}, LSTUR~\cite{an2019lstur},
 NPA~\cite{wu2019npa}, and DKN~\cite{wang2018dkn} established attention- and
 knowledge-based title/user encoders on MIND~\cite{wu2020mind}; the standard task
 is impression-level click ranking (AUC/MRR/nDCG), with published large-test AUC
-in Table~\ref{tab:sota}. All rely on large word-embedding (or entity) tables, the
-very component we remove.
+in Table~\ref{tab:sota}. All rely on large word-embedding (or entity) tables,
+which is the component we remove.
 
 \begin{table}[t]
 \caption{Published MIND (large, test) AUC of standard neural baselines (numbers
@@ -193,11 +195,11 @@ evaluated by distillation quality (cosine to anchors) under footprint
 feasibility, via an evolutionary supernet-free search:
 %
 \begin{itemize}
-  \item \textbf{NAS}---FP32, loose (no MCU constraint); accuracy ceiling.
-  \item \textbf{Micro-NAS}---INT8, hard constraints (flash $\le$~256\,KB,
+  \item \textbf{NAS}: FP32, loose (no MCU constraint); accuracy ceiling.
+  \item \textbf{Micro-NAS}: INT8, hard constraints (flash $\le$~256\,KB,
         RAM $\le$~128\,KB, MACs $\le$~2\,M; deliberately tighter than the
         STM32H7 ceiling so they bind at this small text-encoder scale).
-  \item \textbf{Binarized Micro-NAS}---Binary, same hard constraints.
+  \item \textbf{Binarized Micro-NAS}: Binary, same hard constraints.
 \end{itemize}
 %
 Precision is the controlled second axis of the matrix.
@@ -216,7 +218,7 @@ Params and MACs via \texttt{thop}; model size $=$ params\,$\times$\,bytes\,/\,pr
 energy proxy $=$ MACs\,$\times$\,per-op energy (Horowitz 45\,nm~\cite{horowitz2014}),
 labelled relative. Latency is \emph{measured} on the laptop (CUDA-synced timing on
 the GPU; onnxruntime on the CPU). On-device Pi~5 and STM32H7 latency/energy
-(onnxruntime + INA219; X-CUBE-AI cycles) are \textbf{future work} --- those boards
+(onnxruntime + INA219; X-CUBE-AI cycles) are \textbf{future work}; those boards
 are not yet available, so no Pi~5/STM32H7 numbers are reported.
 
 
@@ -266,16 +268,15 @@ driven from a single notebook.
 \caption{Deployment and measurement platforms.}
 \label{tab:hw}
 \centering\footnotesize
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{lll}
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
 \toprule
 Platform & Key spec & Latency / energy method \\
 \midrule
-Laptop (train + search) & RTX~5070 Laptop GPU, Core Ultra~9 275HX, 32\,GB & CUDA-synced timing; NVML power \\
-Raspberry~Pi~5          & BCM2712, Cortex-A76 $\times$4 @2.4\,GHz        & onnxruntime; INA219 \emph{(planned)} \\
-STM32H743               & Cortex-M7 @480\,MHz, 2\,MB flash / 1\,MB SRAM  & X-CUBE-AI cycles \emph{(planned)} \\
+Laptop (train+search) & RTX~5070 Laptop GPU, Core Ultra~9 275HX, 32\,GB & CUDA-synced timing; NVML power \\
+Raspberry~Pi~5 & BCM2712, Cortex-A76 $\times$4 @2.4\,GHz & onnxruntime; INA219 \emph{(planned)} \\
+STM32H743 & Cortex-M7 @480\,MHz, 2/1\,MB flash/SRAM & X-CUBE-AI cycles \emph{(planned)} \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 \noindent\textbf{Reproducibility.}
@@ -314,6 +315,7 @@ $\dagger$: arm's native precision (intended deployment).}
 \centering
 \setlength{\tabcolsep}{4pt}
 \footnotesize
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{llcccccr}
 \toprule
 Arm & Prec. & AUC & MRR & nDCG@10 & Size (KB) & RAM (KB) & Energy ($\mu$J)\\
@@ -330,7 +332,7 @@ Bin.~$\mu$NAS & FP32  & 0.593 & 0.290 & 0.336 & 311.4  & 48  & 15.43 \\
 Bin.~$\mu$NAS & INT8  & 0.601 & 0.295 & 0.344 & 255.7  & 12  & 3.28  \\
 Bin.~$\mu$NAS & Binary$^\dagger$ & \textbf{0.546} & \textbf{0.273} & \textbf{0.317} & 239.5 & 12 & 3.23 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 INT8 is effectively lossless vs.\ FP32 (often marginally better, a known QAT
@@ -392,19 +394,18 @@ tracking NLLB translation quality.
 \subsection{Baseline Comparison}
 
 Our reproduced NRMS (word-embedding title encoder, 256-d, MINDsmall vocabulary of
-25{,}355 words) has \textbf{7.08\,M parameters---91.6\% in the embedding
-table---i.e.\ ${\sim}27$\,MB FP32 / 6.8\,MB INT8}. It reaches MINDsmall-dev AUC
+25{,}355 words) has 7.08\,M parameters, 91.6\% of them in the embedding table,
+i.e.\ \textbf{${\sim}27$\,MB FP32 / 6.8\,MB INT8}. It reaches MINDsmall-dev AUC
 \textbf{0.607} (MRR 0.322, nDCG@10 0.364); the published MINDlarge-test ceiling is
 AUC 0.6776~\cite{wu2020mind}.
 
 \noindent\textbf{Fairness.} \emph{(i)~Accuracy is like-for-like}: NRMS and our
 models use the identical MINDsmall split, impressions, and metric. The byte
 student \textbf{matches NRMS at 204\,KB} (INT8 Micro-NAS, 0.610) and
-\textbf{exceeds it at 790\,KB} (INT8 NAS, 0.647). \emph{(ii)~Footprint is reported
-honestly}: NRMS is not an edge model, so even at INT8 it is \textbf{6.8\,MB---33$\times$
-our 204\,KB encoder and still beyond the STM32H7 budget}. The gap is intrinsic to
-per-language word-embedding tables; the size axis in Fig.~\ref{fig:pareto} is
-therefore logarithmic.
+\textbf{exceeds it at 790\,KB} (INT8 NAS, 0.647). \emph{(ii)~Footprint:} NRMS is not an edge model, so even at INT8 it is
+\textbf{6.8\,MB}, which is 33$\times$ our 204\,KB encoder and still beyond the
+STM32H7 budget. This gap comes from the per-language word-embedding table; the
+size axis in Fig.~\ref{fig:pareto} is logarithmic.
 
 \noindent\textbf{Ablation: does distillation help?} At the fixed Micro-NAS
 architecture (64-5-384; MINDsmall dev; 10 epochs; identical seed/data) we compare
@@ -427,10 +428,10 @@ distilled-init            & \textbf{0.633} & \textbf{0.345} & \textbf{0.390}\\
 \end{tabular}
 \end{table}
 
-Distillation lifts the tiny 64-5-384 model to 0.633---nearly closing the gap to the
-unconstrained NAS encoder (0.647) and clearly beating the from-scratch model---so
-the teacher distillation, not raw capacity, makes the on-device model competitive.
-This motivates shipping the distilled-init encoder as the deployed model.
+Distillation raises the 64-5-384 model to 0.633, close to the unconstrained NAS
+encoder (0.647) and above the from-scratch model. The improvement comes from the
+teacher distillation rather than added capacity, which is why we deploy the
+distilled-init encoder.
 
 \subsection{Footprint / Energy Trade-off}
 
@@ -500,8 +501,8 @@ languages.
 
 A byte-level, language-agnostic encoder removes the embedding-table memory wall
 and serves 14~xMIND languages plus English (15 evaluated) with a single
-sub-2\,MB model. Across NAS\,/\,Micro-NAS\,/\,
-binarized Micro-NAS and FP32\,/\,INT8\,/\,Binary, we map the
+sub-2\,MB model. Across the NAS, Micro-NAS, and binarized Micro-NAS arms at
+FP32, INT8, and Binary precision, we map the
 accuracy--footprint--energy trade-off for on-device multilingual news
 recommendation. INT8 Micro-NAS is the practical sweet spot: 204\,KB, 2.3\,\uJ,
 AUC\,0.610, and all-14-language coverage with no per-language vocabulary table.
