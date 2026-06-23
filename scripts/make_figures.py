@@ -24,6 +24,10 @@ for arm in m["arm"].unique():
     ax[1].scatter(s["energy_uj"], s["auc"], s=60, label=arm)
     for _, r in s.iterrows():
         ax[0].annotate(r["precision"], (r["size_kb"], r["auc"]), fontsize=7)
+for a in ax:                       # NRMS baseline as a dashed AUC reference
+    a.axhline(0.607, ls="--", color="grey", lw=1.2)
+ax[0].text(ax[0].get_xlim()[1], 0.607, "NRMS 0.607 ", va="bottom", ha="right",
+           fontsize=8, color="grey")
 ax[0].set(xlabel="encoder size (KB)", ylabel="AUC", title="Accuracy vs flash footprint")
 ax[1].set(xlabel="energy (uJ / inference)", ylabel="AUC", title="Accuracy vs energy")
 ax[1].set_xscale("log")
