@@ -21,3 +21,16 @@ hf_cache/
 logs/
 *.log
 .DS_Store
+
+# Farsi learning course (local only, not for publication)
+course/
+
+# LaTeX build artifacts (keep .tex/.cls/.bst/.pdf, drop the junk)
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
