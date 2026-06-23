@@ -45,8 +45,9 @@ under 2\,MB. We study three architecture-search regimes---\textbf{NAS},
 \textbf{Micro-NAS} (MCU-constrained), and \textbf{binarized Micro-NAS}---across
 three precisions (\textbf{FP32\,/\,INT8\,/\,Binary}), reporting a full matrix
 of ranking quality (AUC, MRR, nDCG@5/10 on MIND) against \textbf{flash
-footprint, RAM, and energy} on an RTX~5070\,$\to$\,Raspberry~Pi~5\,$\to$\,STM32H7
-path. INT8 Micro-NAS reaches \textbf{0.610} AUC at \textbf{204\,KB}---matching
+footprint, RAM, and energy} targeting an
+RTX~5070\,$\to$\,Raspberry~Pi~5\,$\to$\,STM32H7 path (measured on the laptop;
+on-device boards are future work). INT8 Micro-NAS reaches \textbf{0.610} AUC at \textbf{204\,KB}---matching
 a full NRMS word-embedding baseline (0.607) at a fraction of the
 size---while unconstrained INT8 NAS reaches \textbf{0.647} AUC at 790\,KB
 (+0.04 over NRMS, with no vocabulary table and full multilingual coverage);
@@ -140,10 +141,13 @@ AUC & 0.646 & 0.667 & 0.669 & 0.677 & 0.678 \\
 
 \noindent\textbf{Tokenization-free / compact encoders.}
 Byte- and character-level models~\cite{clark2022canine} and feature
-hashing~\cite{joulin2017fasttext} drop the vocabulary table; multilingual
+hashing~\cite{joulin2017fasttext} drop the vocabulary table; byte-level models
+scale competitively and are robust in multilingual / noisy settings
+(ByT5~\cite{xue2022byt5}, MambaByte~\cite{wang2024mambabyte}), and multilingual
 distillation~\cite{reimers2020multilingual} aligns translations to a shared
-space. We combine these: a byte student distilled to multilingual teacher anchor
-embeddings.
+space. On-device recommendation is an active area~\cite{yin2024ondevice,yu2021tinynewsrec};
+we bring byte-level encoding + teacher distillation to the on-device news-rec
+setting under a joint NAS\,$\times$\,precision study.
 
 \noindent\textbf{TinyML NAS and BNNs.}
 MCUNet~\cite{lin2020mcunet} and $\mu$NAS~\cite{liberis2021unas} search under MCU
@@ -210,8 +214,10 @@ short QAT are supported.
 
 Params and MACs via \texttt{thop}; model size $=$ params\,$\times$\,bytes\,/\,precision;
 energy proxy $=$ MACs\,$\times$\,per-op energy (Horowitz 45\,nm~\cite{horowitz2014}),
-labelled relative. Measured latency/energy via CUDA timing and NVML on the RTX~5070;
-onnxruntime on the Pi~5 (INA219 for physical power).
+labelled relative. Latency is \emph{measured} on the laptop (CUDA-synced timing on
+the GPU; onnxruntime on the CPU). On-device Pi~5 and STM32H7 latency/energy
+(onnxruntime + INA219; X-CUBE-AI cycles) are \textbf{future work} --- those boards
+are not yet available, so no Pi~5/STM32H7 numbers are reported.
 
 
 %---------------------------------------------------------------
@@ -266,11 +272,19 @@ driven from a single notebook.
 Platform & Key spec & Latency / energy method \\
 \midrule
 Laptop (train + search) & RTX~5070 Laptop GPU, Core Ultra~9 275HX, 32\,GB & CUDA-synced timing; NVML power \\
-Raspberry~Pi~5          & BCM2712, Cortex-A76 $\times$4 @2.4\,GHz        & onnxruntime; INA219 shunt \\
-STM32H743               & Cortex-M7 @480\,MHz, 2\,MB flash / 1\,MB SRAM  & X-CUBE-AI cycles; analytical (binary) \\
+Raspberry~Pi~5          & BCM2712, Cortex-A76 $\times$4 @2.4\,GHz        & onnxruntime; INA219 \emph{(planned)} \\
+STM32H743               & Cortex-M7 @480\,MHz, 2\,MB flash / 1\,MB SRAM  & X-CUBE-AI cycles \emph{(planned)} \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\noindent\textbf{Reproducibility.}
+All runs use a fixed random seed; the datasets are SHA256-pinned (manifest). The
+code, the driving notebook, the exported artifacts (ONNX encoder + cold-start
+prior), and the exact dependency lock are released
+openly.\footnote{Repository URL omitted for double-blind review.} Profiling uses
+\texttt{thop} (MACs) and onnxruntime (CPU latency); MCU footprint follows ST
+X-CUBE-AI conventions.
 
 
 %---------------------------------------------------------------
@@ -325,6 +339,32 @@ $\approx$1.4--2$\times$. Binarization costs 5--9 AUC points; because the byte
 embedding and first/last layers stay full-precision (XNOR-Net practice), its
 size gain over INT8 is modest at this scale. Micro-NAS finds a 204\,KB INT8
 encoder that fits an aggressive on-device budget at near-baseline accuracy.
+
+\subsection{Latency (measured on the laptop)}
+
+Table~\ref{tab:latency} reports single-inference encoder latency measured on the
+laptop (GPU via CUDA-synced timing; CPU via onnxruntime, the engine also used on
+the Pi~5). All configurations are far under the 50\,ms on-device budget; CPU
+latency tracks compute while GPU latency is launch-overhead-dominated at this
+scale. \textbf{Pi~5 and STM32H7 on-device latency/energy are TODO} (boards
+pending); only laptop numbers are reported.
+
+\begin{table}[t]
+\caption{Measured single-inference content-encoder latency on the laptop
+(Table~\ref{tab:hw}); batch~1, mean of 200--500 runs. Pi~5 / STM32H7 on-device
+timings: TODO.}
+\label{tab:latency}
+\centering\footnotesize
+\begin{tabular}{lcc}
+\toprule
+Architecture & GPU (ms) & CPU\,/\,ONNX (ms) \\
+\midrule
+NAS (256-4-384)            & 0.57 & 0.34 \\
+Micro-NAS (64-5-384)       & 0.65 & 0.19 \\
+Bin.\,$\mu$NAS (96-2-384)  & 0.43 & 0.10 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Multilingual Transfer (All 14 Languages)}
 
@@ -429,11 +469,13 @@ single laptop of Table~\ref{tab:hw}.
 %---------------------------------------------------------------
 
 \begin{itemize}
+  \item \textbf{On-device measurements are pending.} We measure latency on the
+    laptop only (GPU + onnxruntime CPU). Raspberry~Pi~5 and STM32H7 boards are not
+    yet available, so their on-device latency/energy are \emph{not measured here}
+    and remain TODO; size/RAM are computed and energy is the Horowitz proxy.
   \item \textbf{Binary-on-MCU is analytical.} No PyTorch\,$\to$\,1-bit\,$\to$\,STM32H7
-    toolchain exists (X-CUBE-AI's 1-bit path is Larq/TF only). We report measured
-    binary inference on Pi\,5 and the RTX~5070, and analytical flash/RAM/energy for the
-    MCU. Cortex-M7 lacks POPCOUNT, so binary is \emph{footprint-motivated, not
-    latency-motivated}.
+    toolchain exists (X-CUBE-AI's 1-bit path is Larq/TF only); Cortex-M7 also lacks
+    POPCOUNT, so binary is \emph{footprint-motivated, not latency-motivated}.
   \item \textbf{Cross-lingual transfer only.} xMIND reuses English impressions;
     results are not native-language click behaviour.
   \item \textbf{MT quality} varies for low-resource languages (grn, hat, som).
