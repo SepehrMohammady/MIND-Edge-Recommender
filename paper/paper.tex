@@ -1,0 +1,356 @@
+% paper.tex — LLNCS (ApPLIES / ApplePies, Springer LNEE)
+% Compile: pdflatex paper && bibtex paper && pdflatex paper && pdflatex paper
+% Authors and affiliations to be filled in before submission.
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{xspace}
+%
+% Convenience macros
+\newcommand{\uNAS}{$\mu$NAS\xspace}
+\newcommand{\mJ}{\,mJ}
+\newcommand{\uJ}{\,$\mu$J}
+\newcommand{\KB}{\,KB}
+%
+\begin{document}
+%
+\title{A Byte-Level Multilingual News Recommender for
+       Microcontrollers: NAS, Micro-NAS and Binarized
+       Micro-NAS across Flash, RAM and Energy}
+%
+\titlerunning{Byte-Level Multilingual News Recommender}
+%
+% Authors removed; fill in names and affiliations before submission.
+\author{}
+\authorrunning{}
+\institute{}
+%
+\maketitle
+%
+%---------------------------------------------------------------
+\begin{abstract}
+On-device news recommendation promises privacy---no behavioural data leaves
+the device---but faces a cold-start problem and a hard memory wall: classic
+neural news recommenders carry a word-embedding table of tens to hundreds of
+megabytes, far beyond a microcontroller's flash. We present a tiny,
+\textbf{language-agnostic} news encoder that distils a frozen multilingual
+sentence-transformer teacher into a \textbf{byte-level char-CNN student}
+whose entire vocabulary is the 256 UTF-8 byte values, eliminating
+per-language tables and serving all 14 languages of xMIND with one model
+under 2\,MB. We study three architecture-search regimes---\textbf{NAS},
+\textbf{Micro-NAS} (MCU-constrained), and \textbf{binarized Micro-NAS}---across
+three precisions (\textbf{FP32\,/\,INT8\,/\,Binary}), reporting a full matrix
+of ranking quality (AUC, MRR, nDCG@5/10 on MIND) against \textbf{flash
+footprint, RAM, and energy} on an RTX~5070\,$\to$\,Raspberry~Pi~5\,$\to$\,STM32H7
+path. INT8 Micro-NAS reaches \textbf{0.610} AUC at \textbf{204\,KB}---matching
+a full NRMS word-embedding baseline (0.607) at a fraction of the
+size---while unconstrained INT8 NAS reaches \textbf{0.647} AUC at 790\,KB
+(+0.04 over NRMS, with no vocabulary table and full multilingual coverage);
+binarization cuts the footprint to \textbf{186--239\,KB} at 0.52--0.55 AUC.
+We release the full pipeline and exportable cold-start prior and content
+encoder for edge deployment.
+
+\keywords{Edge AI \and Neural Architecture Search \and Binarized Neural
+Networks \and Multilingual News Recommendation \and TinyML \and Knowledge
+Distillation}
+\end{abstract}
+%---------------------------------------------------------------
+
+
+%---------------------------------------------------------------
+\section{Introduction}
+%---------------------------------------------------------------
+
+Privacy-first reading apps increasingly personalize \textit{on-device}, where
+the user model never leaves the phone or edge node. Two obstacles dominate.
+(i)~\textbf{Cold start}: a per-user model initialized from zero gives poor early
+recommendations. (ii)~\textbf{The memory wall}: state-of-the-art news
+recommenders such as NRMS~\cite{wu2019nrms} and NAML encode article titles with
+a word-embedding matrix (e.g., GloVe-300d over a 30k--100k vocabulary $=$
+37--120\,MB in FP32), which cannot fit a microcontroller's flash; multiplying
+this per language for a multilingual app is hopeless.
+
+We target both. We pretrain, \textit{fully offline}, a population cold-start
+prior and a compact content encoder on MIND~\cite{wu2020mind} and its
+multilingual extension xMIND~\cite{iana2024xmind}, then compress to the edge.
+The encoder is a \textbf{byte-level char-CNN} distilled
+\cite{reimers2020multilingual} from a frozen multilingual teacher: because its
+only symbols are the 256 UTF-8 bytes, a \textit{single} model handles all
+14~xMIND languages with no per-language table, directly dissolving the memory
+wall and enabling cheap all-language evaluation.
+
+Our contribution is a systematic \textbf{architecture\,$\times$\,precision}
+study for this encoder: NAS, Micro-NAS (with hard STM32H7 flash/RAM/MAC
+constraints), and binarized Micro-NAS, each at FP32, INT8, and Binary, measured
+on flash, RAM, and energy across three deployment tiers. This extends our
+group's prior NAS-for-BNN work~\cite{pighetti2026nasbnn} from vision
+(WakeVision) to multilingual text recommendation.
+
+
+%---------------------------------------------------------------
+\section{Related Work}
+%---------------------------------------------------------------
+
+\noindent\textbf{Neural news recommendation.}
+NRMS~\cite{wu2019nrms}, NAML, and LSTUR established attention-based title
+encoders and user encoders on MIND~\cite{wu2020mind}; the standard task is
+impression-level click ranking (AUC/MRR/nDCG). All rely on large word-embedding
+tables, the very component we remove.
+
+\noindent\textbf{Tokenization-free / compact encoders.}
+Byte- and character-level models~\cite{clark2022canine} and feature
+hashing~\cite{joulin2017fasttext} drop the vocabulary table; multilingual
+distillation~\cite{reimers2020multilingual} aligns translations to a shared
+space. We combine these: a byte student distilled to multilingual teacher anchor
+embeddings.
+
+\noindent\textbf{TinyML NAS and BNNs.}
+MCUNet~\cite{lin2020mcunet} and $\mu$NAS~\cite{liberis2021unas} search under MCU
+memory budgets; NAS-BNN~\cite{nasbnn2024} searches binary networks;
+XNOR-Net~\cite{rastegari2016xnor} established 1-bit training with full-precision
+first/last layers. Our group recently applied NAS-BNN to WakeVision at this
+venue~\cite{pighetti2026nasbnn}; here we bring the same NAS\,$\times$\,precision
+methodology to on-device multilingual recommendation.
+
+
+%---------------------------------------------------------------
+\section{Method}
+%---------------------------------------------------------------
+
+\subsection{Task}
+
+Impression-level click ranking: given a user's clicked history and candidate
+articles, score candidates. Metrics: AUC, MRR, nDCG@5, nDCG@10.
+
+\subsection{Language-Agnostic Content Encoder (Teacher $\to$ Student)}
+
+A frozen \texttt{paraphrase-multilingual-MiniLM-L12-v2} teacher produces a
+384-d \emph{anchor} embedding for each article's English title. Since xMIND
+titles are parallel translations, every language's translation is distilled to
+the \textbf{same} anchor~\cite{reimers2020multilingual}. The student is a
+\textbf{byte-level char-CNN}: an embedding over 256 UTF-8 byte values,
+depthwise-separable 1-D conv blocks, masked mean pooling, and a linear head,
+trained with a Matryoshka cosine loss so a truncated prefix is usable
+on-device. No per-language vocabulary exists.
+
+\subsection{Recommender}
+
+News vectors from the student feed an additive-attention user encoder over click
+history; scores are user\,$\cdot$\,candidate dot products, trained NRMS-style
+with one positive and $K$ negatives (softmax cross-entropy).
+
+\subsection{Architecture Search (Three Arms)}
+
+One search space over $\{\text{channels},\;\text{depth},\;\text{out\_dim}\}$,
+evaluated by distillation quality (cosine to anchors) under footprint
+feasibility, via an evolutionary supernet-free search:
+%
+\begin{itemize}
+  \item \textbf{NAS}---FP32, loose (no MCU constraint); accuracy ceiling.
+  \item \textbf{Micro-NAS}---INT8, hard STM32H7 constraints
+        (flash $\le$~2\,MB, RAM $\le$~512\,KB, MACs $\le$~5\,M).
+  \item \textbf{Binarized Micro-NAS}---Binary, same hard constraints.
+\end{itemize}
+%
+Precision is the controlled second axis of the matrix.
+
+\subsection{Precision (FP32 $\to$ INT8 $\to$ Binary)}
+
+Simulated quantization with a straight-through estimator: per-output-channel
+symmetric INT8, and sign\,$\times$\,scale binarization. Following
+XNOR-Net~\cite{rastegari2016xnor}, the byte embedding and first/last projections
+stay full-precision; only inner conv/linear weights are quantized. Both PTQ and
+short QAT are supported.
+
+\subsection{Footprint \& Energy}
+
+Params and MACs via \texttt{thop}; model size $=$ params\,$\times$\,bytes\,/\,precision;
+energy proxy $=$ MACs\,$\times$\,per-op energy (Horowitz 45\,nm~\cite{horowitz2014}),
+labelled relative. Measured latency/energy via CUDA timing and NVML on the RTX~5070;
+onnxruntime on the Pi~5 (INA219 for physical power).
+
+
+%---------------------------------------------------------------
+\section{Experimental Setup}
+%---------------------------------------------------------------
+
+\noindent\textbf{Datasets.}
+MINDsmall~\cite{wu2020mind}: 50k users; train 156,965\,/\,dev 73,152 impressions;
+51,282 articles. xMINDsmall~\cite{iana2024xmind}: 14 languages (zho, fin, grn,
+hat, ind, jpn, kat, ron, som, swh, tam, tha, tur, vie), NLLB-3.3B
+translations~\cite{nllb2022}. xMIND supplies translated title/abstract keyed by
+news id; MIND behaviours are reused. Multilingual evaluation is therefore
+\textbf{cross-lingual transfer over identical English impressions}, not
+native-language behaviour.
+
+\noindent\textbf{Protocol.}
+Train on MINDsmall train; evaluate on MINDsmall dev (no public small test). We
+reproduce NRMS as the FP32 ceiling and cite the published MINDlarge-test NRMS
+(AUC~0.6776)~\cite{wu2020mind} as external reference. Fixed seed; SHA256-pinned
+data.
+
+\noindent\textbf{Hardware / stack.}
+RTX~5070 Blackwell GPU (PyTorch~2.12 cu130, CUDA~13.0); Raspberry~Pi~5 (onnxruntime
+aarch64); STM32H7 (X-CUBE-AI; binary numbers analytical,
+see Sect.~\ref{sec:limitations}). Full pipeline driven from one notebook.
+
+
+%---------------------------------------------------------------
+\section{Results}
+%---------------------------------------------------------------
+
+\subsection{Architecture $\times$ Precision Matrix (MINDsmall dev)}
+
+Searched architectures (channels-depth-out\_dim): NAS = 256-4-384 (unconstrained);
+Micro-NAS = 64-5-384; Bin.\,$\mu$NAS = 96-2-384. Footprint, MACs, and energy are
+of the content encoder only.
+
+\begin{table}[t]
+\caption{Architecture $\times$ precision matrix (MINDsmall dev). Energy proxy
+via Horowitz 45\,nm~\cite{horowitz2014}. \textbf{Bold}: best per group.}
+\label{tab:matrix}
+\centering
+\setlength{\tabcolsep}{4pt}
+\footnotesize
+\begin{tabular}{llcccccr}
+\toprule
+Arm & Prec. & AUC & MRR & nDCG@10 & Size (KB) & RAM (KB) & Energy ($\mu$J)\\
+\midrule
+NAS          & FP32   & 0.633 & 0.326 & 0.375 & 1566.8 & 128 & 168.7 \\
+NAS          & INT8   & \textbf{0.647} & \textbf{0.338} & \textbf{0.387} & 789.8 & 32 & 4.65 \\
+NAS          & Binary & 0.588 & 0.297 & 0.342 & 563.1  & 32  & 4.25  \\
+\midrule
+Micro-NAS    & FP32   & 0.605 & 0.307 & 0.352 & 266.8  & 32  & 15.90 \\
+Micro-NAS    & INT8   & \textbf{0.610} & \textbf{0.314} & \textbf{0.360} & 203.9 & 8 & 2.30 \\
+Micro-NAS    & Binary & 0.521 & 0.251 & 0.294 & 185.6  & 8   & 2.25  \\
+\midrule
+Bin.~$\mu$NAS & FP32  & 0.593 & 0.290 & 0.336 & 311.4  & 48  & 15.43 \\
+Bin.~$\mu$NAS & INT8  & 0.601 & 0.295 & 0.344 & 255.7  & 12  & 3.28  \\
+Bin.~$\mu$NAS & Binary& \textbf{0.546} & \textbf{0.273} & \textbf{0.317} & 239.5 & 12 & 3.23 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+INT8 is effectively lossless vs.\ FP32 (often marginally better, a known QAT
+regularization effect) while cutting energy 7--36$\times$ and size
+$\approx$1.4--2$\times$. Binarization costs 5--9 AUC points; because the byte
+embedding and first/last layers stay full-precision (XNOR-Net practice), its
+size gain over INT8 is modest at this scale. Micro-NAS finds a 204\,KB INT8
+encoder that fits an aggressive on-device budget at near-baseline accuracy.
+
+\subsection{Multilingual Transfer (All 14 Languages)}
+
+\begin{table}[t]
+\caption{Cross-lingual AUC of Micro-NAS\,/\,INT8 across all 14~xMIND languages
+plus English (en). Single byte-level model; no per-language vocabulary table.}
+\label{tab:multilingual}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{ccccccccccccccc}
+\toprule
+en & hat & jpn & grn & ron & tur & vie & swh & zho & ind & som & tha & tam & fin & kat \\
+\midrule
+.604 & .556 & .551 & .533 & .532 & .530 & .523 & .521 & .521 & .537 & .514 & .504 & .504 & .495 & .491 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All 14~languages run on one sub-2\,MB model with no per-language table (Table~\ref{tab:multilingual}).
+Transfer is strongest for Latin-script / higher-resource targets and weakest for
+low-resource or distinct-script languages (Georgian~kat, Finnish~fin, Tamil~tam),
+tracking NLLB translation quality.
+
+\subsection{Baseline Comparison}
+
+Reproduced NRMS (FP32, word-embedding) MINDsmall-dev AUC \textbf{0.607}
+(MRR 0.322, nDCG@10 0.364); external MINDlarge-test ceiling AUC
+0.6776~\cite{wu2020mind}. The byte-level student \textbf{matches NRMS at
+204\,KB (INT8 Micro-NAS, AUC~0.610)} and \textbf{exceeds it at 790\,KB (INT8
+NAS, AUC~0.647)}, with no vocabulary table and 14-language coverage vs.\
+NRMS's English-only word embeddings.
+
+\subsection{Footprint / Energy Trade-off}
+
+Figure~\ref{fig:pareto} shows the Pareto fronts of AUC vs.\ model size and
+vs.\ energy. INT8 points dominate: Micro-NAS\,/\,INT8 (0.610 AUC, 204\,KB,
+2.3\,\uJ) is the on-device sweet spot; NAS\,/\,INT8 is the accuracy leader
+(0.647, 790\,KB). Binary points sit lower-left (smallest, lowest energy) but pay
+an accuracy cost; on Cortex-M7 (no POPCOUNT), their energy advantage over INT8 is
+small, so they are footprint-motivated rather than speed-motivated. The full study
+(3 arms $\times$ 3 precisions + NRMS + 15-language eval) ran in 8.2\,h on a
+single RTX~5070 Blackwell GPU.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/pareto.png}
+  \caption{Pareto fronts: AUC vs.\ model size (left) and vs.\ energy proxy
+  (right). Each marker is one arm\,$\times$\,precision configuration. INT8
+  points (circles) dominate both fronts; the reproduced NRMS baseline is shown
+  as a dashed reference line.}
+  \label{fig:pareto}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\textwidth]{figures/multilingual.png}
+  \caption{Per-language AUC of the deployed Micro-NAS\,/\,INT8 model across all
+  14~xMIND languages. A single byte-level encoder with no per-language vocabulary
+  table serves every language.}
+  \label{fig:multilingual}
+\end{figure}
+
+
+%---------------------------------------------------------------
+\section{Limitations}
+\label{sec:limitations}
+%---------------------------------------------------------------
+
+\begin{itemize}
+  \item \textbf{Binary-on-MCU is analytical.} No PyTorch\,$\to$\,1-bit\,$\to$\,STM32H7
+    toolchain exists (X-CUBE-AI's 1-bit path is Larq/TF only). We report measured
+    binary inference on Pi\,5 and the RTX~5070, and analytical flash/RAM/energy for the
+    MCU. Cortex-M7 lacks POPCOUNT, so binary is \emph{footprint-motivated, not
+    latency-motivated}.
+  \item \textbf{Cross-lingual transfer only.} xMIND reuses English impressions;
+    results are not native-language click behaviour.
+  \item \textbf{MT quality} varies for low-resource languages (grn, hat, som).
+  \item \textbf{MINDsmall scale.} MINDlarge experiments are left to future work.
+\end{itemize}
+
+
+%---------------------------------------------------------------
+\section{Ethics \& Data Statement}
+%---------------------------------------------------------------
+
+MIND is used under the Microsoft Research License (non-commercial research);
+xMIND under CC-BY-NC-SA-4.0. No personal data is collected or generated; all
+behaviour data is from the public MIND logs. Translations are machine-generated
+(NLLB-3.3B) and may carry quality artefacts, especially for low-resource
+languages.
+
+
+%---------------------------------------------------------------
+\section{Conclusion}
+%---------------------------------------------------------------
+
+A byte-level, language-agnostic encoder removes the embedding-table memory wall
+and serves 14~languages with a single sub-2\,MB model. Across NAS\,/\,Micro-NAS\,/\,
+binarized Micro-NAS and FP32\,/\,INT8\,/\,Binary, we map the
+accuracy--footprint--energy trade-off for on-device multilingual news
+recommendation. INT8 Micro-NAS is the practical sweet spot: 204\,KB, 2.3\,\uJ,
+AUC\,0.610, and all-14-language coverage with no per-language vocabulary table.
+The pipeline and deployment artefacts (ONNX encoder, cold-start prior) are
+released openly.
+
+
+%---------------------------------------------------------------
+% Bibliography
+%---------------------------------------------------------------
+\bibliographystyle{splncs04}
+\bibliography{references}
+
+\end{document}
