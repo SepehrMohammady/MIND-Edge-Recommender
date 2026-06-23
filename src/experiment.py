@@ -109,3 +109,52 @@ def save_matrix(cfg: dict, rows: list[dict], name="results_matrix.csv") -> pd.Da
     df = pd.DataFrame(rows)
     df.to_csv(Path(cfg["paths"]["artifacts_dir"]) / name, index=False)
     return df
+
+
+# ------------------------------------------------------------------ ablation
+def run_ablation(cfg: dict, arch: dict | None = None,
+                 distill_epochs: int = 12, train_epochs: int | None = None,
+                 max_train_impressions: int | None = None) -> dict:
+    """Does distillation help? Compare a news encoder trained on clicks from
+    scratch vs initialised from the distilled student, at a fixed architecture.
+    ``max_train_impressions`` caps the click log for fast (QUICK) runs."""
+    import torch.nn.functional as F
+
+    arch = arch or {"channels": 64, "depth": 5, "out_dim": 384}
+    be = cfg["student"]["byte_embed_dim"]
+    train_epochs = train_epochs or cfg["train"]["epochs"]
+    device = ("cuda" if torch.cuda.is_available() and cfg["train"]["device"] == "cuda" else "cpu")
+
+    def mk():
+        return student.ByteCNNEncoder(be, arch["channels"], arch["depth"], arch["out_dim"])
+
+    scratch = recommender.train_recommender(cfg, news_encoder=mk(), epochs=train_epochs,
+                                            max_train_impressions=max_train_impressions)
+    r_scratch = recommender.evaluate(cfg, scratch, split="dev")
+
+    bytes_np, tgt_np, anchors = student.build_distill_data(cfg, "train")
+    anchors_t = torch.tensor(anchors, device=device)
+    dl = torch.utils.data.DataLoader(
+        torch.utils.data.TensorDataset(torch.tensor(bytes_np, dtype=torch.long),
+                                       torch.tensor(tgt_np, dtype=torch.long)),
+        batch_size=512, shuffle=True, drop_last=True)
+    enc = mk().to(device)
+    opt = torch.optim.AdamW(enc.parameters(), lr=cfg["train"]["distill_lr"])
+    dims = tuple(d for d in (64, 128, 256, 384) if d <= arch["out_dim"])
+    enc.train()
+    for _ in range(distill_epochs):
+        for ids, ti in dl:
+            ids = ids.to(device)
+            tgt = anchors_t[ti.to(device)]
+            pred = F.normalize(enc(ids), dim=-1)
+            loss = sum(1 - F.cosine_similarity(pred[:, :d], tgt[:, :d], dim=-1).mean()
+                       for d in dims) / len(dims)
+            opt.zero_grad(); loss.backward(); opt.step()
+    distilled = recommender.train_recommender(
+        cfg, model=recommender.NewsRecommender(enc), epochs=train_epochs,
+        max_train_impressions=max_train_impressions)
+    r_distilled = recommender.evaluate(cfg, distilled, split="dev")
+
+    return {"arch": arch, "train_epochs": train_epochs, "distill_epochs": distill_epochs,
+            "scratch": {k: round(v, 4) for k, v in r_scratch.items()},
+            "distilled_init": {k: round(v, 4) for k, v in r_distilled.items()}}

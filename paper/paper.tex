@@ -1,4 +1,5 @@
-% paper.tex — LLNCS (ApPLIES / ApplePies, Springer LNEE)
+% paper.tex — LLNCS (ApplePies: Applications in Electronics Pervading Industry,
+%             Environment and Society; Springer LNEE)
 % Compile: pdflatex paper && bibtex paper && pdflatex paper && pdflatex paper
 % Authors and affiliations to be filled in before submission.
 \documentclass[runningheads]{llncs}
@@ -187,11 +188,21 @@ news id; MIND behaviours are reused. Multilingual evaluation is therefore
 \textbf{cross-lingual transfer over identical English impressions}, not
 native-language behaviour.
 
+\noindent\textbf{Why MINDsmall?}
+We use MINDsmall (50k users) rather than MINDlarge (1M users, 24M impressions,
+161k articles) because the contribution is on-device footprint/energy and
+multilingual coverage, not leaderboard accuracy. The full study (three arms,
+three precisions, evolutionary NAS, and 15-language evaluation) already takes
+8.2\,h on a single laptop GPU on MINDsmall and would be roughly an order of
+magnitude longer on MINDlarge; the latter is left to future work
+(Sect.~\ref{sec:limitations}).
+
 \noindent\textbf{Protocol.}
-Train on MINDsmall train; evaluate on MINDsmall dev (no public small test). We
-reproduce NRMS as the FP32 ceiling and cite the published MINDlarge-test NRMS
-(AUC~0.6776)~\cite{wu2020mind} as external reference. Fixed seed; SHA256-pinned
-data.
+We train on MINDsmall train and evaluate on MINDsmall dev (small has no public
+test labels). \emph{Our reproduced NRMS baseline is trained and evaluated on the
+same MINDsmall split as our models}, so the accuracy comparison is like-for-like;
+the published MINDlarge-test NRMS (AUC~0.6776)~\cite{wu2020mind} is cited only as
+an external reference, not a same-split comparison. Fixed seed; SHA256-pinned data.
 
 \noindent\textbf{Hardware / stack.}
 RTX~5070 Blackwell GPU (PyTorch~2.12 cu130, CUDA~13.0); Raspberry~Pi~5 (onnxruntime
@@ -209,9 +220,19 @@ Searched architectures (channels-depth-out\_dim): NAS = 256-4-384 (unconstrained
 Micro-NAS = 64-5-384; Bin.\,$\mu$NAS = 96-2-384. Footprint, MACs, and energy are
 of the content encoder only.
 
+\noindent\emph{How to read Table~\ref{tab:matrix}.} The \textbf{arm} is the
+\emph{search procedure} (each produces a different architecture); the
+\textbf{precision} is the \emph{deployment quantization}. The two are orthogonal,
+so we run every searched architecture at all three precisions. Each arm's
+\emph{native} precision ($\dagger$: NAS/FP32, Micro-NAS/INT8,
+Binarized-$\mu$NAS/Binary) is its intended deployment; the off-diagonal cells
+(e.g.\ Micro-NAS at Binary) are ablations that isolate the architecture choice
+from the precision choice.
+
 \begin{table}[t]
 \caption{Architecture $\times$ precision matrix (MINDsmall dev). Energy proxy
-via Horowitz 45\,nm~\cite{horowitz2014}. \textbf{Bold}: best per group.}
+via Horowitz 45\,nm~\cite{horowitz2014}. \textbf{Bold}: best per group;
+$\dagger$: arm's native precision (intended deployment).}
 \label{tab:matrix}
 \centering
 \setlength{\tabcolsep}{4pt}
@@ -220,17 +241,17 @@ via Horowitz 45\,nm~\cite{horowitz2014}. \textbf{Bold}: best per group.}
 \toprule
 Arm & Prec. & AUC & MRR & nDCG@10 & Size (KB) & RAM (KB) & Energy ($\mu$J)\\
 \midrule
-NAS          & FP32   & 0.633 & 0.326 & 0.375 & 1566.8 & 128 & 168.7 \\
+NAS          & FP32$^\dagger$ & 0.633 & 0.326 & 0.375 & 1566.8 & 128 & 168.7 \\
 NAS          & INT8   & \textbf{0.647} & \textbf{0.338} & \textbf{0.387} & 789.8 & 32 & 4.65 \\
 NAS          & Binary & 0.588 & 0.297 & 0.342 & 563.1  & 32  & 4.25  \\
 \midrule
 Micro-NAS    & FP32   & 0.605 & 0.307 & 0.352 & 266.8  & 32  & 15.90 \\
-Micro-NAS    & INT8   & \textbf{0.610} & \textbf{0.314} & \textbf{0.360} & 203.9 & 8 & 2.30 \\
+Micro-NAS    & INT8$^\dagger$ & \textbf{0.610} & \textbf{0.314} & \textbf{0.360} & 203.9 & 8 & 2.30 \\
 Micro-NAS    & Binary & 0.521 & 0.251 & 0.294 & 185.6  & 8   & 2.25  \\
 \midrule
 Bin.~$\mu$NAS & FP32  & 0.593 & 0.290 & 0.336 & 311.4  & 48  & 15.43 \\
 Bin.~$\mu$NAS & INT8  & 0.601 & 0.295 & 0.344 & 255.7  & 12  & 3.28  \\
-Bin.~$\mu$NAS & Binary& \textbf{0.546} & \textbf{0.273} & \textbf{0.317} & 239.5 & 12 & 3.23 \\
+Bin.~$\mu$NAS & Binary$^\dagger$ & \textbf{0.546} & \textbf{0.273} & \textbf{0.317} & 239.5 & 12 & 3.23 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -373,7 +394,8 @@ languages.
 %---------------------------------------------------------------
 
 A byte-level, language-agnostic encoder removes the embedding-table memory wall
-and serves 14~languages with a single sub-2\,MB model. Across NAS\,/\,Micro-NAS\,/\,
+and serves 14~xMIND languages plus English (15 evaluated) with a single
+sub-2\,MB model. Across NAS\,/\,Micro-NAS\,/\,
 binarized Micro-NAS and FP32\,/\,INT8\,/\,Binary, we map the
 accuracy--footprint--energy trade-off for on-device multilingual news
 recommendation. INT8 Micro-NAS is the practical sweet spot: 204\,KB, 2.3\,\uJ,
