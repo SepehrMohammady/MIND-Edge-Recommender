@@ -141,6 +141,13 @@ AUC & 0.646 & 0.667 & 0.669 & 0.677 & 0.678 \\
 \end{tabular}
 \end{table}
 
+\noindent Stronger results exist: pre-trained-language-model recommenders
+(PLM-NR~\cite{wu2021plmnr}, Fastformer~\cite{wu2021fastformer}, and UNBERT/MINER-style
+models) push MIND AUC to roughly 0.70--0.73~\cite{wu2023survey}, but they wrap
+BERT-scale encoders (hundreds of MB) and are unsuitable for microcontrollers. We
+therefore use NRMS, the strongest \emph{lightweight} title-only model, as the
+reference baseline.
+
 \noindent\textbf{Tokenization-free / compact encoders.}
 Byte- and character-level models~\cite{clark2022canine} and feature
 hashing~\cite{joulin2017fasttext} drop the vocabulary table; byte-level models
@@ -250,6 +257,12 @@ test labels). \emph{Our reproduced NRMS baseline is trained and evaluated on the
 same MINDsmall split as our models}, so the accuracy comparison is like-for-like;
 the published MINDlarge-test NRMS (AUC~0.6776)~\cite{wu2020mind} is cited only as
 an external reference, not a same-split comparison. Fixed seed; SHA256-pinned data.
+
+\noindent\textbf{What each model trains on.} Every recommender in the matrix, and
+NRMS, is trained on \emph{English MINDsmall clicks only}, so the accuracy
+comparison is like-for-like. xMIND text is used only (a)~at evaluation, for
+cross-lingual transfer, and (b)~in the distillation stage of the distilled-init
+encoder (the ablation in Sect.~5); no model receives non-English click supervision.
 
 \noindent\textbf{Hardware \& measurement.}
 All training and architecture search run on a single laptop: Intel Core
@@ -474,8 +487,11 @@ single laptop of Table~\ref{tab:hw}.
     laptop only (GPU + onnxruntime CPU). Raspberry~Pi~5 and STM32H7 boards are not
     yet available, so their on-device latency/energy are \emph{not measured here}
     and remain TODO; size/RAM are computed and energy is the Horowitz proxy.
-  \item \textbf{Binary-on-MCU is analytical.} No PyTorch\,$\to$\,1-bit\,$\to$\,STM32H7
-    toolchain exists (X-CUBE-AI's 1-bit path is Larq/TF only); Cortex-M7 also lacks
+  \item \textbf{Binary-on-MCU is analytical.} INT8 \emph{does} deploy to STM32H7
+    directly through ONNX\,$\to$\,X-CUBE-AI; only the 1-bit path is blocked, as
+    X-CUBE-AI accepts 1-bit nets only from Larq/QKeras (TensorFlow). We keep the
+    PyTorch pipeline rather than re-implement it in TF for one binary number (and
+    Larq is now archived), so binary-on-MCU stays analytical. Cortex-M7 also lacks
     POPCOUNT, so binary is \emph{footprint-motivated, not latency-motivated}.
   \item \textbf{Cross-lingual transfer only.} xMIND reuses English impressions;
     results are not native-language click behaviour.
