@@ -53,7 +53,10 @@ boards are future work). INT8 Micro-NAS reaches \textbf{0.610} AUC at \textbf{20
 a full NRMS word-embedding baseline (0.607) at a fraction of the
 size, while unconstrained INT8 NAS reaches \textbf{0.647} AUC at 790\,KB
 (+0.04 over NRMS, with no vocabulary table and full multilingual coverage);
-binarization cuts the footprint to \textbf{186--239\,KB} at 0.52--0.55 AUC.
+binarization cuts the footprint to \textbf{186--239\,KB}: naive 1-bit is weak
+(0.52--0.55 AUC), but ReActNet-style training with a distilled initialisation
+recovers it to \textbf{0.572} at 186\,KB, making fully-binary on-device
+recommendation viable.
 We release the full pipeline and exportable cold-start prior and content
 encoder for edge deployment.
 
@@ -104,6 +107,9 @@ binarized-$\mu$NAS at FP32/INT8/Binary) reporting ranking quality against flash,
 RAM, and energy on a laptop\,$\to$\,Pi\,5\,$\to$\,STM32H7 path. (3)~A distillation
 ablation isolating the gain of distilled initialisation ($+3.3$ AUC at the
 Micro-NAS scale), with released cold-start prior and content encoder for deployment.
+(4)~An improved binary encoder (ReActNet activations + Bi-Real shortcuts,
+distilled) that lifts 1-bit accuracy from 0.521 to 0.572 AUC at ${\sim}186$\,KB,
+making fully-binary on-device recommendation viable.
 
 \paragraph{Novelty.}
 To our knowledge this is the first byte-level, vocabulary-free news recommender
@@ -217,7 +223,10 @@ Simulated quantization with a straight-through estimator: per-output-channel
 symmetric INT8, and sign\,$\times$\,scale binarization. Following
 XNOR-Net~\cite{rastegari2016xnor}, the byte embedding and first/last projections
 stay full-precision; only inner conv/linear weights are quantized. Both PTQ and
-short QAT are supported.
+short QAT are supported. Because binary is the most efficient (and our intended)
+target, the binary arm additionally uses ReActNet activations (RSign, RPReLU)
+\cite{liu2020reactnet} and Bi-Real real-valued shortcuts~\cite{liu2018bireal}
+with a distilled initialisation to recover ranking accuracy (Sect.~5).
 
 \subsection{Footprint \& Energy}
 
@@ -410,7 +419,10 @@ Our reproduced NRMS (word-embedding title encoder, 256-d, MINDsmall vocabulary o
 25{,}355 words) has 7.08\,M parameters, 91.6\% of them in the embedding table,
 i.e.\ \textbf{${\sim}27$\,MB FP32 / 6.8\,MB INT8}. It reaches MINDsmall-dev AUC
 \textbf{0.607} (MRR 0.322, nDCG@10 0.364); the published MINDlarge-test ceiling is
-AUC 0.6776~\cite{wu2020mind}.
+AUC 0.6776~\cite{wu2020mind}. Quantizing NRMS to INT8 leaves accuracy essentially
+unchanged (we measured $\Delta$AUC $<0.001$ on dev), so NRMS-FP32 and NRMS-INT8
+are one model at two sizes (27\,MB and 6.8\,MB); even the INT8 version is
+33$\times$ our 204\,KB encoder.
 
 \noindent\textbf{Fairness.} \emph{(i)~Accuracy is like-for-like}: NRMS and our
 models use the identical MINDsmall split, impressions, and metric. The byte
@@ -445,6 +457,22 @@ Distillation raises the 64-5-384 model to 0.633, close to the unconstrained NAS
 encoder (0.647) and above the from-scratch model. The improvement comes from the
 teacher distillation rather than added capacity, which is why we deploy the
 distilled-init encoder.
+
+\subsection{Recovering Binary Accuracy}
+
+Binary is the most efficient target but naive sign-binarization is weak
+(Table~\ref{tab:matrix}: Micro-NAS/Binary 0.521, near chance for ranking). We
+therefore train an improved binary encoder with ReActNet activations (RSign,
+RPReLU)~\cite{liu2020reactnet} and Bi-Real shortcuts~\cite{liu2018bireal},
+initialised by distillation. At the Micro-NAS shape (64-5-384, ${\sim}186$\,KB)
+this lifts binary AUC from 0.521 to \textbf{0.572} (MRR 0.291, nDCG@10 0.336) on
+MINDsmall-dev --- within 0.035 AUC of the FP32 word-embedding baseline (0.607) at
+roughly two orders of magnitude less memory. Binary thus becomes a usable
+ultra-low-footprint option; INT8 still leads on accuracy. Real binary execution
+needs a 1-bit runtime (Larq Compute Engine on 64-bit ARM, or X-CUBE-AI on the
+MCU), which we could not run on our Windows/PyTorch setup; we therefore report
+binary footprint analytically and leave on-device binary inference to future work
+(Sect.~\ref{sec:limitations}).
 
 \subsection{Footprint / Energy Trade-off}
 
@@ -491,8 +519,11 @@ single laptop of Table~\ref{tab:hw}.
     directly through ONNX\,$\to$\,X-CUBE-AI; only the 1-bit path is blocked, as
     X-CUBE-AI accepts 1-bit nets only from Larq/QKeras (TensorFlow). We keep the
     PyTorch pipeline rather than re-implement it in TF for one binary number (and
-    Larq is now archived), so binary-on-MCU stays analytical. Cortex-M7 also lacks
-    POPCOUNT, so binary is \emph{footprint-motivated, not latency-motivated}.
+    Larq is now archived), so binary-on-MCU stays analytical. We verified Larq
+    itself loads (via a Keras-2 shim), but Larq Compute Engine---the 1-bit ARM
+    runtime---has no Windows build, so real binary inference awaits a Linux/ARM
+    setup with the boards. Cortex-M7 also lacks POPCOUNT, so binary is
+    \emph{footprint-motivated, not latency-motivated}.
   \item \textbf{Cross-lingual transfer only.} xMIND reuses English impressions;
     results are not native-language click behaviour.
   \item \textbf{MT quality} varies for low-resource languages (grn, hat, som).
@@ -522,8 +553,12 @@ FP32, INT8, and Binary precision, we map the
 accuracy--footprint--energy trade-off for on-device multilingual news
 recommendation. INT8 Micro-NAS is the practical sweet spot: 204\,KB, 2.3\,\uJ,
 AUC\,0.610, and all-14-language coverage with no per-language vocabulary table.
-The pipeline and deployment artefacts (ONNX encoder, cold-start prior) are
-released openly.
+Binary is the most efficient target: ReActNet-style training with distillation
+brings it to 0.572 AUC at 186\,KB (up from 0.521), making fully-binary deployment
+realistic, with INT8 as the higher-accuracy fallback. Real binary execution needs
+a 1-bit ARM runtime (Larq Compute Engine / X-CUBE-AI) on Linux plus the boards,
+which is the main item of future work. The pipeline and deployment artefacts
+(ONNX encoder, cold-start prior) are released openly.
 
 
 %---------------------------------------------------------------
