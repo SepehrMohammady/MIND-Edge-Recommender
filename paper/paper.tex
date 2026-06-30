@@ -50,15 +50,18 @@ of ranking quality (AUC, MRR, nDCG@5/10 on MIND) against \textbf{flash
 footprint, RAM, and energy} targeting an
 RTX~5070 $\to$ Raspberry~Pi~5 $\to$ STM32H7 path (laptop-measured; on-device
 boards are future work). INT8 Micro-NAS reaches \textbf{0.610} AUC at \textbf{204\,KB}, matching
-a full NRMS word-embedding baseline (0.607) at a fraction of the
-size, while unconstrained INT8 NAS reaches \textbf{0.647} AUC at 790\,KB
-(+0.04 over NRMS, with no vocabulary table and full multilingual coverage);
+a full NRMS word-embedding baseline (0.607) at ${\sim}1/130$ the size
+(204\,KB vs.\ 27\,MB), while unconstrained INT8 NAS reaches \textbf{0.647} AUC at
+790\,KB (+0.04 over NRMS, with no vocabulary table, covering all 14 xMIND
+languages by cross-lingual transfer);
 binarization cuts the footprint to \textbf{186--239\,KB}: naive 1-bit is weak
 (0.52--0.55 AUC), but ReActNet-style training with a distilled initialisation
-recovers it to \textbf{0.572} at 186\,KB, making fully-binary on-device
-recommendation viable.
-We release the full pipeline and exportable cold-start prior and content
-encoder for edge deployment.
+recovers it to \textbf{0.572} at 186\,KB, a usable ultra-low-footprint option.
+Multilingual numbers are cross-lingual transfer through one language-agnostic
+\emph{content} encoder (the user model uses English click logs); on-device
+latency/energy are analytical or laptop-measured, with Pi\,5/STM32H7 boards as
+future work. We release the full pipeline, the exportable cold-start prior, and
+the content encoder.
 
 \keywords{Edge AI \and Neural Architecture Search \and Binarized Neural
 Networks \and Multilingual News Recommendation \and TinyML \and Knowledge
@@ -231,8 +234,11 @@ with a distilled initialisation to recover ranking accuracy (Sect.~5).
 \subsection{Footprint \& Energy}
 
 Params and MACs via \texttt{thop}; model size $=$ params\,$\times$\,bytes\,/\,precision;
-energy proxy $=$ MACs\,$\times$\,per-op energy (Horowitz 45\,nm~\cite{horowitz2014}),
-labelled relative. Latency is \emph{measured} on the laptop (CUDA-synced timing on
+energy proxy $=$ MACs\,$\times$\,per-op energy from Horowitz 45\,nm~\cite{horowitz2014}
+(FP32 MAC 4.6\,pJ, INT8 MAC 0.23\,pJ, 1-bit op 0.0072\,pJ). This is a
+\emph{compute-only} proxy: it ignores memory-access / SRAM energy and instruction
+overhead, so absolute on-device energy will differ and we use it only for
+relative comparison. Latency is \emph{measured} on the laptop (CUDA-synced timing on
 the GPU; onnxruntime on the CPU). On-device Pi~5 and STM32H7 latency/energy
 (onnxruntime + INA219; X-CUBE-AI cycles) are \textbf{future work}; those boards
 are not yet available, so no Pi~5/STM32H7 numbers are reported.
@@ -272,6 +278,13 @@ NRMS, is trained on \emph{English MINDsmall clicks only}, so the accuracy
 comparison is like-for-like. xMIND text is used only (a)~at evaluation, for
 cross-lingual transfer, and (b)~in the distillation stage of the distilled-init
 encoder (the ablation in Sect.~5); no model receives non-English click supervision.
+
+\noindent\textbf{NAS configuration.} Evolutionary search with population~30 and
+15~generations; each candidate is scored by a 2-epoch distillation on a 20k-title
+subset (cosine to the teacher anchors), and candidates that violate the
+flash/RAM/MAC budget are rejected. The Micro-NAS thresholds (256\,KB / 128\,KB /
+2\,M MACs) sit ${\sim}8\times$ below the STM32H7 ceiling so they bind at this
+small encoder scale; relaxing them collapses Micro-NAS into the unconstrained NAS arm.
 
 \noindent\textbf{Hardware \& measurement.}
 All training and architecture search run on a single laptop: Intel Core
@@ -411,7 +424,10 @@ en & hat & jpn & grn & ron & tur & vie & swh & zho & ind & som & tha & tam & fin
 All 14~languages run on one sub-2\,MB model with no per-language table (Table~\ref{tab:multilingual}).
 Transfer is strongest for Latin-script / higher-resource targets and weakest for
 low-resource or distinct-script languages (Georgian~kat, Finnish~fin, Tamil~tam),
-tracking NLLB translation quality.
+tracking NLLB translation quality. These numbers measure the content encoder's
+\emph{cross-lingual reach}, not native-language personalisation: the user model is
+trained on English clicks, so this is transfer, not multilingual user modelling --
+a language-agnostic \emph{content encoder}, not an end-to-end multilingual recommender.
 
 \subsection{Baseline Comparison}
 
@@ -522,8 +538,15 @@ single laptop of Table~\ref{tab:hw}.
     Larq is now archived), so binary-on-MCU stays analytical. We verified Larq
     itself loads (via a Keras-2 shim), but Larq Compute Engine---the 1-bit ARM
     runtime---has no Windows build, so real binary inference awaits a Linux/ARM
-    setup with the boards. Cortex-M7 also lacks POPCOUNT, so binary is
-    \emph{footprint-motivated, not latency-motivated}.
+    setup with the boards. Cortex-M7 also lacks a hardware POPCOUNT, so 1-bit dot
+    products fall back to software bit-counting that can erase the theoretical MAC
+    saving in latency and dynamic energy; we therefore make no binary \emph{speed}
+    claim and treat binary as \emph{footprint-motivated only}.
+  \item \textbf{Byte sequences are longer.} A byte-level encoder processes
+    ${\sim}5\times$ more positions than a word model, so on an MCU its 1-D
+    convolutions incur proportionally more activation/SRAM traffic; this trades a
+    large flash saving for higher memory bandwidth, which the laptop latencies do
+    not capture and on-device tests must quantify.
   \item \textbf{Cross-lingual transfer only.} xMIND reuses English impressions;
     results are not native-language click behaviour.
   \item \textbf{MT quality} varies for low-resource languages (grn, hat, som).
