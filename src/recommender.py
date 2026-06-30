@@ -134,7 +134,8 @@ def train_recommender(cfg: dict, news_encoder: nn.Module | None = None,
 @torch.no_grad()
 def evaluate(cfg: dict, model: NewsRecommender, split: str = "dev",
              lang: str | None = None, max_impressions: int | None = None,
-             min_hist: int | None = None, max_hist: int | None = None) -> dict:
+             min_hist: int | None = None, max_hist: int | None = None,
+             mask_history: bool = False) -> dict:
     """Impression-level ranking metrics. ``lang`` swaps title text to an xMIND
     language (cross-lingual transfer); ``None`` = English MIND.
     ``min_hist``/``max_hist`` filter impressions by clicked-history length (for
@@ -160,7 +161,8 @@ def evaluate(cfg: dict, model: NewsRecommender, split: str = "dev",
 
     scored = []
     for imp in impressions:
-        h = torch.tensor(vocab.to_indices(imp["history"]), device=device)
+        hist = [] if mask_history else imp["history"]
+        h = torch.tensor(vocab.to_indices(hist), device=device)
         c = torch.tensor(vocab.to_indices(imp["cands"]), device=device)
         if len(h) == 0:
             user = torch.zeros(embs.shape[1], device=device)
