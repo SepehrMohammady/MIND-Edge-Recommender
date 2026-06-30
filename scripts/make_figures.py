@@ -34,7 +34,7 @@ ax[1].set_xscale("log")
 for a in ax:
     a.legend(fontsize=8); a.grid(alpha=0.3)
 plt.tight_layout()
-plt.savefig(figdir / "pareto.png", dpi=160)
+plt.savefig(figdir / "pareto.png", dpi=200, bbox_inches="tight")
 print("wrote", figdir / "pareto.png")
 
 # Fig 2: per-language AUC bar.
@@ -45,5 +45,5 @@ if (art / "lang_matrix.csv").exists():
     plt.axhline(0.5, color="grey", ls="--", lw=1)
     plt.ylabel("AUC"); plt.title("Cross-lingual transfer (Micro-NAS, all languages)")
     plt.tight_layout()
-    plt.savefig(figdir / "multilingual.png", dpi=160)
+    plt.savefig(figdir / "multilingual.png", dpi=200, bbox_inches="tight")
     print("wrote", figdir / "multilingual.png")

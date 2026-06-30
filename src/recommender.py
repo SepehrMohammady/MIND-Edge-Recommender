@@ -133,9 +133,12 @@ def train_recommender(cfg: dict, news_encoder: nn.Module | None = None,
 # --------------------------------------------------------------- evaluation
 @torch.no_grad()
 def evaluate(cfg: dict, model: NewsRecommender, split: str = "dev",
-             lang: str | None = None, max_impressions: int | None = None) -> dict:
+             lang: str | None = None, max_impressions: int | None = None,
+             min_hist: int | None = None, max_hist: int | None = None) -> dict:
     """Impression-level ranking metrics. ``lang`` swaps title text to an xMIND
-    language (cross-lingual transfer); ``None`` = English MIND."""
+    language (cross-lingual transfer); ``None`` = English MIND.
+    ``min_hist``/``max_hist`` filter impressions by clicked-history length (for
+    cold-start analysis: e.g. max_hist=0 = users with no history)."""
     device = next(model.parameters()).device
     news = (data_xmind.localized_news(cfg, lang, split) if lang
             else data_mind.read_news(cfg, split))
@@ -148,6 +151,10 @@ def evaluate(cfg: dict, model: NewsRecommender, split: str = "dev",
 
     impressions = data_mind.build_eval_impressions(
         data_mind.read_behaviors(cfg, split), cfg["data"]["max_history"])
+    if min_hist is not None:
+        impressions = [i for i in impressions if len(i["history"]) >= min_hist]
+    if max_hist is not None:
+        impressions = [i for i in impressions if len(i["history"]) <= max_hist]
     if max_impressions:
         impressions = impressions[:max_impressions]
 
