@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۳ — معلم–دانش‌آموز | MIND Edge Recommender</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-chapter="ch03">
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-brand"><h1>MIND Edge Recommender</h1><p>دوره آموزشی | از صفر تا قهرمان</p></div>
+  <div class="sidebar-nav">
+    <div class="nav-section">فصل‌ها</div>
+    <a class="nav-link" href="../01-intro/index.html" data-chapter="ch01"><span class="icon">🏠</span> مقدمه <span class="badge">—</span></a>
+    <a class="nav-link" href="../02-datasets/index.html" data-chapter="ch02"><span class="icon">🗄️</span> داده‌ها <span class="badge">—</span></a>
+    <a class="nav-link active" href="../03-teacher-student/index.html" data-chapter="ch03"><span class="icon">🎓</span> معلم–دانش‌آموز <span class="badge">—</span></a>
+    <a class="nav-link" href="../04-architecture/index.html" data-chapter="ch04"><span class="icon">🏗️</span> معماری و NAS <span class="badge">—</span></a>
+    <a class="nav-link" href="../05-quantization/index.html" data-chapter="ch05"><span class="icon">⚡</span> فشرده‌سازی <span class="badge">—</span></a>
+    <a class="nav-link" href="../06-evaluation/index.html" data-chapter="ch06"><span class="icon">📊</span> ارزیابی <span class="badge">—</span></a>
+    <a class="nav-link" href="../07-deployment/index.html" data-chapter="ch07"><span class="icon">🚀</span> استقرار <span class="badge">—</span></a>
+  </div>
+</nav>
+<main class="main">
+<header class="chapter-header">
+  <div class="chapter-num">فصل ۳ از ۷</div>
+  <h1>معلم–دانش‌آموز</h1>
+  <p class="subtitle">Knowledge Distillation، teacher چندزبانه و student بایت‌محور</p>
+  <div class="progress-wrap"><div class="progress-fill" style="width:42%"></div></div>
+</header>
+<div class="content">
+
+<h2>۳.۱ Knowledge Distillation چیست؟</h2>
+<p><strong>Knowledge Distillation</strong> (تقطیر دانش) روشی است که در آن یک مدل سبک (<em>Student</em>) یاد می‌گیرد رفتار مدل بزرگ‌تر (<em>Teacher</em>) را تقلید کند. نتیجه: دقت نزدیک به teacher، اندازه بسیار کوچکتر.</p>
+
+<div class="diagram">
+Teacher (بزرگ، دقیق، کُند)         Student (کوچک، سریع)
+┌──────────────────────┐             ┌────────────────┐
+│ paraphrase-multilingual│ → anchor → │ Byte-level CNN │
+│ MiniLM-L12-v2        │  embeddings │                │
+│ 117 MB, 384-dim      │             │ 204 KB, 384-dim│
+└──────────────────────┘             └────────────────┘
+     (یخ‌زده، آموزش نمی‌بیند)          ↑
+                                    Matryoshka Cosine Loss
+                                    (student باید embedding
+                                     teacher را تقلید کند)</div>
+
+<h2>۳.۲ Teacher — مدل چندزبانه</h2>
+<p>ما از <code>paraphrase-multilingual-MiniLM-L12-v2</code> به عنوان teacher استفاده می‌کنیم. این مدل قبلاً با میلیون‌ها جمله در زبان‌های مختلف آموزش دیده.</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ویژگی Teacher</th><th>مقدار</th></tr></thead>
+  <tbody>
+    <tr><td>مدل پایه</td><td>MiniLM-L12</td></tr>
+    <tr><td>اندازه</td><td>~117 MB</td></tr>
+    <tr><td>ابعاد embedding</td><td>384</td></tr>
+    <tr><td>زبان‌های پشتیبانی</td><td>>100 زبان</td></tr>
+    <tr><td>وضعیت در آموزش</td><td><span class="badge-info">یخ‌زده (frozen)</span> — آموزش نمی‌بیند</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Anchor Embeddings</h3>
+<p>Teacher فقط روی عناوین <em>انگلیسی</em> MIND اجرا می‌شود و یک <strong>anchor embedding</strong> برای هر مقاله می‌سازد. سپس student یاد می‌گیرد ترجمه‌های هر زبان را به همان anchor نزدیک کند.</p>
+
+<div class="callout callout-success">
+  <div class="callout-title">✅ ایده هوشمندانه</div>
+  چون xMIND ترجمه‌های موازی دارد (همه زبان‌ها همان مقاله را توصیف می‌کنند)، هر ترجمه باید به anchor یکسانی نزدیک شود. Student یاد می‌گیرد معنا را بشناسد، نه زبان را!
+</div>
+
+<h2>۳.۳ Student — Byte-level Char-CNN</h2>
+<p>Student یک شبکه عصبی کانولوشنی <strong>بایت‌محور</strong> است. به جای یادگیری روی کلمات، روی بایت‌های UTF-8 عمل می‌کند.</p>
+
+<div class="diagram">ورودی: "Sports News"
+     ↓ encode UTF-8
+[83, 112, 111, 114, 116, 115, ...]   ← byte ids (0-255)
+     ↓ Byte Embedding Table (257 × 64)  ← 256 بایت + 1 pad
+[vec₀, vec₁, vec₂, ...]             ← embedding هر بایت
+     ↓ Depthwise-Separable 1-D Conv (چند لایه)
+[feature_maps...]
+     ↓ Masked Mean Pooling
+[384-dim vector]                     ← embedding مقاله
+     ↓ Linear head
+[out_dim vector]                     ← خروجی نهایی</div>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>لایه Student</th><th>توضیح</th><th>نکته</th></tr></thead>
+  <tbody>
+    <tr><td>Byte Embedding</td><td>جدول ۲۵۷ × ۶۴ (۲۵۶ بایت + pad)</td><td>واژگان ثابت برای همه زبان‌ها</td></tr>
+    <tr><td>Conv Blocks</td><td>Depthwise-Separable 1-D</td><td>سبک‌تر از Conv معمولی</td></tr>
+    <tr><td>Masked Mean Pool</td><td>میانگین روی توکن‌های واقعی</td><td>padding را نادیده می‌گیرد</td></tr>
+    <tr><td>Linear Head</td><td>تبدیل به out_dim</td><td>در FP32 نگه داشته می‌شود</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>۳.۴ Matryoshka Loss</h2>
+<p><strong>Matryoshka Representation Learning</strong> می‌گوید: ابتدای embedding باید به تنهایی هم مفید باشد. اگر embedding 384-بعدی داریم، prefix 64-بعدی آن هم باید کار کند.</p>
+
+<div class="callout callout-info">
+  <div class="callout-title">💡 چرا مهم است؟</div>
+  روی دستگاه‌های بسیار ضعیف می‌توانیم از 64 یا 128 بعد اول استفاده کنیم و از ذخیره‌سازی کمتری بهره‌مند شویم — بدون آموزش مجدد.
+</div>
+
+<h2>۳.۵ کد آموزش Student</h2>
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">Python — src/student.py (ساده‌شده)</span><button class="copy-btn">کپی</button></div>
+  <pre><span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn
+
+<span class="kw">class</span> <span class="cls">ByteLevelEncoder</span>(nn.<span class="cls">Module</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, channels=<span class="num">64</span>, depth=<span class="num">5</span>, out_dim=<span class="num">384</span>):
+        <span class="fn">super</span>().__init__()
+        self.embed = nn.<span class="cls">Embedding</span>(<span class="num">257</span>, <span class="num">64</span>)   <span class="cmt"># 256 بایت + pad؛ سپس proj→channels (src/student.py)</span>
+        self.convs = nn.<span class="cls">Sequential</span>(*[
+            <span class="cls">DepthwiseSepConv</span>(channels) <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(depth)
+        ])
+        self.head = nn.<span class="cls">Linear</span>(channels, out_dim)
+
+    <span class="kw">def</span> <span class="fn">forward</span>(self, byte_ids):             <span class="cmt"># (B, L)</span>
+        mask = (byte_ids > <span class="num">0</span>).float()
+        x = self.<span class="fn">embed</span>(byte_ids)             <span class="cmt"># (B, L, C)</span>
+        x = self.<span class="fn">convs</span>(x.transpose(<span class="num">1</span>,<span class="num">2</span>)).transpose(<span class="num">1</span>,<span class="num">2</span>)
+        x = (x * mask.unsqueeze(<span class="num">-1</span>)).<span class="fn">sum</span>(<span class="num">1</span>) / mask.<span class="fn">sum</span>(<span class="num">1</span>, keepdim=<span class="kw">True</span>)
+        <span class="kw">return</span> self.<span class="fn">head</span>(x)                   <span class="cmt"># (B, out_dim)</span>
+
+<span class="cmt"># تابع Matryoshka Loss</span>
+<span class="kw">def</span> <span class="fn">matryoshka_loss</span>(pred, target, dims=[<span class="num">64</span>, <span class="num">128</span>, <span class="num">256</span>, <span class="num">384</span>]):
+    total = <span class="num">0</span>
+    <span class="kw">for</span> d <span class="kw">in</span> dims:
+        total += <span class="num">1</span> - nn.functional.<span class="fn">cosine_similarity</span>(
+            pred[:, :d], target[:, :d]).mean()
+    <span class="kw">return</span> total / <span class="fn">len</span>(dims)</pre>
+</div>
+
+<h2>۳.۶ واژه‌نامه اصطلاحات کلیدی</h2>
+<p>هر اصطلاحی که در این فصل دیدی، ساده و با مثالِ همین پروژه:</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>اصطلاح</th><th>یعنی چه؟</th></tr></thead>
+  <tbody>
+    <tr><td><strong>embedding</strong><br>(بردار نهفته)</td><td>تبدیل یک چیز گسسته (یک بایت، یک کلمه) به برداری از اعداد که شبکه می‌تواند رویش حساب کند. مثل یک جدول جست‌وجو: <code>id → بردار</code>.</td></tr>
+    <tr><td><strong>Byte Embedding</strong><br>(امبدینگ بایت)</td><td>جدول ما برای ۲۵۶ مقدار ممکنِ بایت UTF-8 (+۱ برای pad). هر بایت → بردار ۶۴‌تایی (<code>byte_embed_dim=64</code>). <em>یک</em> جدول برای هر ۱۴ زبان → هیچ واژگانِ جداگانه‌ای برای هر زبان لازم نیست.</td></tr>
+    <tr><td><strong>padding</strong><br>(پُرکردن)</td><td>عنوان‌ها طول متفاوت دارند ولی تنسور باید اندازهٔ ثابت داشته باشد. جاهای خالی را با id صفر پر می‌کنیم تا به <code>max_title_bytes=128</code> برسد. pad معنا ندارد و باید نادیده گرفته شود.</td></tr>
+    <tr><td><strong>Conv Blocks</strong><br>(بلوک‌های کانولوشن)</td><td>فیلترهای کانولوشن ۱بُعدی که روی دنبالهٔ بایت‌ها سُر می‌خورند و الگوهای محلی را یاد می‌گیرند (n-gramهای بایتی ≈ زیرکلمه/تکواژ). ما نوع depthwise-separable را به‌کار می‌بریم که سبک و مناسب MCU است.</td></tr>
+    <tr><td><strong>Masked Mean Pool</strong><br>(میانگین‌گیری ماسک‌دار)</td><td>دنبالهٔ ۱۲۸ بردار → <em>یک</em> بردار، با میانگین‌گیری روی موقعیت‌ها. «ماسک‌دار» یعنی موقعیت‌های pad در میانگین حساب نمی‌شوند تا پُرکننده‌ها نتیجه را خراب نکنند.</td></tr>
+    <tr><td><strong>Linear Head</strong><br>(سرِ خطی)</td><td>آخرین لایه، یک <code>nn.Linear(channels → out_dim)</code>. بردار جمع‌شده را به اندازهٔ خروجی نهایی تبدیل می‌کند. «head» یعنی لایهٔ پایانی که نتیجه را می‌سازد.</td></tr>
+    <tr><td><strong>out_dim</strong><br>(بُعد خروجی)</td><td>اندازهٔ بردار خبرِ تولیدشده (مثلاً ۳۸۴). باید با بُعد teacher برابر باشد تا student بتواند آن را تقلید کند. NAS همین مقدار را جست‌وجو می‌کند.</td></tr>
+    <tr><td><strong>anchor / anchor embedding</strong><br>(لنگر)</td><td>بردارِ هدفی که student کپی می‌کند. teacherِ یخ‌زده عنوانِ <em>انگلیسی</em> هر مقاله را کد می‌کند → بردار ۳۸۴‌تایی = «لنگر». چون ترجمه‌ها موازی‌اند، هر زبان به همان لنگر نزدیک می‌شود → یک فضای معنایی مشترک.</td></tr>
+    <tr><td><strong>Matryoshka<br>Representation Learning</strong></td><td>طوری آموزش بده که بردار حتی با نگه‌داشتن فقط چند بُعدِ اول هم مفید باشد — مثل عروسک‌های تودرتوی روسی (ماتریوشکا). loss، پیشوندها را در ۶۴/۱۲۸/۲۵۶/۳۸۴ بُعد مقایسه می‌کند.</td></tr>
+    <tr><td><strong>prefix</strong><br>(پیشوند)</td><td>چند عددِ اولِ یک بردار. <code>vec[:64]</code> = پیشوندِ ۶۴‌تایی. MRL باعث می‌شود همین پیشوندِ کوتاه هم به‌تنهایی معنادار باشد (برای دستگاه‌های کم‌حافظه).</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">🔗 جریان کامل</div>
+  بایت‌های عنوان → <strong>Byte Embedding</strong> → <strong>Conv Blocks</strong> → <strong>Masked Mean Pool</strong> → <strong>Linear Head</strong> (به اندازهٔ <strong>out_dim</strong>) → embeddingِ student؛ که با loss به <strong>anchor</strong>ِ teacher نزدیک می‌شود، و <strong>Matryoshka</strong> تضمین می‌کند هر <strong>prefix</strong> هم کار کند.
+</div>
+
+<!-- QUIZ -->
+<section class="quiz-section">
+  <h2>🧪 آزمون فصل ۳</h2>
+  <div class="quiz-score">امتیاز شما: <span class="score-num">0</span> از 4</div>
+
+  <div class="question-block" data-correct="1">
+    <p class="question-text"><span class="q-num">۱</span> در Knowledge Distillation، وزن‌های teacher در هنگام آموزش student چه وضعیتی دارند؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> همراه student آموزش می‌بینند</div>
+      <div class="option"><div class="opt-letter">ب</div> یخ‌زده (frozen) هستند و آموزش نمی‌بینند</div>
+      <div class="option"><div class="opt-letter">ج</div> حذف می‌شوند</div>
+      <div class="option"><div class="opt-letter">د</div> به student منتقل می‌شوند</div>
+    </div>
+    <div class="explanation">Teacher یخ‌زده است — وزن‌هایش تغییر نمی‌کنند. فقط برای تولید anchor embeddings استفاده می‌شود. Student یاد می‌گیرد همان embeddings را با اندازه کوچک‌تر تولید کند.</div>
+  </div>
+
+  <div class="question-block" data-correct="0">
+    <p class="question-text"><span class="q-num">۲</span> واژگان (Vocabulary) مدل student ما چه چیزی است؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> ۲۵۶ بایت UTF-8</div>
+      <div class="option"><div class="opt-letter">ب</div> ۵۰,۰۰۰ کلمه انگلیسی</div>
+      <div class="option"><div class="opt-letter">ج</div> ۱۴ کد زبان</div>
+      <div class="option"><div class="opt-letter">د</div> ۳۸۴ بردار</div>
+    </div>
+    <div class="explanation">Student فقط ۲۵۶ بایت UTF-8 (0-255) را می‌شناسد. همه متن‌های جهان با این ۲۵۶ نماد قابل نمایش‌اند — پس یک مدل همه زبان‌ها را پوشش می‌دهد.</div>
+  </div>
+
+  <div class="question-block" data-correct="2">
+    <p class="question-text"><span class="q-num">۳</span> Matryoshka Loss چه مزیتی دارد؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> آموزش را سریع‌تر می‌کند</div>
+      <div class="option"><div class="opt-letter">ب</div> loss کمتری تولید می‌کند</div>
+      <div class="option"><div class="opt-letter">ج</div> prefix‌های کوتاه‌تر embedding هم به تنهایی مفید هستند</div>
+      <div class="option"><div class="opt-letter">د</div> فقط روی GPU کار می‌کند</div>
+    </div>
+    <div class="explanation">با Matryoshka Loss، embedding نه تنها در بعد کامل (384) بلکه در prefix‌های کوچکتر (96، 192) هم مفید است. روی MCU می‌توان از بعد کوچکتر استفاده کرد.</div>
+  </div>
+
+  <div class="question-block" data-correct="-1">
+    <p class="question-text"><span class="q-num">۴</span> چرا teacher فقط روی عناوین انگلیسی اجرا می‌شود (نه ترجمه‌ها)؟</p>
+    <div class="open-answer">
+      <textarea placeholder="جواب خود را بنویسید..."></textarea>
+      <div class="explanation" style="display:none">چون xMIND ترجمه موازی دارد — همه زبان‌ها همان مقاله را توصیف می‌کنند. Anchor انگلیسی نمایانگر «معنا» است. Student یاد می‌گیرد هر ترجمه را به همان معنا نزدیک کند. این روش Multilingual Knowledge Distillation (Reimers & Gurevych, 2020) است.</div>
+      <button class="reveal-btn">نمایش جواب</button>
+    </div>
+  </div>
+
+  <div class="quiz-result"><div class="result-score"></div><div class="result-msg"></div></div>
+</section>
+
+<!-- Practice -->
+<section class="practice-section">
+  <h2>💻 تمرین عملی</h2>
+  <h3>تمرین ۳.۱ — بررسی anchor embeddings</h3>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">کپی</button></div>
+    <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cmt"># بارگذاری anchor embeddings (از teacher)</span>
+nids = <span class="fn">open</span>(<span class="str">"artifacts/teacher_anchor_small_train.nids.txt"</span>).<span class="fn">read</span>().<span class="fn">split</span>()
+anchors = np.<span class="fn">load</span>(<span class="str">"artifacts/teacher_anchor_small_train.npy"</span>)
+
+<span class="fn">print</span>(<span class="str">f"تعداد مقالات: {len(nids)}"</span>)
+<span class="fn">print</span>(<span class="str">f"شکل anchors: {anchors.shape}"</span>)   <span class="cmt"># (n_articles, 384)</span>
+
+<span class="cmt"># شباهت cosine بین دو مقاله تصادفی</span>
+<span class="kw">from</span> numpy.linalg <span class="kw">import</span> norm
+a, b = anchors[<span class="num">0</span>], anchors[<span class="num">100</span>]
+sim = np.<span class="fn">dot</span>(a, b) / (norm(a) * norm(b))
+<span class="fn">print</span>(<span class="str">f"شباهت cosine بین مقاله 0 و 100: {sim:.4f}"</span>)</pre>
+  </div>
+
+  <h3>تمرین ۳.۲ — اجرای student روی یک عنوان</h3>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">کپی</button></div>
+    <pre><span class="kw">import</span> torch
+<span class="kw">from</span> src.config <span class="kw">import</span> load_config
+<span class="kw">from</span> src.student <span class="kw">import</span> ByteCNNEncoder
+
+cfg = <span class="fn">load_config</span>()
+s = cfg[<span class="str">"student"</span>]
+<span class="cmt"># student.pt یک state_dict است؛ اول مدل را بساز، بعد وزن‌ها را بارگذاری کن</span>
+model = <span class="fn">ByteCNNEncoder</span>(s[<span class="str">"byte_embed_dim"</span>], s[<span class="str">"channels"</span>], s[<span class="str">"depth"</span>], s[<span class="str">"out_dim"</span>])
+model.<span class="fn">load_state_dict</span>(torch.<span class="fn">load</span>(<span class="str">"artifacts/student.pt"</span>, map_location=<span class="str">"cpu"</span>))
+model.<span class="fn">eval</span>()
+
+title = <span class="str">"Sports news from around the world"</span>
+L = cfg[<span class="str">"data"</span>][<span class="str">"max_title_bytes"</span>]
+byte_ids = [b + <span class="num">1</span> <span class="kw">for</span> b <span class="kw">in</span> title.<span class="fn">encode</span>(<span class="str">"utf-8"</span>)][:L]   <span class="cmt"># +1 چون 0 برای pad رزرو است</span>
+byte_ids += [<span class="num">0</span>] * (L - <span class="fn">len</span>(byte_ids))
+
+<span class="kw">with</span> torch.no_grad():
+    emb = model(torch.<span class="fn">tensor</span>([byte_ids]))
+<span class="fn">print</span>(<span class="str">f"Embedding shape: {emb.shape}"</span>)   <span class="cmt"># (1, out_dim)</span>
+<span class="fn">print</span>(<span class="str">f"Norm: {emb.norm().item():.4f}"</span>)</pre>
+  </div>
+</section>
+
+<nav class="chapter-nav">
+  <a class="nav-btn secondary" href="../02-datasets/index.html">← فصل ۲: داده‌ها</a>
+  <a class="nav-btn" href="../04-architecture/index.html">فصل ۴: معماری و NAS →</a>
+</nav>
+</div>
+</main>
+</div>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

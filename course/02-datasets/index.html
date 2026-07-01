@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۲ — داده‌ها | MIND Edge Recommender</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-chapter="ch02">
+<div class="layout">
+
+<nav class="sidebar">
+  <div class="sidebar-brand"><h1>MIND Edge Recommender</h1><p>دوره آموزشی | از صفر تا قهرمان</p></div>
+  <div class="sidebar-nav">
+    <div class="nav-section">فصل‌ها</div>
+    <a class="nav-link" href="../01-intro/index.html" data-chapter="ch01"><span class="icon">🏠</span> مقدمه <span class="badge">—</span></a>
+    <a class="nav-link active" href="../02-datasets/index.html" data-chapter="ch02"><span class="icon">🗄️</span> داده‌ها <span class="badge">—</span></a>
+    <a class="nav-link" href="../03-teacher-student/index.html" data-chapter="ch03"><span class="icon">🎓</span> معلم–دانش‌آموز <span class="badge">—</span></a>
+    <a class="nav-link" href="../04-architecture/index.html" data-chapter="ch04"><span class="icon">🏗️</span> معماری و NAS <span class="badge">—</span></a>
+    <a class="nav-link" href="../05-quantization/index.html" data-chapter="ch05"><span class="icon">⚡</span> فشرده‌سازی <span class="badge">—</span></a>
+    <a class="nav-link" href="../06-evaluation/index.html" data-chapter="ch06"><span class="icon">📊</span> ارزیابی <span class="badge">—</span></a>
+    <a class="nav-link" href="../07-deployment/index.html" data-chapter="ch07"><span class="icon">🚀</span> استقرار <span class="badge">—</span></a>
+  </div>
+</nav>
+
+<main class="main">
+<header class="chapter-header">
+  <div class="chapter-num">فصل ۲ از ۷</div>
+  <h1>داده‌ها — MIND و xMIND</h1>
+  <p class="subtitle">دیتاست‌های اخبار، ساختار فایل‌ها، دانلود و بارگذاری</p>
+  <div class="progress-wrap"><div class="progress-fill" style="width:28%"></div></div>
+</header>
+
+<div class="content">
+
+<h2>۲.۱ دیتاست MIND</h2>
+<p><strong>MIND</strong> (Microsoft News Dataset) توسط مایکروسافت ریسرچ ساخته شده و استاندارد ارزیابی توصیه اخبار است.</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ویژگی</th><th>مقدار</th></tr></thead>
+  <tbody>
+    <tr><td>کاربران</td><td>~50,000</td></tr>
+    <tr><td>مقالات</td><td>51,282</td></tr>
+    <tr><td>Impressions (train)</td><td>156,965</td></tr>
+    <tr><td>Impressions (dev)</td><td>73,152</td></tr>
+    <tr><td>زبان</td><td>انگلیسی</td></tr>
+    <tr><td>لایسنس</td><td><span class="badge-warn">Microsoft Research — غیر تجاری</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>ساختار فایل‌ها</h3>
+<div class="diagram">data/mind/small/
+├── train/
+│   ├── news.tsv          ← اطلاعات مقالات (category, title, abstract)
+│   ├── behaviors.tsv     ← رفتار کاربران (history + impression labels)
+│   └── entity_embedding.vec
+└── dev/
+    ├── news.tsv
+    └── behaviors.tsv</div>
+
+<h3>فرمت news.tsv</h3>
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">TSV</span></div>
+  <pre>NewsID  Category  SubCategory  Title             Abstract  ...
+N55528  lifestyle lifestyleroyals "Princess ..." "From ..."
+N19505  sports    golf            "Woods wins..." "Tiger..."</pre>
+</div>
+
+<h3>فرمت behaviors.tsv</h3>
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">TSV</span></div>
+  <pre>ImpressionID  UserID  Time       History            Impressions
+1             U131    11/11/2019 N3130 N11621 N11655  N28417-0 N12089-1 N5672-0
+<span class="cmt">                                 ← مقالات کلیک‌شده   NID-0=نمایش بدون کلیک, NID-1=کلیک‌شده</span></pre>
+</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">📌 نکته مهم — Impression چیست؟</div>
+  هر <em>impression</em> یک بار نمایش خبرخوان به کاربر است. شامل تاریخچه قبلی و لیست مقالاتی است که نشان داده شد، با برچسب ۰ (ندیده) یا ۱ (کلیک شده).
+</div>
+
+<!-- ─── xMIND ─── -->
+<h2>۲.۲ دیتاست xMIND و NLLB-3.3B</h2>
+<p><strong>xMIND</strong> نسخه چندزبانه MIND است — عناوین و چکیده مقالات با مدل ترجمه <strong>NLLB-3.3B</strong> (No Language Left Behind) به 14 زبان ترجمه شده‌اند.</p>
+
+<h3>NLLB-3.3B چیست؟</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ویژگی</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td>نام</td><td><strong>No Language Left Behind</strong> — Meta (Facebook) 2022</td></tr>
+    <tr><td>پارامترها</td><td>۳.۳ میلیارد (اینجا "3.3B" می‌آید)</td></tr>
+    <tr><td>معماری</td><td>Transformer encoder-decoder برای ترجمه چندزبانه</td></tr>
+    <tr><td>زبان‌های پشتیبانی‌شده</td><td>۲۰۰+ زبان (پرمنبع و کم‌منبع)</td></tr>
+    <tr><td>داده آموزشی NLLB</td><td>ویکی‌پدیا + Flores + CCMatrix + داده‌های parallel</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">💡 چرا کیفیت ترجمه متفاوت است؟</div>
+  تمام 14 زبان xMIND یکسان ترجمه شده‌اند، اما کیفیت ترجمه به اینکه NLLB برای هر زبان چقدر داده parallel دارد بستگی دارد:<br><br>
+  <strong>زبان‌های پرمنبع</strong> (zho، jpn): NLLB میلیاردها جملات برای این زبان‌ها دارد → ترجمه عالی<br>
+  <strong>زبان‌های کم‌منبع</strong> (kat، tam): NLLB فقط میلیون‌ها جملات دارد → ترجمه ضعیف‌تر
+</div>
+
+<h3>۱۴ زبان xMIND و سطح منابع NLLB</h3>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کد زبان</th><th>زبان</th><th>خط نوشتاری</th><th>سطح منابع</th></tr></thead>
+  <tbody>
+    <tr><td><code>zho</code></td><td>چینی</td><td>Han</td><td><span class="badge-good">زیاد</span></td></tr>
+    <tr><td><code>jpn</code></td><td>ژاپنی</td><td>Kana/Kanji</td><td><span class="badge-good">زیاد</span></td></tr>
+    <tr><td><code>ind</code></td><td>اندونزیایی</td><td>لاتین</td><td><span class="badge-good">زیاد</span></td></tr>
+    <tr><td><code>tur</code></td><td>ترکی</td><td>لاتین</td><td><span class="badge-info">متوسط</span></td></tr>
+    <tr><td><code>ron</code></td><td>رومانیایی</td><td>لاتین</td><td><span class="badge-info">متوسط</span></td></tr>
+    <tr><td><code>vie</code></td><td>ویتنامی</td><td>لاتین</td><td><span class="badge-info">متوسط</span></td></tr>
+    <tr><td><code>tha</code></td><td>تایلندی</td><td>Thai</td><td><span class="badge-info">متوسط</span></td></tr>
+    <tr><td><code>swh</code></td><td>سواحیلی</td><td>لاتین</td><td><span class="badge-warn">کم</span></td></tr>
+    <tr><td><code>fin</code></td><td>فنلاندی</td><td>لاتین</td><td><span class="badge-warn">کم</span></td></tr>
+    <tr><td><code>kat</code></td><td>گرجی</td><td>Georgian</td><td><span class="badge-warn">کم</span></td></tr>
+    <tr><td><code>tam</code></td><td>تامیلی</td><td>Tamil</td><td><span class="badge-warn">کم</span></td></tr>
+    <tr><td><code>hat</code></td><td>هائیتی کریول</td><td>لاتین</td><td><span class="badge-warn">خیلی کم</span></td></tr>
+    <tr><td><code>grn</code></td><td>گوارانی</td><td>لاتین</td><td><span class="badge-warn">خیلی کم</span></td></tr>
+    <tr><td><code>som</code></td><td>سومالیایی</td><td>لاتین</td><td><span class="badge-warn">خیلی کم</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>می‌توانم زبان دیگری (مثل Italian یا Farsi) اضافه کنم؟</h3>
+<p>بله! اگر می‌خواهید نسخه xMIND را برای Italian یا Farsi گسترش دهید، می‌توانید NLLB-3.3B را مستقیم استفاده کنید:</p>
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">کپی</button></div>
+  <pre><span class="kw">from</span> transformers <span class="kw">import</span> pipeline
+
+<span class="cmt"># NLLB از کدهای زبان (eng_Latn / ita_Latn / pes_Arab) و آرگومان‌های</span>
+<span class="cmt"># src_lang و tgt_lang استفاده می‌کند — نه task مثل translation_en_to_xx</span>
+trans = pipeline(<span class="str">"translation"</span>, model=<span class="str">"facebook/nllb-200-3.3B"</span>,
+                 src_lang=<span class="str">"eng_Latn"</span>, tgt_lang=<span class="str">"ita_Latn"</span>)
+title_en = <span class="str">"Breaking: France wins World Cup"</span>
+<span class="fn">print</span>(<span class="str">"Italian:"</span>, trans(title_en)[<span class="num">0</span>][<span class="str">"translation_text"</span>])
+
+<span class="cmt"># فارسی: tgt_lang را به pes_Arab تغییر بده</span>
+trans_fa = pipeline(<span class="str">"translation"</span>, model=<span class="str">"facebook/nllb-200-3.3B"</span>,
+                    src_lang=<span class="str">"eng_Latn"</span>, tgt_lang=<span class="str">"pes_Arab"</span>)
+<span class="fn">print</span>(<span class="str">"Farsi:"</span>, trans_fa(title_en)[<span class="num">0</span>][<span class="str">"translation_text"</span>])</pre>
+</div>
+
+<p><strong>اما:</strong> xMIND یک دیتاست منتشرشده و ثابت است. این 14 زبان برای تنوع و بنچ‌مارک‌سازی انتخاب شدند. اگر می‌خواهید Italian یا Farsi به پروژه خود اضافه کنید، باید:</p>
+<div class="steps">
+  <div class="step">
+    <div class="step-num">۱</div>
+    <div class="step-body">NLLB-3.3B را برای ترجمه MIND انگلیسی استفاده کنید</div>
+  </div>
+  <div class="step">
+    <div class="step-num">۲</div>
+    <div class="step-body">embedding‌های entity و relation را برای زبان جدید تولید کنید</div>
+  </div>
+  <div class="step">
+    <div class="step-num">۳</div>
+    <div class="step-body">مدل‌های استاد و دانشجو را برای زبان جدید آموزش دهید</div>
+  </div>
+</div>
+
+<div class="callout callout-warn">
+  <div class="callout-title">⚠️ نکته ارزیابی — Cross-lingual Transfer</div>
+  xMIND فقط <em>متن مقالات</em> را ترجمه می‌کند. رفتار کاربران (کلیک‌ها) همان داده انگلیسی MIND است. پس ارزیابی <strong>cross-lingual transfer</strong> است، نه رفتار بومی هر زبان.
+</div>
+
+<!-- ─── Download ─── -->
+<h2>۲.۳ دانلود و تأیید داده‌ها</h2>
+
+<div class="steps">
+  <div class="step">
+    <div class="step-num">۱</div>
+    <div class="step-body">
+      <h4>اجرای اسکریپت دانلود</h4>
+      <div class="code-wrap" style="margin-top:8px">
+        <div class="code-header"><span class="code-lang">PowerShell</span><button class="copy-btn">کپی</button></div>
+        <pre>python -m src.download</pre>
+      </div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">۲</div>
+    <div class="step-body">
+      <h4>تأیید SHA256</h4>
+      <p>پس از دانلود، hash هر فایل با <code>data/manifest.json</code> مقایسه می‌شود تا یکپارچگی داده تضمین شود.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">۳</div>
+    <div class="step-body">
+      <h4>پیکربندی زبان‌ها</h4>
+      <p>زبان‌های مورد نظر را در <code>config.yaml</code> تغییر دهید — دانلود برای هر زبان جداگانه انجام می‌شود.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Code: Loading ─── -->
+<h2>۲.۴ بارگذاری داده‌ها در Python</h2>
+
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">Python — data_mind.py</span><button class="copy-btn">کپی</button></div>
+  <pre><span class="kw">from</span> src.config <span class="kw">import</span> load_config
+<span class="kw">from</span> src <span class="kw">import</span> data_mind
+
+cfg = <span class="fn">load_config</span>()
+
+<span class="cmt"># بارگذاری مقالات</span>
+news = data_mind.<span class="fn">read_news</span>(cfg, <span class="str">"train"</span>)
+<span class="cmt"># → dict[nid → {title, category, subcategory, abstract}]</span>
+
+<span class="cmt"># بارگذاری رفتار کاربران</span>
+behaviors = data_mind.<span class="fn">read_behaviors</span>(cfg, <span class="str">"train"</span>)
+<span class="cmt"># → list of {user, history, cands, labels}</span>
+
+ex = behaviors[<span class="num">0</span>]
+<span class="fn">print</span>(<span class="str">f"تعداد impression: {len(behaviors)}"</span>)
+<span class="fn">print</span>(<span class="str">f"تاریخچه: {ex['history'][:3]}"</span>)
+<span class="fn">print</span>(<span class="str">f"کاندیداها: {ex['cands'][:3]}"</span>)
+<span class="fn">print</span>(<span class="str">f"برچسب‌ها: {ex['labels'][:3]}"</span>)</pre>
+</div>
+
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">Python — data_xmind.py</span><button class="copy-btn">کپی</button></div>
+  <pre><span class="kw">from</span> src <span class="kw">import</span> data_xmind
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cmt"># بارگذاری xMIND برای یک زبان</span>
+df_zh = pd.<span class="fn">read_parquet</span>(<span class="str">"data/xmind/small/data/zho/train.parquet.gzip"</span>)
+<span class="fn">print</span>(df_zh[[<span class="str">"nid"</span>, <span class="str">"title"</span>]].<span class="fn">head</span>(<span class="num">3</span>))
+
+<span class="cmt"># مقایسه چندزبانه برای یک news ID</span>
+nid = <span class="str">"N55528"</span>
+<span class="kw">for</span> lang <span class="kw">in</span> [<span class="str">"zho"</span>, <span class="str">"jpn"</span>, <span class="str">"tur"</span>]:
+    df = pd.<span class="fn">read_parquet</span>(<span class="str">f"data/xmind/small/data/{lang}/train.parquet.gzip"</span>)
+    row = df[df[<span class="str">"nid"</span>] == nid]
+    <span class="kw">if</span> <span class="fn">len</span>(row):
+        <span class="fn">print</span>(<span class="str">f"[{lang}] {row['title'].values[0]}"</span>)</pre>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<section class="quiz-section">
+  <h2>🧪 آزمون فصل ۲</h2>
+  <div class="quiz-score">امتیاز شما: <span class="score-num">0</span> از 4</div>
+
+  <div class="question-block" data-correct="1">
+    <p class="question-text"><span class="q-num">۱</span> فایل behaviors.tsv چه اطلاعاتی دارد؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> متن مقالات و چکیده آن‌ها</div>
+      <div class="option"><div class="opt-letter">ب</div> تاریخچه کلیک کاربران و impression‌ها</div>
+      <div class="option"><div class="opt-letter">ج</div> ترجمه‌های xMIND به ۱۴ زبان</div>
+      <div class="option"><div class="opt-letter">د</div> وزن‌های مدل teacher</div>
+    </div>
+    <div class="explanation">behaviors.tsv هر session کاربر را ثبت می‌کند: شناسه کاربر، تاریخچه کلیک، و لیست مقالات نمایش‌داده‌شده با برچسب ۰/۱.</div>
+  </div>
+
+  <div class="question-block" data-correct="1">
+    <p class="question-text"><span class="q-num">۲</span> چرا ارزیابی xMIND را "cross-lingual transfer" می‌نامیم؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> چون مدل ما چندزبانه است</div>
+      <div class="option"><div class="opt-letter">ب</div> چون رفتار کاربران همان داده انگلیسی است و فقط متن مقالات ترجمه شده</div>
+      <div class="option"><div class="opt-letter">ج</div> چون از NLLB برای ترجمه استفاده شده</div>
+      <div class="option"><div class="opt-letter">د</div> چون AUC را اندازه می‌گیریم</div>
+    </div>
+    <div class="explanation">xMIND فقط متن مقالات را ترجمه کرده؛ کلیک‌های کاربران همان لاگ‌های انگلیسی MIND هستند. پس مدل ما با رفتار انگلیسی آموزش دیده و روی متن زبان‌های دیگر تست می‌شود.</div>
+  </div>
+
+  <div class="question-block" data-correct="2">
+    <p class="question-text"><span class="q-num">۳</span> تعداد مقالات در MINDsmall چقدر است؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> 156,965</div>
+      <div class="option"><div class="opt-letter">ب</div> 73,152</div>
+      <div class="option"><div class="opt-letter">ج</div> 51,282</div>
+      <div class="option"><div class="opt-letter">د</div> 50,000</div>
+    </div>
+    <div class="explanation">51,282 مقاله در MINDsmall. 156,965 تعداد impression های train است و 50,000 تعداد تقریبی کاربران.</div>
+  </div>
+
+  <div class="question-block" data-correct="1">
+    <p class="question-text"><span class="q-num">۴</span> کدام زبان در xMIND احتمالاً کمترین کیفیت ترجمه را دارد و چرا؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> چینی (zho) — NLLB داده زیاد برای این زبان دارد</div>
+      <div class="option"><div class="opt-letter">ب</div> گوارانی (grn) — NLLB داده‌های parallel کمتری برای این زبان دارد</div>
+      <div class="option"><div class="opt-letter">ج</div> ژاپنی (jpn) — NLLB داده زیاد برای این زبان دارد</div>
+      <div class="option"><div class="opt-letter">د</div> ترکی (tur) — منابع متوسط</div>
+    </div>
+    <div class="explanation">NLLB-3.3B برای زبان‌های کم‌منبع مثل grn (گوارانی)، hat (هائیتی کریول)، tam (تامیلی) و som (سومالیایی) کم‌تر داده parallel دارد (میلیون‌ها به جای میلیاردها)، بنابراین ترجمه خطاهای بیشتری دارد و مدل باید از یک encoder چندزبانه ضعیفتر استفاده کند.</div>
+  </div>
+
+  <div class="quiz-result">
+    <div class="result-score"></div>
+    <div class="result-msg"></div>
+  </div>
+</section>
+
+<!-- Practice -->
+<section class="practice-section">
+  <h2>💻 تمرین عملی</h2>
+
+  <h3>تمرین ۲.۱ — آمار داده‌ها</h3>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">کپی</button></div>
+    <pre><span class="kw">from</span> src.config <span class="kw">import</span> load_config
+<span class="kw">from</span> src <span class="kw">import</span> data_mind
+<span class="kw">from</span> collections <span class="kw">import</span> Counter
+
+cfg = <span class="fn">load_config</span>()
+news = data_mind.<span class="fn">read_news</span>(cfg, <span class="str">"train"</span>)
+
+<span class="fn">print</span>(<span class="str">f"تعداد مقالات: {len(news)}"</span>)
+
+cats = <span class="cls">Counter</span>(n[<span class="str">"category"</span>] <span class="kw">for</span> n <span class="kw">in</span> news.<span class="fn">values</span>())
+<span class="fn">print</span>(<span class="str">"\nتوزیع دسته‌بندی (top 5):"</span>)
+<span class="kw">for</span> cat, count <span class="kw">in</span> cats.<span class="fn">most_common</span>(<span class="num">5</span>):
+    bar = <span class="str">"█"</span> * (count // <span class="num">500</span>)
+    <span class="fn">print</span>(<span class="str">f"  {cat:<20} {bar} {count}"</span>)</pre>
+  </div>
+
+  <h3>تمرین ۲.۲ — توزیع طول عنوان‌ها</h3>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">کپی</button></div>
+    <pre>titles = [n[<span class="str">"title"</span>] <span class="kw">for</span> n <span class="kw">in</span> news.<span class="fn">values</span>()]
+lengths = [<span class="fn">len</span>(t.<span class="fn">encode</span>(<span class="str">"utf-8"</span>)) <span class="kw">for</span> t <span class="kw">in</span> titles]
+
+<span class="kw">import</span> statistics
+<span class="fn">print</span>(<span class="str">f"میانگین طول (byte): {statistics.mean(lengths):.1f}"</span>)
+<span class="fn">print</span>(<span class="str">f"حداکثر:              {max(lengths)}"</span>)
+<span class="fn">print</span>(<span class="str">f"چند درصد زیر 64 بایت: {sum(l<=64 for l in lengths)/len(lengths)*100:.1f}%"</span>)</pre>
+  </div>
+</section>
+
+<nav class="chapter-nav">
+  <a class="nav-btn secondary" href="../01-intro/index.html">← فصل ۱: مقدمه</a>
+  <a class="nav-btn" href="../03-teacher-student/index.html">فصل ۳: معلم–دانش‌آموز →</a>
+</nav>
+
+</div>
+</main>
+</div>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

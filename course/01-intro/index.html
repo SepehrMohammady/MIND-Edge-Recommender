@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۱ — مقدمه | MIND Edge Recommender</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-chapter="ch01">
+<div class="layout">
+
+<!-- ═══ Sidebar ═══ -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <h1>MIND Edge Recommender</h1>
+    <p>دوره آموزشی | از صفر تا قهرمان</p>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">فصل‌ها</div>
+    <a class="nav-link active" href="../01-intro/index.html" data-chapter="ch01"><span class="icon">🏠</span> مقدمه <span class="badge">—</span></a>
+    <a class="nav-link" href="../02-datasets/index.html" data-chapter="ch02"><span class="icon">🗄️</span> داده‌ها <span class="badge">—</span></a>
+    <a class="nav-link" href="../03-teacher-student/index.html" data-chapter="ch03"><span class="icon">🎓</span> معلم–دانش‌آموز <span class="badge">—</span></a>
+    <a class="nav-link" href="../04-architecture/index.html" data-chapter="ch04"><span class="icon">🏗️</span> معماری و NAS <span class="badge">—</span></a>
+    <a class="nav-link" href="../05-quantization/index.html" data-chapter="ch05"><span class="icon">⚡</span> فشرده‌سازی <span class="badge">—</span></a>
+    <a class="nav-link" href="../06-evaluation/index.html" data-chapter="ch06"><span class="icon">📊</span> ارزیابی <span class="badge">—</span></a>
+    <a class="nav-link" href="../07-deployment/index.html" data-chapter="ch07"><span class="icon">🚀</span> استقرار <span class="badge">—</span></a>
+  </div>
+</nav>
+
+<!-- ═══ Main ═══ -->
+<main class="main">
+
+<header class="chapter-header">
+  <div class="chapter-num">فصل ۱ از ۷</div>
+  <h1>مقدمه — توصیه‌گر اخبار چیست؟</h1>
+  <p class="subtitle">مشکل اصلی را بشناسیم و ببینیم راه‌حل ما چیست</p>
+  <div class="progress-wrap"><div class="progress-fill" style="width:14%"></div></div>
+</header>
+
+<div class="content">
+
+<!-- ─── Section 1 ─── -->
+<h2>۱.۱ مسئله را بشناسیم</h2>
+<p>هر روز میلیون‌ها مقاله خبری منتشر می‌شود. کاربر وقت ندارد همه را بخواند. یک <strong>Recommender System</strong> (سیستم توصیه‌گر) مقاله‌هایی را نشان می‌دهد که بیشترین احتمال کلیک دارند.</p>
+
+<div class="diagram">کاربر ← [تاریخچه کلیک‌ها]
+      ↓
+  سیستم توصیه‌گر
+      ↓
+رتبه‌بندی مقالات جدید → نمایش بهترین‌ها</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">💡 مثال ساده</div>
+  تاریخچه: فوتبال، اقتصاد، فناوری<br>
+  مقالات جدید: [آب‌وهوا، پیروزی تیم ملی، بورس، هوش مصنوعی، آشپزی]<br>
+  توصیه: <strong>پیروزی تیم ملی ✅ | بورس ✅ | هوش مصنوعی ✅</strong>
+</div>
+
+<!-- ─── Section 2 ─── -->
+<h2>۱.۲ روش‌های مختلف توصیه اخبار</h2>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>روش</th><th>ایده اصلی</th><th>مشکل</th></tr></thead>
+  <tbody>
+    <tr><td>Collaborative Filtering</td><td>کاربران مشابه را پیدا کن</td><td>نیاز به داده رفتاری زیاد</td></tr>
+    <tr><td>Content-based</td><td>محتوای مقاله را آنالیز کن</td><td>Cold Start دارد</td></tr>
+    <tr><td>NRMS / NAML (Neural)</td><td>Attention روی word embeddings</td><td><span class="badge-warn">جدول embedding سنگین</span></td></tr>
+    <tr><td><strong>روش ما</strong></td><td>Byte-level CNN + Distillation</td><td><span class="badge-good">سبک، چندزبانه، بدون جدول</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ─── Section 3 ─── -->
+<h2>۱.۳ چرا On-Device؟</h2>
+
+<div class="card-grid">
+  <div class="card">
+    <div class="card-icon">🔒</div>
+    <h4>حریم خصوصی</h4>
+    <p>داده رفتاری کاربر هرگز دستگاه را ترک نمی‌کند</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">📶</div>
+    <h4>آفلاین</h4>
+    <p>بدون اینترنت هم توصیه می‌کند</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">⚡</div>
+    <h4>کم‌تأخیر</h4>
+    <p>نیاز به round-trip شبکه ندارد</p>
+  </div>
+</div>
+
+<!-- ─── Section 4: Memory Wall ─── -->
+<h2>۱.۴ مشکل Memory Wall</h2>
+<p>مدل NRMS استاندارد چقدر حافظه می‌خواهد؟</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>قطعه مدل</th><th>اندازه در FP32</th><th>نسبت</th></tr></thead>
+  <tbody>
+    <tr><td>Word Embedding (25,355 × 256d)</td><td><span class="badge-warn">~25 MB</span></td><td>92%</td></tr>
+    <tr><td>شبکه‌ی attention (NRMS)</td><td>~2 MB</td><td>8%</td></tr>
+    <tr><td><strong>جمع کل (NRMS بازتولیدشدهٔ ما، FP32)</strong></td><td><strong>~27 MB</strong> (INT8: 6.8 MB)</td><td>100%</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout callout-warn">
+  <div class="callout-title">⚠️ محدودیت MCU</div>
+  میکروکنترلر STM32H7: <strong>2 MB Flash</strong> — مدل NRMS در آن جا نمی‌شود!
+</div>
+
+<h3>راه‌حل: حذف جدول لغات با Byte-level Encoding</h3>
+<p>به جای نگهداری جدول لغات برای هر زبان، ما از <strong>256 بایت UTF-8</strong> به عنوان واژگان استفاده می‌کنیم. یک مدل → همه زبان‌ها!</p>
+
+<figure style="margin:16px 0">
+  <img src="../assets/size_chart.png" alt="مقایسه اندازهٔ مدل‌ها روی مقیاس لگاریتمی" style="width:100%;max-width:660px;display:block;margin:0 auto">
+  <figcaption style="font-size:0.82em;opacity:0.7;text-align:center;margin-top:6px">اندازهٔ content encoder روی محور <strong>لگاریتمی</strong>؛ NRMS حدود ۱۳۲× بزرگ‌تر از Micro-NAS است.</figcaption>
+</figure>
+
+<!-- ─── Section 5 ─── -->
+<h2>۱.۵ معماری کلی پروژه</h2>
+
+<div class="flow">
+  <div class="flow-stage">آموزش آفلاین (این repository)</div>
+  <div class="flow-row">
+    <span class="flow-node" dir="ltr">MIND data</span><span class="flow-arr">→</span>
+    <span class="flow-node" dir="ltr">Teacher (MiniLM-L12)</span><span class="flow-arr">→</span>
+    <span class="flow-node" dir="ltr">anchor embeddings</span>
+  </div>
+  <div class="flow-down">↓ distillation</div>
+  <div class="flow-row">
+    <span class="flow-node" dir="ltr">xMIND (14 lang)</span><span class="flow-arr">→</span>
+    <span class="flow-node accent" dir="ltr">Student (Byte-CNN)</span><span class="flow-arr">→</span>
+    <span class="flow-node" dir="ltr">NAS</span>
+  </div>
+  <div class="flow-down">↓</div>
+  <div class="flow-node" dir="ltr">Quantization (FP32 / INT8 / Binary)</div>
+  <div class="flow-down">↓</div>
+  <div class="flow-node" dir="ltr">Export: ONNX + JSON</div>
+  <div class="flow-stage">استقرار روی دستگاه ↓</div>
+  <div class="flow-row">
+    <span class="flow-node" dir="ltr">Raspberry Pi 5 (ONNX Runtime)</span>
+    <span class="flow-node" dir="ltr">STM32H7 (X-CUBE-AI)</span>
+  </div>
+</div>
+
+<!-- ─── Section 6: Results ─── -->
+<h2>۱.۶ نتایج اصلی پروژه</h2>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مدل</th><th>AUC</th><th>اندازه</th><th>انرژی</th><th>زبان‌ها</th></tr></thead>
+  <tbody>
+    <tr><td>NRMS baseline (FP32 / INT8)</td><td>0.607</td><td><span class="badge-warn">~27 MB / 6.8 MB</span></td><td>زیاد</td><td>فقط انگلیسی</td></tr>
+    <tr><td>NAS / INT8</td><td><strong>0.647</strong></td><td>790 KB</td><td>4.65 µJ</td><td><span class="badge-good">14 زبان</span></td></tr>
+    <tr><td>Micro-NAS / INT8 ⭐</td><td><strong>0.610</strong></td><td><span class="badge-good">204 KB</span></td><td>2.30 µJ</td><td><span class="badge-good">14 زبان</span></td></tr>
+    <tr><td>Micro-NAS / Binary</td><td>0.521</td><td>186 KB</td><td>2.25 µJ</td><td><span class="badge-good">14 زبان</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout callout-success">
+  <div class="callout-title">✅ نتیجه کلیدی</div>
+  مدل Micro-NAS/INT8 با <strong>204 KB</strong> همان دقتی دارد که NRMS با <strong>~27 MB</strong> (یا 6.8 MB در INT8) — و 14 زبان هم پشتیبانی می‌کند!
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<section class="quiz-section">
+  <h2>🧪 آزمون فصل ۱</h2>
+  <div class="quiz-score">امتیاز شما: <span class="score-num">0</span> از 4</div>
+
+  <!-- Q1 -->
+  <div class="question-block" data-correct="1">
+    <p class="question-text"><span class="q-num">۱</span> اصلی‌ترین دلیل اینکه NRMS روی STM32H7 جا نمی‌شود چیست؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> شبکه عصبی خیلی عمیق است</div>
+      <div class="option"><div class="opt-letter">ب</div> جدول word embedding خیلی بزرگ است</div>
+      <div class="option"><div class="opt-letter">ج</div> به GPU نیاز دارد</div>
+      <div class="option"><div class="opt-letter">د</div> زبان Python پشتیبانی نمی‌شود</div>
+    </div>
+    <div class="explanation">جدول embedding با ~۲۵ هزار واژه × ۲۵۶ بُعد تقریباً ۲۵ مگابایت است (۹۲٪ کل مدل) — بسیار بیشتر از ۲ مگابایت flash موجود در STM32H7.</div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="question-block" data-correct="1">
+    <p class="question-text"><span class="q-num">۲</span> چرا Byte-level encoding مشکل چندزبانگی را حل می‌کند؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> برای هر زبان یک مدل جداگانه می‌سازد</div>
+      <div class="option"><div class="opt-letter">ب</div> از ۲۵۶ بایت UTF-8 مشترک بین همه زبان‌ها استفاده می‌کند</div>
+      <div class="option"><div class="opt-letter">ج</div> از Google Translate استفاده می‌کند</div>
+      <div class="option"><div class="opt-letter">د</div> فقط زبان‌های لاتین را پشتیبانی می‌کند</div>
+    </div>
+    <div class="explanation">UTF-8 همه متن‌های جهان را با ترکیبی از ۲۵۶ بایت نشان می‌دهد. پس یک مدل با واژگان ۲۵۶ کاراکتری می‌تواند هر زبانی را پردازش کند.</div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="question-block" data-correct="2">
+    <p class="question-text"><span class="q-num">۳</span> مدل Micro-NAS/INT8 ما چه AUC دارد؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> 0.521</div>
+      <div class="option"><div class="opt-letter">ب</div> 0.607</div>
+      <div class="option"><div class="opt-letter">ج</div> 0.610</div>
+      <div class="option"><div class="opt-letter">د</div> 0.647</div>
+    </div>
+    <div class="explanation">AUC 0.610 برای Micro-NAS/INT8 — کمی بیشتر از NRMS baseline با 0.607 — با اندازه فقط 204 KB.</div>
+  </div>
+
+  <!-- Q4 open -->
+  <div class="question-block" data-correct="-1">
+    <p class="question-text"><span class="q-num">۴</span> سه مزیت اصلی on-device recommendation را نام ببرید.</p>
+    <div class="open-answer">
+      <textarea placeholder="جواب خود را اینجا بنویسید..."></textarea>
+      <div class="explanation" style="display:none">۱) حریم خصوصی: داده رفتاری دستگاه را ترک نمی‌کند &nbsp; ۲) کارکرد آفلاین: بدون اینترنت &nbsp; ۳) کم‌تأخیری: نیاز به round-trip شبکه ندارد</div>
+      <button class="reveal-btn">نمایش جواب</button>
+    </div>
+  </div>
+
+  <div class="quiz-result">
+    <div class="result-score"></div>
+    <div class="result-msg"></div>
+  </div>
+</section>
+
+<!-- ═══ Practice ═══ -->
+<section class="practice-section">
+  <h2>💻 تمرین عملی</h2>
+
+  <h3>تمرین ۱.۱ — تبدیل متن به byte ids</h3>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">کپی</button></div>
+    <pre><span class="cmt"># این کد را در notebook پروژه اجرا کنید</span>
+text_en = <span class="str">"Breaking News"</span>
+text_fa = <span class="str">"اخبار مهم"</span>
+text_ja = <span class="str">"最新ニュース"</span>
+
+<span class="kw">for</span> text <span class="kw">in</span> [text_en, text_fa, text_ja]:
+    byte_ids = <span class="fn">list</span>(text.<span class="fn">encode</span>(<span class="str">"utf-8"</span>))
+    <span class="fn">print</span>(<span class="str">f"'{text}' → {len(byte_ids)} bytes → {byte_ids[:8]}..."</span>)
+
+<span class="cmt"># سوال: چرا متن فارسی و ژاپنی بایت‌های بیشتری دارند؟</span></pre>
+  </div>
+
+  <h3>تمرین ۱.۲ — بررسی فایل artifacts پروژه</h3>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">کپی</button></div>
+    <pre><span class="kw">import</span> json
+
+state = json.<span class="fn">load</span>(<span class="fn">open</span>(<span class="str">"artifacts/edgeml_model_state_v1.json"</span>))
+<span class="fn">print</span>(<span class="str">"Schema:"</span>, state[<span class="str">"schema"</span>])
+<span class="fn">print</span>(<span class="str">"زبان‌ها:"</span>, state[<span class="str">"languages"</span>])
+<span class="fn">print</span>(<span class="str">"ابعاد embedding:"</span>, state[<span class="str">"contentEncoder"</span>][<span class="str">"embedDim"</span>])
+<span class="fn">print</span>(<span class="str">"تعداد دسته‌بندی:"</span>, <span class="fn">len</span>(state[<span class="str">"topicWeights"</span>]))
+<span class="fn">print</span>(<span class="str">"سه دسته پرطرفدار:"</span>)
+<span class="kw">for</span> cat, w <span class="kw">in</span> <span class="fn">list</span>(state[<span class="str">"topicWeights"</span>].items())[:3]:
+    <span class="fn">print</span>(<span class="str">f"  {cat}: {w:.4f}"</span>)</pre>
+  </div>
+
+  <div class="callout callout-info">
+    <div class="callout-title">📁 مسیر اجرا</div>
+    کدهای بالا را از ریشه پروژه (<code>c:\Projects\PhD\MIND</code>) در notebook یا ترمینال اجرا کنید.
+  </div>
+</section>
+
+<!-- Chapter nav -->
+<nav class="chapter-nav">
+  <a class="nav-btn secondary" href="../index.html">← فهرست دوره</a>
+  <a class="nav-btn" href="../02-datasets/index.html">فصل ۲: داده‌ها ←</a>
+</nav>
+
+</div><!-- /content -->
+</main>
+</div><!-- /layout -->
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

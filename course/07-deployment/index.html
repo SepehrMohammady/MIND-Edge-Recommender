@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۷ — استقرار | MIND Edge Recommender</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-chapter="ch07">
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-brand"><h1>MIND Edge Recommender</h1><p>دوره آموزشی | از صفر تا قهرمان</p></div>
+  <div class="sidebar-nav">
+    <div class="nav-section">فصل‌ها</div>
+    <a class="nav-link" href="../01-intro/index.html" data-chapter="ch01"><span class="icon">🏠</span> مقدمه <span class="badge">—</span></a>
+    <a class="nav-link" href="../02-datasets/index.html" data-chapter="ch02"><span class="icon">🗄️</span> داده‌ها <span class="badge">—</span></a>
+    <a class="nav-link" href="../03-teacher-student/index.html" data-chapter="ch03"><span class="icon">🎓</span> معلم–دانش‌آموز <span class="badge">—</span></a>
+    <a class="nav-link" href="../04-architecture/index.html" data-chapter="ch04"><span class="icon">🏗️</span> معماری و NAS <span class="badge">—</span></a>
+    <a class="nav-link" href="../05-quantization/index.html" data-chapter="ch05"><span class="icon">⚡</span> فشرده‌سازی <span class="badge">—</span></a>
+    <a class="nav-link" href="../06-evaluation/index.html" data-chapter="ch06"><span class="icon">📊</span> ارزیابی <span class="badge">—</span></a>
+    <a class="nav-link active" href="../07-deployment/index.html" data-chapter="ch07"><span class="icon">🚀</span> استقرار <span class="badge">—</span></a>
+  </div>
+</nav>
+<main class="main">
+<header class="chapter-header">
+  <div class="chapter-num">فصل ۷ از ۷</div>
+  <h1>استقرار و اندازه‌گیری انرژی</h1>
+  <p class="subtitle">ONNX Export، اجرا روی Pi 5 و STM32H7، اندازه‌گیری مصرف انرژی</p>
+  <div class="progress-wrap"><div class="progress-fill" style="width:100%"></div></div>
+</header>
+<div class="content">
+
+<h2>۷.۱ Artifacts آماده برای استقرار</h2>
+<p>پس از اجرای pipeline، دو فایل در <code>artifacts/</code> برای استقرار آماده هستند:</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فایل</th><th>توضیح</th><th>وضعیت</th></tr></thead>
+  <tbody>
+    <tr><td><code>content_encoder.onnx</code></td><td>مدل byte-CNN در فرمت ONNX opset 18 (تک‌فایل، بدون external data)</td><td><span class="badge-good">✅ آماده</span></td></tr>
+    <tr><td><code>edgeml_model_state_v1.json</code></td><td>Schema: prior + تنظیمات encoder + زبان‌ها</td><td><span class="badge-good">✅ آماده</span></td></tr>
+    <tr><td><code>student.pt</code></td><td>Checkpoint PyTorch برای آموزش مجدد</td><td><span class="badge-info">پشتیبان</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>۷.۲ فرمت ONNX چیست؟</h2>
+<p><strong>ONNX</strong> (Open Neural Network Exchange) یک فرمت استاندارد باز برای مدل‌های هوش مصنوعی است. مدل PyTorch صادر می‌شود و با <strong>ONNX Runtime</strong> روی هر سخت‌افزاری اجرا می‌شود.</p>
+
+<div class="diagram">PyTorch model
+    ↓ torch.onnx.export()
+content_encoder.onnx
+    ↓
+ ┌────────────────────────────────┐
+ │       ONNX Runtime             │
+ ├──────────────┬─────────────────┤
+ │ Windows/Linux│ aarch64 (Pi 5)  │
+ │ CPUExecProv  │ CPUExecutionProv│
+ └──────────────┴─────────────────┘</div>
+
+<h2>۷.۳ صادرکردن مدل (Export)</h2>
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">Python — src/export.py</span><button class="copy-btn">کپی</button></div>
+  <pre><span class="kw">import</span> torch, json
+<span class="kw">from</span> src.config <span class="kw">import</span> load_config
+<span class="kw">from</span> src <span class="kw">import</span> export, data_xmind
+<span class="kw">from</span> src.student <span class="kw">import</span> ByteCNNEncoder
+
+cfg = <span class="fn">load_config</span>(); s = cfg[<span class="str">"student"</span>]
+
+<span class="cmt"># student.pt یک state_dict است → اول مدل را بساز، بعد وزن‌ها را بارگذاری کن</span>
+model = <span class="fn">ByteCNNEncoder</span>(s[<span class="str">"byte_embed_dim"</span>], s[<span class="str">"channels"</span>], s[<span class="str">"depth"</span>], s[<span class="str">"out_dim"</span>])
+model.<span class="fn">load_state_dict</span>(torch.<span class="fn">load</span>(<span class="str">"artifacts/student.pt"</span>, map_location=<span class="str">"cpu"</span>))
+
+<span class="cmt"># صادرکردن به ONNX + ساختن state JSON</span>
+langs = [<span class="str">"en"</span>] + data_xmind.<span class="fn">available_langs</span>(cfg)
+state_path = export.<span class="fn">export_artifacts</span>(cfg, model, langs)
+<span class="fn">print</span>(<span class="str">"Exported:"</span>, state_path)
+
+state = json.<span class="fn">load</span>(<span class="fn">open</span>(<span class="str">"artifacts/edgeml_model_state_v1.json"</span>, encoding=<span class="str">"utf-8"</span>))
+<span class="fn">print</span>(json.<span class="fn">dumps</span>(state[<span class="str">"contentEncoder"</span>], indent=<span class="num">2</span>, ensure_ascii=<span class="kw">False</span>))</pre>
+</div>
+
+<h2>۷.۴ اجرا با ONNX Runtime (Python)</h2>
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">Python — OnnxRuntime</span><button class="copy-btn">کپی</button></div>
+  <pre><span class="kw">import</span> onnxruntime <span class="kw">as</span> ort, numpy <span class="kw">as</span> np, json
+
+<span class="cmt"># بارگذاری state و model</span>
+state = json.<span class="fn">load</span>(<span class="fn">open</span>(<span class="str">"artifacts/edgeml_model_state_v1.json"</span>))
+sess  = ort.<span class="cls">InferenceSession</span>(<span class="str">"artifacts/content_encoder.onnx"</span>,
+         providers=[<span class="str">"CPUExecutionProvider"</span>])
+
+max_len = state[<span class="str">"contentEncoder"</span>][<span class="str">"inputBytes"</span>]
+
+<span class="kw">def</span> <span class="fn">encode_title</span>(title: str) -> np.ndarray:
+    <span class="str">"""عنوان را به embedding تبدیل کن."""</span>
+    b = [x + <span class="num">1</span> <span class="kw">for</span> x <span class="kw">in</span> title.<span class="fn">encode</span>(<span class="str">"utf-8"</span>)][:max_len]   <span class="cmt"># +1 چون 0 = pad</span>
+    b += [<span class="num">0</span>] * (max_len - <span class="fn">len</span>(b))   <span class="cmt"># padding</span>
+    x = np.<span class="fn">array</span>([b], dtype=np.int64)
+    <span class="kw">return</span> sess.<span class="fn">run</span>(<span class="kw">None</span>, {<span class="str">"title_bytes"</span>: x})[<span class="num">0</span>]
+
+<span class="cmt"># آزمون با چند زبان</span>
+titles = {
+    <span class="str">"en"</span>: <span class="str">"Sports news from the world"</span>,
+    <span class="str">"zho"</span>: <span class="str">"世界体育新闻"</span>,
+    <span class="str">"tur"</span>: <span class="str">"Dünya spor haberleri"</span>,
+}
+<span class="kw">for</span> lang, title <span class="kw">in</span> titles.<span class="fn">items</span>():
+    emb = <span class="fn">encode_title</span>(title)
+    <span class="fn">print</span>(<span class="str">f"[{lang}] shape={emb.shape}, norm={np.linalg.norm(emb):.3f}"</span>)</pre>
+</div>
+
+<h2>۷.۵ اندازه‌گیری انرژی — سه روش</h2>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>سخت‌افزار</th><th>روش</th><th>ابزار</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>RTX 5070 GPU</strong><br>(Blackwell, CUDA 13.0)</td>
+      <td>CUDA timing + NVML power sampling</td>
+      <td><code>pynvml</code> — انرژی = (توان−idle) × زمان</td>
+    </tr>
+    <tr>
+      <td><strong>Raspberry Pi 5</strong><br>(CPU / ORT)</td>
+      <td>Wall-clock timing + INA219 sensor</td>
+      <td><code>onnxruntime</code> + سنسور فیزیکی</td>
+    </tr>
+    <tr>
+      <td><strong>STM32H7</strong><br>(MCU)</td>
+      <td>Horowitz 45nm proxy</td>
+      <td>Energy ≈ MACs × pJ/MAC — تحلیلی</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3>روش ۱: اندازه‌گیری GPU با NVML</h3>
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">Python — src/measure_energy.py</span><button class="copy-btn">کپی</button></div>
+  <pre><span class="kw">from</span> src.measure_energy <span class="kw">import</span> energy_nvml
+<span class="kw">from</span> src.config <span class="kw">import</span> load_config
+<span class="kw">from</span> src.student <span class="kw">import</span> ByteCNNEncoder
+<span class="kw">import</span> torch
+
+cfg = <span class="fn">load_config</span>(); s = cfg[<span class="str">"student"</span>]
+model = <span class="fn">ByteCNNEncoder</span>(s[<span class="str">"byte_embed_dim"</span>], s[<span class="str">"channels"</span>], s[<span class="str">"depth"</span>], s[<span class="str">"out_dim"</span>])
+model.<span class="fn">load_state_dict</span>(torch.<span class="fn">load</span>(<span class="str">"artifacts/student.pt"</span>, map_location=<span class="str">"cpu"</span>))
+model = model.<span class="fn">cuda</span>()
+x = torch.<span class="fn">zeros</span>(<span class="num">1</span>, <span class="num">128</span>, dtype=torch.long)
+
+result = <span class="fn">energy_nvml</span>(model, x, n=<span class="num">500</span>)
+<span class="kw">if</span> result[<span class="str">"available"</span>]:
+    <span class="fn">print</span>(<span class="str">f"توان متوسط GPU:    {result['avg_power_w']:.1f} W"</span>)
+    <span class="fn">print</span>(<span class="str">f"توان idle:         {result['idle_w']:.1f} W"</span>)
+    <span class="fn">print</span>(<span class="str">f"انرژی/inference:   {result['energy_mj_per_inf']:.4f} mJ"</span>)
+    <span class="fn">print</span>(<span class="str">f"تأخیر/inference:   {result['latency_ms']:.4f} ms"</span>)</pre>
+</div>
+
+<h3>روش ۲: اندازه‌گیری CPU با OnnxRuntime (Pi 5)</h3>
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">Python — OnnxRuntime timing</span><button class="copy-btn">کپی</button></div>
+  <pre><span class="kw">from</span> src.measure_energy <span class="kw">import</span> latency_onnx
+
+ms = <span class="fn">latency_onnx</span>(
+    <span class="str">"artifacts/content_encoder.onnx"</span>,
+    max_len=<span class="num">128</span>,   <span class="cmt"># طول ثابت ONNX = max_title_bytes</span>
+    n=<span class="num">200</span>, warmup=<span class="num">20</span>
+)
+<span class="fn">print</span>(<span class="str">f"تأخیر CPU: {ms:.3f} ms/inference"</span>)
+
+<span class="cmt"># روی Pi 5 با INA219:
+# import board, adafruit_ina219
+# ina = adafruit_ina219.INA219(board.I2C())
+# power_mw = ina.power  ← توان لحظه‌ای
+</span></pre>
+</div>
+
+<h3>روش ۳: Proxy تحلیلی Horowitz (MCU)</h3>
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">Python — src/footprint.py</span><button class="copy-btn">کپی</button></div>
+  <pre><span class="kw">from</span> src.config <span class="kw">import</span> load_config
+<span class="kw">from</span> src.nas <span class="kw">import</span> search
+
+cfg = <span class="fn">load_config</span>()
+arch = {<span class="str">"channels"</span>: <span class="num">64</span>, <span class="str">"depth"</span>: <span class="num">5</span>, <span class="str">"out_dim"</span>: <span class="num">384</span>}
+
+<span class="cmt"># arch_cost از energy_pj در config.yaml استفاده می‌کند (Horowitz 45nm):</span>
+<span class="cmt">#   fp32_mac=4.6 pJ ، int8_mac=0.23 pJ ، binary_op=0.0072 pJ</span>
+<span class="kw">for</span> prec <span class="kw">in</span> [<span class="str">"fp32"</span>, <span class="str">"int8"</span>, <span class="str">"binary"</span>]:
+    fp = search.<span class="fn">arch_cost</span>(cfg, arch, prec)
+    <span class="fn">print</span>(<span class="str">f"{prec:6s}: {fp['macs']/1e6:.2f}M MACs, {fp['size_kb']:.1f} KB, {fp['energy_uj_per_inf']} µJ"</span>)</pre>
+</div>
+
+<h2>۷.۶ مسیر استقرار</h2>
+<div class="steps">
+  <div class="step">
+    <div class="step-num">۱</div>
+    <div class="step-body">
+      <h4>RTX 5070 Blackwell / Windows / Linux</h4>
+      <p><code>onnxruntime</code> با CPUExecutionProvider — مستقیم اجرا می‌شود. GPU با CUDAExecutionProvider.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">۲</div>
+    <div class="step-body">
+      <h4>Raspberry Pi 5 (aarch64)</h4>
+      <p>نصب onnxruntime نسخه aarch64 و همان کد Python — بدون تغییر. برای اندازه‌گیری واقعی انرژی، INA219 سنسور اضافه کنید.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">۳</div>
+    <div class="step-body">
+      <h4>STM32H7 (MCU)</h4>
+      <p>ONNX → X-CUBE-AI برای INT8. فایل <code>.onnx</code> را import کنید و X-CUBE-AI کد C بهینه‌شده برای Cortex-M7 می‌سازد.</p>
+    </div>
+  </div>
+</div>
+
+<div class="callout callout-warn">
+  <div class="callout-title">⚠️ محدودیت Binary روی MCU</div>
+  هیچ toolchain کاملی برای PyTorch → Binary → STM32H7 وجود ندارد. X-CUBE-AI نسخه 1-bit را فقط از Larq/TensorFlow می‌خواند. اعداد Binary برای MCU در این پروژه <strong>تحلیلی</strong> (Horowitz proxy) هستند، نه اندازه‌گیری واقعی.
+</div>
+
+<!-- QUIZ -->
+<section class="quiz-section">
+  <h2>🧪 آزمون فصل ۷</h2>
+  <div class="quiz-score">امتیاز شما: <span class="score-num">0</span> از 4</div>
+
+  <div class="question-block" data-correct="1">
+    <p class="question-text"><span class="q-num">۱</span> ONNX چه مزیتی دارد؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> فقط روی GPU کار می‌کند</div>
+      <div class="option"><div class="opt-letter">ب</div> مدل را روی هر سخت‌افزاری (CPU، GPU، MCU) با یک فرمت اجرا می‌کند</div>
+      <div class="option"><div class="opt-letter">ج</div> سرعت آموزش را بالا می‌برد</div>
+      <div class="option"><div class="opt-letter">د</div> فقط برای PyTorch است</div>
+    </div>
+    <div class="explanation">ONNX یک فرمت میانی (intermediate representation) است که مدل آموزش‌دیده با هر framework را روی هر runtime و سخت‌افزاری قابل اجرا می‌کند.</div>
+  </div>
+
+  <div class="question-block" data-correct="0">
+    <p class="question-text"><span class="q-num">۲</span> انرژی GPU چطور اندازه‌گیری می‌شود؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> NVML power sampling در حین inference، minus idle baseline</div>
+      <div class="option"><div class="opt-letter">ب</div> فقط با timer</div>
+      <div class="option"><div class="opt-letter">ج</div> با INA219 sensor</div>
+      <div class="option"><div class="opt-letter">د</div> فرمول Horowitz</div>
+    </div>
+    <div class="explanation">روی GPU، NVML (NVIDIA Management Library) توان لحظه‌ای را در حین اجرا می‌خواند. توان idle کم می‌شود و ضرب در زمان inference → انرژی mJ می‌دهد.</div>
+  </div>
+
+  <div class="question-block" data-correct="2">
+    <p class="question-text"><span class="q-num">۳</span> برای استقرار روی Pi 5، از کدام ابزار استفاده می‌شود؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> X-CUBE-AI</div>
+      <div class="option"><div class="opt-letter">ب</div> TensorFlow Lite</div>
+      <div class="option"><div class="opt-letter">ج</div> ONNX Runtime (aarch64)</div>
+      <div class="option"><div class="opt-letter">د</div> PyTorch Mobile</div>
+    </div>
+    <div class="explanation">onnxruntime نسخه aarch64 روی Raspberry Pi 5 نصب می‌شود و مستقیماً فایل .onnx را اجرا می‌کند — همان کد Python، بدون تغییر.</div>
+  </div>
+
+  <div class="question-block" data-correct="-1">
+    <p class="question-text"><span class="q-num">۴</span> چرا اعداد انرژی برای Binary روی MCU "تحلیلی" هستند نه "اندازه‌گیری‌شده"؟</p>
+    <div class="open-answer">
+      <textarea placeholder="جواب خود را بنویسید..."></textarea>
+      <div class="explanation" style="display:none">هیچ toolchain کاملی از PyTorch → 1-bit → STM32H7 وجود ندارد. X-CUBE-AI فقط از Larq/TensorFlow نسخه binary را می‌خواند. پس ما از فرمول Horowitz (Energy ≈ MACs × پیکوژول/MAC) استفاده می‌کنیم که یک تخمین نظری است، نه اندازه‌گیری واقعی از روی MCU.</div>
+      <button class="reveal-btn">نمایش جواب</button>
+    </div>
+  </div>
+
+  <div class="quiz-result"><div class="result-score"></div><div class="result-msg"></div></div>
+</section>
+
+<!-- Practice -->
+<section class="practice-section">
+  <h2>💻 تمرین عملی نهایی — پروژه کامل</h2>
+  <h3>همه چیز را با هم ببینید</h3>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">Python — End-to-End Demo</span><button class="copy-btn">کپی</button></div>
+    <pre><span class="kw">import</span> onnxruntime <span class="kw">as</span> ort, numpy <span class="kw">as</span> np, json, time
+<span class="kw">from</span> numpy.linalg <span class="kw">import</span> norm
+
+state = json.<span class="fn">load</span>(<span class="fn">open</span>(<span class="str">"artifacts/edgeml_model_state_v1.json"</span>))
+sess  = ort.<span class="cls">InferenceSession</span>(<span class="str">"artifacts/content_encoder.onnx"</span>,
+         providers=[<span class="str">"CPUExecutionProvider"</span>])
+L = state[<span class="str">"contentEncoder"</span>][<span class="str">"inputBytes"</span>]
+
+<span class="kw">def</span> <span class="fn">embed</span>(text):
+    b = [x + <span class="num">1</span> <span class="kw">for</span> x <span class="kw">in</span> text.<span class="fn">encode</span>(<span class="str">"utf-8"</span>)][:L]   <span class="cmt"># +1: 0 = pad</span>
+    b += [<span class="num">0</span>] * (L - <span class="fn">len</span>(b))
+    <span class="kw">return</span> sess.<span class="fn">run</span>(<span class="kw">None</span>, {<span class="str">"title_bytes"</span>: np.<span class="fn">array</span>([b], dtype=np.int64)})[<span class="num">0</span>][<span class="num">0</span>]
+
+<span class="cmt"># مقاله با ترجمه‌های مختلف</span>
+article = {
+    <span class="str">"en"</span>: <span class="str">"World Cup: France wins championship"</span>,
+    <span class="str">"zho"</span>: <span class="str">"世界杯：法国赢得冠军"</span>,
+    <span class="str">"tur"</span>: <span class="str">"Dünya Kupası: Fransa şampiyonluğu kazandı"</span>,
+    <span class="str">"jpn"</span>: <span class="str">"ワールドカップ：フランスが優勝"</span>,
+}
+
+embs = {lang: <span class="fn">embed</span>(title) <span class="kw">for</span> lang, title <span class="kw">in</span> article.<span class="fn">items</span>()}
+
+<span class="fn">print</span>(<span class="str">"شباهت cosine با نسخه انگلیسی:"</span>)
+en = embs[<span class="str">"en"</span>]
+<span class="kw">for</span> lang, emb <span class="kw">in</span> embs.<span class="fn">items</span>():
+    sim = np.<span class="fn">dot</span>(en, emb) / (norm(en) * norm(emb))
+    <span class="fn">print</span>(<span class="str">f"  [{lang}] cosine = {sim:.4f}"</span>)
+
+<span class="cmt"># Cold-start prior — topic weights
+</span>
+<span class="fn">print</span>(<span class="str">"\nTop-5 دسته‌بندی در prior:"</span>)
+<span class="kw">for</span> cat, w <span class="kw">in</span> <span class="fn">list</span>(state[<span class="str">"topicWeights"</span>].<span class="fn">items</span>())[:5]:
+    bar = <span class="str">"█"</span> * <span class="fn">int</span>(w * <span class="num">100</span>)
+    <span class="fn">print</span>(<span class="str">f"  {cat:<20} {bar} {w:.3f}"</span>)</pre>
+  </div>
+</section>
+
+<!-- Final callout -->
+<div class="callout callout-success" style="margin-top:30px">
+  <div class="callout-title">🎉 تبریک! دوره را تمام کردید</div>
+  حالا می‌دانید چطور یک سیستم توصیه‌گر اخبار چندزبانه، سبک و حریم‌خصوصی‌محور بسازید که روی میکروکنترلر اجرا می‌شود. برای ادامه یادگیری، notebook پروژه و کد منبع را مطالعه کنید.
+</div>
+
+<nav class="chapter-nav">
+  <a class="nav-btn secondary" href="../06-evaluation/index.html">← فصل ۶: ارزیابی</a>
+  <a class="nav-btn" href="../index.html">بازگشت به فهرست ←</a>
+</nav>
+</div>
+</main>
+</div>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

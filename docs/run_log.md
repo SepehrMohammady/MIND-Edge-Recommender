@@ -26,3 +26,17 @@ variance estimation and the Matryoshka / cold-start checks (not the headline
 matrix numbers). Per-stage timing appended below by the script.
 
 <!-- run_reviews appends timed entries here -->
+- [7.7m] multiseed micro_int8 seed 42: AUC=0.5828 (7.7m)
+- [15.4m] multiseed micro_int8 seed 1: AUC=0.5641 (7.7m)
+- [23.1m] multiseed micro_int8 seed 2: AUC=0.5692 (7.7m)
+- [23.1m] multiseed micro_int8: mean=0.572 std=0.0079
+- [151.2m] multiseed nas_int8 seed 42: AUC=0.6206 (128.1m)
+- [279.4m] multiseed nas_int8 seed 1: AUC=0.6 (128.1m)
+- [1.0m] binary: distill data built
+- [16.4m] binary micro seed 42: AUC=0.5172 (15.4m)
+- [31.8m] binary micro seed 1: AUC=0.5398 (15.3m)
+- [47.1m] binary micro seed 2: AUC=0.5462 (15.4m)
+- [47.1m] binary micro: mean=0.5344 std=0.0124
+- [47.2m] matryoshka: {'64': 0.459, '128': 0.4577, '256': 0.4555, '384': 0.4539}
+- [54.0m] coldstart: with_history=0.5908 masked=0.5 topic_prior=0.551
+- [54.0m] REVIEWS2 DONE

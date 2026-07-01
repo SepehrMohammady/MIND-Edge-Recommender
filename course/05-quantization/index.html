@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۵ — فشرده‌سازی | MIND Edge Recommender</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-chapter="ch05">
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-brand"><h1>MIND Edge Recommender</h1><p>دوره آموزشی | از صفر تا قهرمان</p></div>
+  <div class="sidebar-nav">
+    <div class="nav-section">فصل‌ها</div>
+    <a class="nav-link" href="../01-intro/index.html" data-chapter="ch01"><span class="icon">🏠</span> مقدمه <span class="badge">—</span></a>
+    <a class="nav-link" href="../02-datasets/index.html" data-chapter="ch02"><span class="icon">🗄️</span> داده‌ها <span class="badge">—</span></a>
+    <a class="nav-link" href="../03-teacher-student/index.html" data-chapter="ch03"><span class="icon">🎓</span> معلم–دانش‌آموز <span class="badge">—</span></a>
+    <a class="nav-link" href="../04-architecture/index.html" data-chapter="ch04"><span class="icon">🏗️</span> معماری و NAS <span class="badge">—</span></a>
+    <a class="nav-link active" href="../05-quantization/index.html" data-chapter="ch05"><span class="icon">⚡</span> فشرده‌سازی <span class="badge">—</span></a>
+    <a class="nav-link" href="../06-evaluation/index.html" data-chapter="ch06"><span class="icon">📊</span> ارزیابی <span class="badge">—</span></a>
+    <a class="nav-link" href="../07-deployment/index.html" data-chapter="ch07"><span class="icon">🚀</span> استقرار <span class="badge">—</span></a>
+  </div>
+</nav>
+<main class="main">
+<header class="chapter-header">
+  <div class="chapter-num">فصل ۵ از ۷</div>
+  <h1>فشرده‌سازی مدل</h1>
+  <p class="subtitle">FP32 → INT8 → Binary: مقایسه دقت، اندازه و انرژی</p>
+  <div class="progress-wrap"><div class="progress-fill" style="width:71%"></div></div>
+</header>
+<div class="content">
+
+<h2>۵.۱ چرا Quantization؟</h2>
+<p><strong>Quantization</strong> وزن‌های float32 مدل را به نوع داده کوچکتر تبدیل می‌کند. نتیجه: مدل کوچکتر، استنتاج سریع‌تر، مصرف انرژی کمتر.</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Precision</th><th>بایت/وزن</th><th>نسبت فشرده‌سازی</th><th>انرژی نسبی</th></tr></thead>
+  <tbody>
+    <tr><td><strong>FP32</strong></td><td>4 byte</td><td>1×</td><td>~100%</td></tr>
+    <tr><td><strong>INT8</strong></td><td>1 byte</td><td>4×</td><td><span class="badge-good">~7-36× کمتر</span></td></tr>
+    <tr><td><strong>Binary</strong></td><td>1 bit</td><td>32×</td><td><span class="badge-good">~37× کمتر</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>۵.۲ سه سطح Precision</h2>
+
+<h3>FP32 — دقت کامل</h3>
+<div class="diagram">وزن‌ها: [-0.423, 1.872, -0.091, ...]
+هر عدد: 32 bit = 4 byte
+مزیت: دقت بالا، محاسبه ساده
+مشکل: حافظه زیاد، انرژی بالا</div>
+
+<h3>INT8 — کوانتیزه شده</h3>
+<div class="diagram">وزن‌ها: [-54, 127, -12, ...]
+هر عدد: 8 bit = 1 byte
+فرمول: w_int8 = round(w_fp32 / scale)
+مزیت: 4× کوچکتر، سخت‌افزار بهینه‌شده (ARM Cortex-M)
+مشکل: کمی افت دقت (اما QAT آن را جبران می‌کند)</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">💡 INT8 ≈ FP32</div>
+  در پروژه ما INT8 تقریباً همان دقت FP32 را دارد (گاهی کمی بالاتر، به‌خاطر اثر regularization در QAT). این تفاوت‌ها کوچک‌اند و در حد نوسانِ یک seed — پس <strong>ادعا نمی‌کنیم INT8 واقعاً از FP32 بهتر است</strong>. نکتهٔ مهم: کوانتیزه‌کردنِ این مدلِ کوچک دقت را تقریباً تغییر نمی‌دهد ولی اندازه و انرژی را کم می‌کند.
+</div>
+
+<h3>Binary — یک‌بیتی</h3>
+<div class="diagram">وزن‌ها: [-1, +1, -1, +1, -1, ...]  ← فقط دو مقدار!
+XNOR-Net: لایه اول/آخر و Byte Embedding = FP32
+لایه‌های میانی = Binary (sign × scale)
+مزیت: کوچکترین اندازه ممکن
+مشکل: STM32H7 POPCOUNT ندارد → سرعت واقعی کمتر از INT8</div>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>معماری + Precision</th><th>AUC</th><th>Size</th><th>RAM</th><th>Energy (µJ)</th></tr></thead>
+  <tbody>
+    <tr><td>NAS / FP32</td><td>0.633</td><td>1566 KB</td><td>128 KB</td><td>168.7</td></tr>
+    <tr><td>NAS / INT8</td><td><strong>0.647</strong></td><td>790 KB</td><td>32 KB</td><td>4.65</td></tr>
+    <tr><td>NAS / Binary</td><td>0.588</td><td>563 KB</td><td>32 KB</td><td>4.25</td></tr>
+    <tr class="row-hl"><td>Micro-NAS / INT8 ⭐</td><td><strong>0.610</strong></td><td><strong>204 KB</strong></td><td>8 KB</td><td><strong>2.30</strong></td></tr>
+    <tr><td>Micro-NAS / Binary</td><td>0.521</td><td>186 KB</td><td>8 KB</td><td>2.25</td></tr>
+    <tr><td>Bin.µNAS / Binary</td><td>0.546</td><td>240 KB</td><td>12 KB</td><td>3.23</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>۵.۳ PTQ vs QAT</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>روش</th><th>توضیح</th><th>مزیت</th><th>مشکل</th></tr></thead>
+  <tbody>
+    <tr><td><strong>PTQ</strong><br>Post-Training Quantization</td><td>مدل آموزش‌دیده FP32 را مستقیماً کوانتیزه کن</td><td>سریع، بدون آموزش مجدد</td><td>کمی افت دقت</td></tr>
+    <tr><td><strong>QAT</strong><br>Quantization-Aware Training</td><td>در حین آموزش، quantization شبیه‌سازی کن</td><td>دقت بهتر، گاهی بهتر از FP32</td><td>نیاز به آموزش مجدد</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>۵.۴ کد Quantization</h2>
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">Python — src/quantize.py (ساده‌شده)</span><button class="copy-btn">کپی</button></div>
+  <pre><span class="kw">from</span> src.quantize <span class="kw">import</span> convert_to_quant
+
+<span class="cmt"># یک مدل آموزش‌دیدهٔ FP32 را به INT8 یا Binary تبدیل کن. لایه‌های داخلی</span>
+<span class="cmt"># Conv1d/Linear با fake-quant + STE کوانتیزه می‌شوند؛ embedding و</span>
+<span class="cmt"># proj_in/head به‌صورت FP32 می‌مانند (روش XNOR-Net).</span>
+q_int8   = convert_to_quant(model, <span class="str">"int8"</span>)     <span class="cmt"># PTQ؛ برای QAT دوباره train کن</span>
+q_binary = convert_to_quant(model, <span class="str">"binary"</span>)
+
+<span class="cmt"># هستهٔ کوانتیزه‌سازی در src/quantize.py (ساده‌شده):</span>
+<span class="kw">def</span> <span class="fn">fake_quant_weight</span>(w, bits):
+    <span class="kw">if</span> bits == <span class="num">1</span>:                          <span class="cmt"># Binary: sign × میانگین|w| (per-channel)</span>
+        scale = w.<span class="fn">abs</span>().<span class="fn">mean</span>(dim=<span class="num">1</span>, keepdim=<span class="kw">True</span>)
+        <span class="kw">return</span> _SignSTE.<span class="fn">apply</span>(w) * scale
+    qmax  = <span class="num">2</span> ** (bits - <span class="num">1</span>) - <span class="num">1</span>        <span class="cmt"># INT8: qmax = 127</span>
+    scale = w.<span class="fn">abs</span>().<span class="fn">amax</span>(dim=<span class="num">1</span>, keepdim=<span class="kw">True</span>) / qmax
+    <span class="kw">return</span> _RoundSTE.<span class="fn">apply</span>((w / scale).<span class="fn">clamp</span>(-qmax-<span class="num">1</span>, qmax)) * scale</pre>
+</div>
+
+<div class="callout callout-success">
+  <div class="callout-title">✅ بازیابی دقت Binary (هدف اصلی ما)</div>
+  Binaryِ ساده ضعیف است (Micro-NAS/Binary ≈ <strong>۰٫۵۲۱</strong>، نزدیکِ تصادفی). اما با تکنیک‌های <strong>ReActNet</strong> (RSign/RPReLU) + میان‌بر <strong>Bi-Real</strong> و مقداردهیِ اولیه با distillation، دقتِ binary به <strong>۰٫۵۷۲</strong> در ۱۸۶KB می‌رسد — فقط ۰٫۰۳۵ AUC پایین‌تر از baselineِ کامل، با دو مرتبه‌بزرگی حافظهٔ کمتر. Binary گزینهٔ کم‌ترین‌فوت‌پرینت است؛ INT8 هنوز در دقت جلوتر.
+</div>
+
+<h2>۵.۵ XNOR-Net — لایه‌های Full-Precision</h2>
+<div class="callout callout-warn">
+  <div class="callout-title">⚠️ نکته مهم</div>
+  در پروژه ما (مثل XNOR-Net) لایه‌های زیر همیشه FP32 نگه داشته می‌شوند:
+  <ul style="margin-top:8px">
+    <li><strong>Byte Embedding</strong>: جدول 257 × 64 (256 بایت + pad)</li>
+    <li><strong>اولین Conv</strong>: ورودی binary نباشد</li>
+    <li><strong>Linear head</strong>: خروجی با دقت کامل</li>
+  </ul>
+  فقط لایه‌های میانی conv و linear کوانتیزه می‌شوند.
+</div>
+
+<!-- QUIZ -->
+<section class="quiz-section">
+  <h2>🧪 آزمون فصل ۵</h2>
+  <div class="quiz-score">امتیاز شما: <span class="score-num">0</span> از 4</div>
+
+  <div class="question-block" data-correct="1">
+    <p class="question-text"><span class="q-num">۱</span> INT8 چند بایت برای هر وزن استفاده می‌کند؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> 4 byte</div>
+      <div class="option"><div class="opt-letter">ب</div> 1 byte</div>
+      <div class="option"><div class="opt-letter">ج</div> 1 bit</div>
+      <div class="option"><div class="opt-letter">د</div> 2 byte</div>
+    </div>
+    <div class="explanation">INT8 یک بایت (8 bit) برای هر وزن استفاده می‌کند — ۴× کوچکتر از FP32 با ۴ بایت. Binary فقط ۱ بیت است.</div>
+  </div>
+
+  <div class="question-block" data-correct="1">
+    <p class="question-text"><span class="q-num">۲</span> چرا INT8 گاهی دقت بیشتری از FP32 دارد؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> چون محاسبات دقیق‌تر هستند</div>
+      <div class="option"><div class="opt-letter">ب</div> اثر regularization در QAT</div>
+      <div class="option"><div class="opt-letter">ج</div> چون اندازه مدل کمتر است</div>
+      <div class="option"><div class="opt-letter">د</div> چون بایت‌ها بهتر آموزش می‌بینند</div>
+    </div>
+    <div class="explanation">در QAT، شبیه‌سازی quantization نوعی regularization ایجاد می‌کند که گاهی از overfitting جلوگیری کرده و دقت را بهبود می‌دهد.</div>
+  </div>
+
+  <div class="question-block" data-correct="2">
+    <p class="question-text"><span class="q-num">۳</span> چرا Binarized µNAS روی STM32H7 سرعت واقعی زیادی ندارد؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> مدل خیلی بزرگ است</div>
+      <div class="option"><div class="opt-letter">ب</div> RAM کافی نیست</div>
+      <div class="option"><div class="opt-letter">ج</div> STM32H7 دستورالعمل POPCOUNT ندارد</div>
+      <div class="option"><div class="opt-letter">د</div> X-CUBE-AI از Binary پشتیبانی نمی‌کند</div>
+    </div>
+    <div class="explanation">محاسبات binary روی Cortex-M7 نیاز به POPCOUNT دارند. چون این دستورالعمل در STM32H7 نیست، binary از نظر سرعت مزیتی نسبت به INT8 ندارد. Binary فقط از نظر footprint (اندازه ذخیره‌سازی) مفید است.</div>
+  </div>
+
+  <div class="question-block" data-correct="0">
+    <p class="question-text"><span class="q-num">۴</span> در XNOR-Net، کدام لایه‌ها FP32 نگه داشته می‌شوند؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> لایه Embedding و لایه‌های اول و آخر</div>
+      <div class="option"><div class="opt-letter">ب</div> همه لایه‌ها</div>
+      <div class="option"><div class="opt-letter">ج</div> فقط لایه آخر</div>
+      <div class="option"><div class="opt-letter">د</div> هیچ لایه‌ای</div>
+    </div>
+    <div class="explanation">XNOR-Net توصیه می‌کند Byte Embedding، اولین لایه، و آخرین لایه FP32 بمانند. این از افت شدید دقت جلوگیری می‌کند.</div>
+  </div>
+
+  <div class="quiz-result"><div class="result-score"></div><div class="result-msg"></div></div>
+</section>
+
+<!-- Practice -->
+<section class="practice-section">
+  <h2>💻 تمرین عملی</h2>
+  <h3>تمرین ۵.۱ — اندازه مدل‌های مختلف</h3>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">کپی</button></div>
+    <pre><span class="kw">import</span> os
+
+<span class="cmt"># بررسی اندازه واقعی مدل ONNX صادرشده</span>
+onnx_path = <span class="str">"artifacts/content_encoder.onnx"</span>
+pt_path   = <span class="str">"artifacts/student.pt"</span>
+
+<span class="kw">for</span> path <span class="kw">in</span> [onnx_path, pt_path]:
+    size_kb = os.path.<span class="fn">getsize</span>(path) / <span class="num">1024</span>
+    <span class="fn">print</span>(<span class="str">f"{os.path.basename(path)}: {size_kb:.1f} KB"</span>)
+
+<span class="cmt"># نسبت فشرده‌سازی</span>
+fp32_size = <span class="num">266.8</span>   <span class="cmt"># KB برای Micro-NAS FP32</span>
+int8_size = <span class="num">203.9</span>   <span class="cmt"># KB برای Micro-NAS INT8</span>
+<span class="fn">print</span>(<span class="str">f"\nنسبت فشرده‌سازی FP32→INT8: {fp32_size/int8_size:.2f}×"</span>)</pre>
+  </div>
+
+  <h3>تمرین ۵.۲ — اجرای مدل ONNX</h3>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">کپی</button></div>
+    <pre><span class="kw">import</span> onnxruntime <span class="kw">as</span> ort, numpy <span class="kw">as</span> np, time
+
+sess = ort.<span class="cls">InferenceSession</span>(<span class="str">"artifacts/content_encoder.onnx"</span>,
+       providers=[<span class="str">"CPUExecutionProvider"</span>])
+
+x = np.<span class="fn">zeros</span>((<span class="num">1</span>, <span class="num">128</span>), dtype=np.int64)   <span class="cmt"># batch=1, len=max_title_bytes=128</span>
+
+<span class="cmt"># اجرا و اندازه‌گیری زمان</span>
+t0 = time.<span class="fn">perf_counter</span>()
+<span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="num">100</span>):
+    emb = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<span class="str">"title_bytes"</span>: x})[<span class="num">0</span>]
+ms = (time.<span class="fn">perf_counter</span>() - t0) / <span class="num">100</span> * <span class="num">1000</span>
+
+<span class="fn">print</span>(<span class="str">f"Embedding shape: {emb.shape}"</span>)
+<span class="fn">print</span>(<span class="str">f"Latency CPU: {ms:.2f} ms/inference"</span>)</pre>
+  </div>
+</section>
+
+<nav class="chapter-nav">
+  <a class="nav-btn secondary" href="../04-architecture/index.html">← فصل ۴: معماری</a>
+  <a class="nav-btn" href="../06-evaluation/index.html">فصل ۶: ارزیابی →</a>
+</nav>
+</div>
+</main>
+</div>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

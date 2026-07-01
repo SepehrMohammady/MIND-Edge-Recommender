@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>دوره آموزشی MIND Edge Recommender</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  body { margin: 0; }
+  .main { margin-right: 0; }
+  .hero { min-height: 340px; display: flex; flex-direction: column; justify-content: center; }
+  .stats { display: flex; justify-content: center; gap: 40px; margin-top: 36px; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 700; color: #fff; }
+  .stat-lbl { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 2px; }
+  .section-title { font-size: 20px; font-weight: 700; color: var(--primary); text-align: center; margin: 44px 0 8px; }
+  .section-sub   { text-align: center; color: var(--text-muted); font-size: 14px; margin-bottom: 0; }
+  .prereq-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 16px; padding: 0 40px 40px; }
+  .prereq-card { background: var(--card); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); border-right: 4px solid var(--primary-light); }
+  .prereq-card h4 { font-size: 14px; color: var(--primary); margin: 0 0 4px; }
+  .prereq-card p  { font-size: 12px; color: var(--text-muted); margin: 0; }
+  footer { background: var(--primary); color: rgba(255,255,255,.55); text-align: center; padding: 24px; font-size: 12px; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>دوره آموزشی توصیه‌گر اخبار در لبه شبکه</h1>
+  <p>یاد بگیرید چطور یک سیستم هوش مصنوعی سبک، چندزبانه، و حریم‌خصوصی‌محور بسازید که روی میکروکنترلر اجرا می‌شود. از صفر تا استقرار.</p>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">۷</div><div class="stat-lbl">فصل</div></div>
+    <div class="stat"><div class="stat-num">۱۴</div><div class="stat-lbl">زبان پشتیبانی‌شده</div></div>
+    <div class="stat"><div class="stat-num">۲۰۴ KB</div><div class="stat-lbl">اندازه مدل نهایی</div></div>
+    <div class="stat"><div class="stat-num">۰.۶۱</div><div class="stat-lbl">دقت AUC</div></div>
+  </div>
+</div>
+
+<!-- Chapter cards -->
+<p class="section-title">فصل‌های دوره</p>
+<p class="section-sub">هر فصل شامل توضیحات، جدول، نمودار، آزمون تعاملی و تمرین عملی است</p>
+
+<div class="chapter-cards">
+
+  <a class="chapter-card" href="01-intro/index.html">
+    <div class="ch-num">فصل ۱</div>
+    <h3>مقدمه</h3>
+    <p>توصیه‌گر اخبار چیست؟ چرا on-device؟ مشکل Memory Wall.</p>
+    <div class="topics">
+      <span class="topic-tag">Recommender Systems</span>
+      <span class="topic-tag">On-Device AI</span>
+      <span class="topic-tag">Memory Wall</span>
+    </div>
+  </a>
+
+  <a class="chapter-card" href="02-datasets/index.html">
+    <div class="ch-num">فصل ۲</div>
+    <h3>داده‌ها</h3>
+    <p>دیتاست MIND و xMIND، ساختار فایل‌ها، دانلود و پردازش.</p>
+    <div class="topics">
+      <span class="topic-tag">MIND</span>
+      <span class="topic-tag">xMIND</span>
+      <span class="topic-tag">Cross-lingual</span>
+    </div>
+  </a>
+
+  <a class="chapter-card" href="03-teacher-student/index.html">
+    <div class="ch-num">فصل ۳</div>
+    <h3>معلم–دانش‌آموز</h3>
+    <p>Knowledge Distillation، Teacher چندزبانه، Student بایت‌محور.</p>
+    <div class="topics">
+      <span class="topic-tag">Knowledge Distillation</span>
+      <span class="topic-tag">Byte-level CNN</span>
+      <span class="topic-tag">Matryoshka Loss</span>
+    </div>
+  </a>
+
+  <a class="chapter-card" href="04-architecture/index.html">
+    <div class="ch-num">فصل ۴</div>
+    <h3>معماری و جستجو</h3>
+    <p>NAS، Micro-NAS، Binarized Micro-NAS و فضای جستجو.</p>
+    <div class="topics">
+      <span class="topic-tag">NAS</span>
+      <span class="topic-tag">Search Space</span>
+      <span class="topic-tag">STM32H7</span>
+    </div>
+  </a>
+
+  <a class="chapter-card" href="05-quantization/index.html">
+    <div class="ch-num">فصل ۵</div>
+    <h3>فشرده‌سازی</h3>
+    <p>FP32 → INT8 → Binary، مقایسه دقت، انرژی و اندازه.</p>
+    <div class="topics">
+      <span class="topic-tag">Quantization</span>
+      <span class="topic-tag">PTQ / QAT</span>
+      <span class="topic-tag">XNOR-Net</span>
+    </div>
+  </a>
+
+  <a class="chapter-card" href="06-evaluation/index.html">
+    <div class="ch-num">فصل ۶</div>
+    <h3>ارزیابی</h3>
+    <p>معیارهای AUC، MRR، nDCG و نتایج ۱۴ زبانه.</p>
+    <div class="topics">
+      <span class="topic-tag">AUC</span>
+      <span class="topic-tag">MRR</span>
+      <span class="topic-tag">nDCG</span>
+    </div>
+  </a>
+
+  <a class="chapter-card" href="07-deployment/index.html">
+    <div class="ch-num">فصل ۷</div>
+    <h3>استقرار</h3>
+    <p>صادرکردن ONNX، اجرا روی Pi 5 و STM32H7، اندازه‌گیری انرژی.</p>
+    <div class="topics">
+      <span class="topic-tag">ONNX</span>
+      <span class="topic-tag">OnnxRuntime</span>
+      <span class="topic-tag">Edge Deploy</span>
+    </div>
+  </a>
+
+</div>
+
+<!-- Prerequisites -->
+<p class="section-title">پیش‌نیازها</p>
+<div class="prereq-grid">
+  <div class="prereq-card"><h4>Python مقدماتی</h4><p>متغیر، حلقه، تابع، pip</p></div>
+  <div class="prereq-card"><h4>یادگیری ماشین</h4><p>آشنایی کلی با neural network</p></div>
+  <div class="prereq-card"><h4>ریاضی</h4><p>ضرب ماتریس، میانگین، dot product</p></div>
+  <div class="prereq-card"><h4>ابزارها</h4><p>VS Code، Jupyter، Git</p></div>
+</div>
+
+<footer>MIND Edge Recommender — دوره آموزشی داخلی | محتوا به فارسی، اصطلاحات فنی به انگلیسی</footer>
+
+<script src="assets/quiz.js"></script>
+</body>
+</html>

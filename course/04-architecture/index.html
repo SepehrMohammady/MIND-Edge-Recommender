@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۴ — معماری و NAS | MIND Edge Recommender</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-chapter="ch04">
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-brand"><h1>MIND Edge Recommender</h1><p>دوره آموزشی | از صفر تا قهرمان</p></div>
+  <div class="sidebar-nav">
+    <div class="nav-section">فصل‌ها</div>
+    <a class="nav-link" href="../01-intro/index.html" data-chapter="ch01"><span class="icon">🏠</span> مقدمه <span class="badge">—</span></a>
+    <a class="nav-link" href="../02-datasets/index.html" data-chapter="ch02"><span class="icon">🗄️</span> داده‌ها <span class="badge">—</span></a>
+    <a class="nav-link" href="../03-teacher-student/index.html" data-chapter="ch03"><span class="icon">🎓</span> معلم–دانش‌آموز <span class="badge">—</span></a>
+    <a class="nav-link active" href="../04-architecture/index.html" data-chapter="ch04"><span class="icon">🏗️</span> معماری و NAS <span class="badge">—</span></a>
+    <a class="nav-link" href="../05-quantization/index.html" data-chapter="ch05"><span class="icon">⚡</span> فشرده‌سازی <span class="badge">—</span></a>
+    <a class="nav-link" href="../06-evaluation/index.html" data-chapter="ch06"><span class="icon">📊</span> ارزیابی <span class="badge">—</span></a>
+    <a class="nav-link" href="../07-deployment/index.html" data-chapter="ch07"><span class="icon">🚀</span> استقرار <span class="badge">—</span></a>
+  </div>
+</nav>
+<main class="main">
+<header class="chapter-header">
+  <div class="chapter-num">فصل ۴ از ۷</div>
+  <h1>معماری و NAS</h1>
+  <p class="subtitle">Neural Architecture Search، فضای جستجو، و سه بازوی اصلی پروژه</p>
+  <div class="progress-wrap"><div class="progress-fill" style="width:57%"></div></div>
+</header>
+<div class="content">
+
+<h2>۴.۱ Neural Architecture Search (NAS) چیست؟</h2>
+<p><strong>NAS</strong> به جای اینکه انسان معماری شبکه را طراحی کند، یک الگوریتم خودکار بهترین معماری را جستجو می‌کند. در پروژه ما، بهترین ترکیب <em>channels</em>، <em>depth</em> و <em>out_dim</em> را می‌یابد.</p>
+
+<div class="card-grid">
+  <div class="card">
+    <div class="card-icon">🧬</div>
+    <h4>Evolutionary Search</h4>
+    <p>جمعیتی از معماری‌ها ایجاد می‌شود، بهترین‌ها انتخاب و جهش‌دار می‌شوند</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">📐</div>
+    <h4>Supernet-Free</h4>
+    <p>هر معماری مستقل آموزش می‌بیند — بدون اشتراک وزن</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">🎯</div>
+    <h4>Objective</h4>
+    <p>بهترین cosine similarity با anchor (teacher) زیر محدودیت‌های حافظه</p>
+  </div>
+</div>
+
+<h2>۴.۲ فضای جستجو</h2>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>هایپرپارامتر</th><th>معنی</th><th>بازه</th></tr></thead>
+  <tbody>
+    <tr><td><code>channels</code></td><td>عرض conv blocks</td><td>{32, 64, 96, 128, 192, 256}</td></tr>
+    <tr><td><code>depth</code></td><td>تعداد لایه‌های conv</td><td>{1, 2, 3, 4, 5}</td></tr>
+    <tr><td><code>out_dim</code></td><td>ابعاد embedding خروجی</td><td>{64, 128, 256, 384}</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>۴.۳ سه بازوی اصلی</h2>
+<p>ما سه رژیم مختلف جستجو داریم که هر کدام با محدودیت‌های متفاوت کار می‌کنند:</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>بازو</th><th>Precision</th><th>محدودیت</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td><strong>NAS</strong></td><td>FP32</td><td>سست (RTX 5070، بدون محدودیت MCU)</td><td>حداکثر دقت</td></tr>
+    <tr><td><strong>Micro-NAS</strong></td><td>INT8</td><td>سخت (STM32H7)</td><td>تعادل دقت–حافظه</td></tr>
+    <tr><td><strong>Binarized Micro-NAS</strong></td><td>Binary</td><td>سخت (STM32H7)</td><td>کوچک‌ترین اندازه</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>محدودیت‌های سخت Micro-NAS (هدف on-device)</h3>
+<p>این محدودیت‌ها عمداً <strong>سخت‌گیرانه‌تر</strong> از سقف واقعی STM32H7 (۲MB Flash / ۱MB RAM) انتخاب شده‌اند تا در این مقیاسِ کوچکِ encoder متنی واقعاً اثر بگذارند و بازوی Micro-NAS از NAS جدا شود.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>منبع</th><th>محدودیت</th></tr></thead>
+  <tbody>
+    <tr><td>Flash (اندازه)</td><td>≤ 256 KB</td></tr>
+    <tr><td>RAM (activation)</td><td>≤ 128 KB</td></tr>
+    <tr><td>MACs</td><td>≤ 2 M</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>۴.۴ معماری‌های یافته‌شده</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>بازو</th><th>Channels</th><th>Depth</th><th>Out_dim</th><th>AUC (INT8)</th><th>Size</th></tr></thead>
+  <tbody>
+    <tr><td>NAS</td><td>256</td><td>4</td><td>384</td><td><span class="badge-good">0.647</span></td><td>790 KB</td></tr>
+    <tr><td>Micro-NAS ⭐</td><td>64</td><td>5</td><td>384</td><td><span class="badge-good">0.610</span></td><td>204 KB</td></tr>
+    <tr><td>Bin. µNAS</td><td>96</td><td>2</td><td>384</td><td>0.546 (Binary)</td><td>240 KB</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>۴.۵ مقایسه اندازه (نمودار)</h2>
+<figure style="margin:16px 0">
+  <img src="../assets/size_chart.png" alt="مقایسه اندازهٔ مدل‌ها روی مقیاس لگاریتمی" style="width:100%;max-width:660px;display:block;margin:0 auto">
+  <figcaption style="font-size:0.82em;opacity:0.7;text-align:center;margin-top:6px">اندازهٔ واقعیِ content encoder روی محور <strong>لگاریتمی</strong> (KB). NRMS = مدل بازتولیدشدهٔ ما (FP32)، حدود ۱۳۲× بزرگ‌تر از Micro-NAS.</figcaption>
+</figure>
+
+<h2>۴.۶ کد جستجو (ساده‌شده)</h2>
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">Python — src/nas/search.py</span><button class="copy-btn">کپی</button></div>
+  <pre><span class="kw">from</span> src.config <span class="kw">import</span> load_config
+<span class="kw">from</span> src.nas <span class="kw">import</span> search
+
+cfg = <span class="fn">load_config</span>()
+
+<span class="cmt"># precision و محدودیت از روی نام بازو تعیین می‌شود:</span>
+<span class="cmt">#   "nas" → FP32 (سست) | "micro_nas" → INT8 | "binarized_micro_nas" → Binary</span>
+results = search.<span class="fn">search</span>(cfg, <span class="str">"micro_nas"</span>, generations=<span class="num">15</span>, population=<span class="num">30</span>)
+
+<span class="cmt"># خروجی مرتب‌شده بر اساس کیفیت (بهترین اول)</span>
+best = results[<span class="num">0</span>]
+<span class="fn">print</span>(best[<span class="str">"arch"</span>], best[<span class="str">"quality"</span>], best[<span class="str">"size_kb"</span>], best[<span class="str">"feasible"</span>])</pre>
+</div>
+
+<!-- QUIZ -->
+<section class="quiz-section">
+  <h2>🧪 آزمون فصل ۴</h2>
+  <div class="quiz-score">امتیاز شما: <span class="score-num">0</span> از 4</div>
+
+  <div class="question-block" data-correct="2">
+    <p class="question-text"><span class="q-num">۱</span> هدف NAS در این پروژه چیست؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> پیدا کردن بهترین dataset</div>
+      <div class="option"><div class="opt-letter">ب</div> بهینه‌سازی learning rate</div>
+      <div class="option"><div class="opt-letter">ج</div> پیدا کردن بهترین channels، depth، out_dim زیر محدودیت‌های حافظه</div>
+      <div class="option"><div class="opt-letter">د</div> آموزش teacher</div>
+    </div>
+    <div class="explanation">NAS فضای معماری را جستجو می‌کند تا بهترین ترکیب channels-depth-out_dim را که cosine similarity با anchor را maximize کند و زیر محدودیت‌های حافظه باشد، بیابد.</div>
+  </div>
+
+  <div class="question-block" data-correct="1">
+    <p class="question-text"><span class="q-num">۲</span> کدام بازو محدودیت سخت STM32H7 را رعایت می‌کند؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> فقط NAS</div>
+      <div class="option"><div class="opt-letter">ب</div> Micro-NAS و Binarized Micro-NAS</div>
+      <div class="option"><div class="opt-letter">ج</div> هر سه بازو</div>
+      <div class="option"><div class="opt-letter">د</div> هیچ‌کدام</div>
+    </div>
+    <div class="explanation">NAS محدودیت سستی دارد (برای RTX 5070 GPU). فقط Micro-NAS و Binarized Micro-NAS محدودیت سخت STM32H7 را اعمال می‌کنند.</div>
+  </div>
+
+  <div class="question-block" data-correct="0">
+    <p class="question-text"><span class="q-num">۳</span> Micro-NAS / INT8 چه معماری یافت؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> channels=64, depth=5, out_dim=384</div>
+      <div class="option"><div class="opt-letter">ب</div> channels=256, depth=4, out_dim=384</div>
+      <div class="option"><div class="opt-letter">ج</div> channels=96, depth=2, out_dim=384</div>
+      <div class="option"><div class="opt-letter">د</div> channels=128, depth=3, out_dim=256</div>
+    </div>
+    <div class="explanation">Micro-NAS بهترین معماری زیر محدودیت MCU را با channels=64، depth=5، out_dim=384 یافت که AUC 0.610 در 204 KB می‌دهد.</div>
+  </div>
+
+  <div class="question-block" data-correct="-1">
+    <p class="question-text"><span class="q-num">۴</span> چرا NAS بازوی بدون محدودیت (سست) داریم؟</p>
+    <div class="open-answer">
+      <textarea placeholder="جواب خود را بنویسید..."></textarea>
+      <div class="explanation" style="display:none">بازوی NAS سست (laptop) سقف دقت (accuracy ceiling) را نشان می‌دهد — اگر حافظه نامحدود داشتیم، بهترین مدل چه AUC می‌گرفت؟ این به ما کمک می‌کند بفهمیم با اعمال محدودیت MCU چقدر دقت از دست می‌دهیم.</div>
+      <button class="reveal-btn">نمایش جواب</button>
+    </div>
+  </div>
+
+  <div class="quiz-result"><div class="result-score"></div><div class="result-msg"></div></div>
+</section>
+
+<!-- Practice -->
+<section class="practice-section">
+  <h2>💻 تمرین عملی</h2>
+  <h3>تمرین ۴.۱ — بررسی نتایج NAS</h3>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">کپی</button></div>
+    <pre><span class="kw">import</span> json
+
+nas = json.<span class="fn">load</span>(<span class="fn">open</span>(<span class="str">"artifacts/nas_results.json"</span>))
+<span class="cmt"># ساختار: {arm: [list of best archs]} — هر بازو یک لیست است</span>
+<span class="kw">for</span> arm, records <span class="kw">in</span> nas.<span class="fn">items</span>():
+    best = records[<span class="num">0</span>]
+    <span class="fn">print</span>(<span class="str">f"[{arm}] arch={best['arch']} quality={best['quality']} size_kb={best['size_kb']}"</span>)</pre>
+  </div>
+
+  <h3>تمرین ۴.۲ — محاسبه اندازه مدل</h3>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">کپی</button></div>
+    <pre><span class="kw">from</span> src.config <span class="kw">import</span> load_config
+<span class="kw">from</span> src.nas <span class="kw">import</span> search
+
+cfg = <span class="fn">load_config</span>()
+archs = {
+    <span class="str">"NAS / int8 (256-4-384)"</span>:      ((<span class="num">256</span>, <span class="num">4</span>, <span class="num">384</span>), <span class="str">"int8"</span>),
+    <span class="str">"Micro-NAS / int8 (64-5-384)"</span>:  ((<span class="num">64</span>, <span class="num">5</span>, <span class="num">384</span>), <span class="str">"int8"</span>),
+    <span class="str">"Bin.µNAS / binary (96-2-384)"</span>: ((<span class="num">96</span>, <span class="num">2</span>, <span class="num">384</span>), <span class="str">"binary"</span>),
+}
+<span class="kw">for</span> name, ((ch, d, od), prec) <span class="kw">in</span> archs.<span class="fn">items</span>():
+    fp = search.<span class="fn">arch_cost</span>(cfg, {<span class="str">"channels"</span>: ch, <span class="str">"depth"</span>: d, <span class="str">"out_dim"</span>: od}, prec)
+    <span class="fn">print</span>(<span class="str">f"{name}: {fp['size_kb']:.1f} KB, {fp['macs']/1e6:.2f}M MACs"</span>)</pre>
+  </div>
+</section>
+
+<nav class="chapter-nav">
+  <a class="nav-btn secondary" href="../03-teacher-student/index.html">← فصل ۳: معلم–دانش‌آموز</a>
+  <a class="nav-btn" href="../05-quantization/index.html">فصل ۵: فشرده‌سازی →</a>
+</nav>
+</div>
+</main>
+</div>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

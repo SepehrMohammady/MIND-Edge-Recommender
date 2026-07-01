@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۶ — ارزیابی | MIND Edge Recommender</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-chapter="ch06">
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-brand"><h1>MIND Edge Recommender</h1><p>دوره آموزشی | از صفر تا قهرمان</p></div>
+  <div class="sidebar-nav">
+    <div class="nav-section">فصل‌ها</div>
+    <a class="nav-link" href="../01-intro/index.html" data-chapter="ch01"><span class="icon">🏠</span> مقدمه <span class="badge">—</span></a>
+    <a class="nav-link" href="../02-datasets/index.html" data-chapter="ch02"><span class="icon">🗄️</span> داده‌ها <span class="badge">—</span></a>
+    <a class="nav-link" href="../03-teacher-student/index.html" data-chapter="ch03"><span class="icon">🎓</span> معلم–دانش‌آموز <span class="badge">—</span></a>
+    <a class="nav-link" href="../04-architecture/index.html" data-chapter="ch04"><span class="icon">🏗️</span> معماری و NAS <span class="badge">—</span></a>
+    <a class="nav-link" href="../05-quantization/index.html" data-chapter="ch05"><span class="icon">⚡</span> فشرده‌سازی <span class="badge">—</span></a>
+    <a class="nav-link active" href="../06-evaluation/index.html" data-chapter="ch06"><span class="icon">📊</span> ارزیابی <span class="badge">—</span></a>
+    <a class="nav-link" href="../07-deployment/index.html" data-chapter="ch07"><span class="icon">🚀</span> استقرار <span class="badge">—</span></a>
+  </div>
+</nav>
+<main class="main">
+<header class="chapter-header">
+  <div class="chapter-num">فصل ۶ از ۷</div>
+  <h1>ارزیابی</h1>
+  <p class="subtitle">AUC، MRR، nDCG@5/10 و ارزیابی ۱۴ زبانه</p>
+  <div class="progress-wrap"><div class="progress-fill" style="width:85%"></div></div>
+</header>
+<div class="content">
+
+<h2>۶.۱ مسئله رتبه‌بندی در Impression</h2>
+<p>در هر impression، لیستی از مقالات نمایش داده شده و برخی کلیک شده‌اند. وظیفه مدل: مقالاتی که کلیک می‌شوند را بالاتر رتبه‌بندی کند.</p>
+
+<div class="diagram">Impression:
+  تاریخچه کاربر: [N1, N2, N5] (قبلاً کلیک شده)
+  کاندیداها:     [N10, N11, N12, N13, N14]
+  برچسب‌ها:     [0,   1,   0,   1,   0 ]
+                  ↑کلیک نشد  ↑کلیک شد
+
+مدل باید N11 و N13 را بالاتر بیاورد.</div>
+
+<h2>۶.۲ معیارهای ارزیابی</h2>
+
+<h3>AUC — Area Under the ROC Curve</h3>
+<p>احتمال اینکه مدل یک مقاله کلیک‌شده را بالاتر از یک مقاله نکلیک‌شده رتبه‌بندی کند.</p>
+<div class="callout callout-info"><div class="callout-title">📌 تفسیر AUC</div>
+AUC=0.5 → تصادفی | AUC=0.6 → خوب | AUC=0.65 → عالی | AUC=1.0 → کامل
+</div>
+
+<h3>MRR — Mean Reciprocal Rank</h3>
+<p>میانگین معکوس رتبه اولین مقاله کلیک‌شده. اگر اولین کلیک در رتبه ۱ باشد: MRR=1. اگر رتبه ۵ باشد: MRR=0.2.</p>
+<div class="diagram">مثال:
+کاندیداها:  [A, B, C, D, E]  ← رتبه‌بندی مدل
+برچسب‌ها:  [0, 0, 1, 0, 1]
+
+اولین کلیک در رتبه 3 → MRR = 1/3 ≈ 0.333</div>
+
+<h3>nDCG — Normalized Discounted Cumulative Gain</h3>
+<p>علاوه بر رتبه، تعداد کلیک‌های درست را هم در نظر می‌گیرد. nDCG@5 و nDCG@10 نسخه‌های رایج هستند.</p>
+<div class="diagram">DCG@5 = Σ (برچسب_i / log2(رتبه_i + 1))  برای i=1 تا 5
+nDCG@5 = DCG@5 / IDCG@5 (مقدار بهینه)</div>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>معیار</th><th>چه می‌سنجد</th><th>بازه</th></tr></thead>
+  <tbody>
+    <tr><td><strong>AUC</strong></td><td>توانایی کلی تمایز کلیک/غیرکلیک</td><td>0 – 1</td></tr>
+    <tr><td><strong>MRR</strong></td><td>رتبه اولین کلیک</td><td>0 – 1</td></tr>
+    <tr><td><strong>nDCG@5</strong></td><td>کیفیت top-5 نتایج</td><td>0 – 1</td></tr>
+    <tr><td><strong>nDCG@10</strong></td><td>کیفیت top-10 نتایج</td><td>0 – 1</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>۶.۳ نتایج کامل — ماتریس معماری × Precision</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>بازو</th><th>Prec.</th><th>AUC</th><th>MRR</th><th>nDCG@10</th><th>Size (KB)</th><th>Energy (µJ)</th></tr></thead>
+  <tbody>
+    <tr><td>NAS</td><td>FP32</td><td>0.633</td><td>0.326</td><td>0.375</td><td>1566</td><td>168.7</td></tr>
+    <tr><td>NAS</td><td>INT8</td><td><strong>0.647</strong></td><td><strong>0.338</strong></td><td><strong>0.387</strong></td><td>790</td><td>4.65</td></tr>
+    <tr><td>NAS</td><td>Binary</td><td>0.588</td><td>0.297</td><td>0.342</td><td>563</td><td>4.25</td></tr>
+    <tr><td>Micro-NAS</td><td>FP32</td><td>0.605</td><td>0.307</td><td>0.352</td><td>267</td><td>15.9</td></tr>
+    <tr class="row-hl"><td>Micro-NAS</td><td>INT8</td><td><strong>0.610</strong></td><td><strong>0.314</strong></td><td><strong>0.360</strong></td><td><strong>204</strong></td><td><strong>2.30</strong></td></tr>
+    <tr><td>Micro-NAS</td><td>Binary</td><td>0.521</td><td>0.251</td><td>0.294</td><td>186</td><td>2.25</td></tr>
+    <tr><td>Bin.µNAS</td><td>FP32</td><td>0.593</td><td>0.290</td><td>0.336</td><td>311</td><td>15.4</td></tr>
+    <tr><td>Bin.µNAS</td><td>INT8</td><td>0.601</td><td>0.295</td><td>0.344</td><td>256</td><td>3.28</td></tr>
+    <tr><td>Bin.µNAS</td><td>Binary</td><td>0.546</td><td>0.273</td><td>0.317</td><td>240</td><td>3.23</td></tr>
+    <tr style="border-top:2px solid #ccc"><td colspan="2"><em>NRMS baseline (FP32)</em></td><td>0.607</td><td>0.322</td><td>0.364</td><td>~27,000 (INT8: 6,800)</td><td>زیاد</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>۶.۴ ارزیابی ۱۴ زبانه</h2>
+<p>مدل Micro-NAS/INT8 (انگلیسی آموزش دیده) روی همه ۱۴ زبان xMIND تست شد:</p>
+
+<div class="bar-chart">
+  <div class="bar-row"><div class="bar-label">en (انگلیسی)</div><div class="bar-track"><div class="bar-fill blue" data-width="100%">0.604</div></div></div>
+  <div class="bar-row"><div class="bar-label">hat (هائیتی کریول)</div><div class="bar-track"><div class="bar-fill blue" data-width="92%">0.556</div></div></div>
+  <div class="bar-row"><div class="bar-label">jpn (ژاپنی)</div><div class="bar-track"><div class="bar-fill blue" data-width="91%">0.551</div></div></div>
+  <div class="bar-row"><div class="bar-label">ind (اندونزیایی)</div><div class="bar-track"><div class="bar-fill blue" data-width="89%">0.537</div></div></div>
+  <div class="bar-row"><div class="bar-label">grn (گوارانی)</div><div class="bar-track"><div class="bar-fill blue" data-width="88%">0.533</div></div></div>
+  <div class="bar-row"><div class="bar-label">ron (رومانیایی)</div><div class="bar-track"><div class="bar-fill blue" data-width="88%">0.532</div></div></div>
+  <div class="bar-row"><div class="bar-label">tur (ترکی)</div><div class="bar-track"><div class="bar-fill blue" data-width="88%">0.530</div></div></div>
+  <div class="bar-row"><div class="bar-label">vie (ویتنامی)</div><div class="bar-track"><div class="bar-fill blue" data-width="87%">0.523</div></div></div>
+  <div class="bar-row"><div class="bar-label">swh (سواحیلی)</div><div class="bar-track"><div class="bar-fill blue" data-width="86%">0.521</div></div></div>
+  <div class="bar-row"><div class="bar-label">zho (چینی)</div><div class="bar-track"><div class="bar-fill blue" data-width="86%">0.521</div></div></div>
+  <div class="bar-row"><div class="bar-label">som (سومالیایی)</div><div class="bar-track"><div class="bar-fill orange" data-width="85%">0.514</div></div></div>
+  <div class="bar-row"><div class="bar-label">tha (تایلندی)</div><div class="bar-track"><div class="bar-fill orange" data-width="83%">0.504</div></div></div>
+  <div class="bar-row"><div class="bar-label">tam (تامیلی)</div><div class="bar-track"><div class="bar-fill orange" data-width="83%">0.504</div></div></div>
+  <div class="bar-row"><div class="bar-label">fin (فنلاندی)</div><div class="bar-track"><div class="bar-fill red" data-width="82%">0.495</div></div></div>
+  <div class="bar-row"><div class="bar-label">kat (گرجی)</div><div class="bar-track"><div class="bar-fill red" data-width="81%">0.491</div></div></div>
+</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">💡 تفسیر</div>
+  زبان‌های کم‌منبع (kat، fin، tam) کمترین AUC را دارند — کیفیت ترجمه NLLB برای آن‌ها پایین‌تر است. برای ضعیف‌ترین زبان (kat: 0.491) مدل عملاً <strong>در سطح تصادفی</strong> است (۰٫۴۹۱ کمی <em>زیر</em> ۰٫۵، نه بالاتر) — یعنی انتقال بین‌زبانی برای گرجی تقریباً شکست می‌خورد: خط نوشتاری متفاوت (Mkhedruli)، زبانِ کم‌منبع، و student فقط روی متنِ انگلیسی برای رتبه‌بندی آموزش دیده. سیگنالِ باقی‌مانده (اعداد، اسامی خاص، کاراکترهای مشترک) آن را دقیقاً روی ۰٫۵ نگه نمی‌دارد.
+</div>
+
+<h2>۶.۵ کد ارزیابی</h2>
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">Python — src/metrics.py</span><button class="copy-btn">کپی</button></div>
+  <pre><span class="kw">from</span> src <span class="kw">import</span> metrics
+<span class="kw">import</span> json
+
+<span class="cmt"># results_summary.json کلیدهای best_arch / baseline / matrix / languages دارد</span>
+results = json.<span class="fn">load</span>(<span class="fn">open</span>(<span class="str">"artifacts/results_summary.json"</span>))
+<span class="kw">for</span> row <span class="kw">in</span> results[<span class="str">"matrix"</span>]:        <span class="cmt"># matrix یک لیست از ردیف‌هاست</span>
+    <span class="fn">print</span>(<span class="str">f"{row['arm']}/{row['precision']}: AUC={row['auc']:.3f}, MRR={row['mrr']:.3f}"</span>)
+
+<span class="cmt"># محاسبهٔ معیارها برای یک impression با metrics.evaluate</span>
+imp = {<span class="str">"labels"</span>: [<span class="num">0</span>, <span class="num">1</span>, <span class="num">0</span>, <span class="num">1</span>, <span class="num">0</span>],
+       <span class="str">"scores"</span>: [<span class="num">0.2</span>, <span class="num">0.8</span>, <span class="num">0.3</span>, <span class="num">0.7</span>, <span class="num">0.1</span>]}
+m = metrics.<span class="fn">evaluate</span>([imp])     <span class="cmt"># میانگین روی همهٔ impressionها</span>
+<span class="fn">print</span>(<span class="str">f"AUC: {m['auc']:.4f}, MRR: {m['mrr']:.4f}, nDCG@10: {m['ndcg@10']:.4f}"</span>)</pre>
+</div>
+
+<!-- QUIZ -->
+<h2>۶.۵ شروع سرد (Cold-Start)</h2>
+<div class="callout callout-info">
+  <div class="callout-title">❄️ آیا prior برای کاربر جدید کار می‌کند؟</div>
+  برای کاربرِ جدیدِ <em>بدون تاریخچه</em>، مدلِ مبتنی‌بر‌تاریخچه در سطح تصادفی است (AUC = <strong>۰٫۵۰۰</strong> — هیچ سیگنالی ندارد). اما رتبه‌بندیِ کاندیداها بر اساس <strong>prior جمعیتیِ موضوع</strong> (وزنِ دسته‌بندی‌ها که offline صادر می‌شود) کاربرِ سرد را به <strong>۰٫۵۵۱</strong> می‌رساند. یعنی prior صادرشده واقعاً برای کاربران جدید ارزش دارد — پاسخِ مستقیم به مسئلهٔ cold-start.
+</div>
+
+<section class="quiz-section">
+  <h2>🧪 آزمون فصل ۶</h2>
+  <div class="quiz-score">امتیاز شما: <span class="score-num">0</span> از 4</div>
+
+  <div class="question-block" data-correct="2">
+    <p class="question-text"><span class="q-num">۱</span> AUC=0.610 برای Micro-NAS/INT8 در مقایسه با NRMS baseline (0.607) چه معنایی دارد؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> مدل ما ضعیف‌تر است</div>
+      <div class="option"><div class="opt-letter">ب</div> مدل ما خیلی بهتر است</div>
+      <div class="option"><div class="opt-letter">ج</div> مدل ما با 204 KB همان دقت ~27 MB NRMS را دارد — رقابتی!</div>
+      <div class="option"><div class="opt-letter">د</div> مدل ما از NAS بهتر است</div>
+    </div>
+    <div class="explanation">0.610 نسبت به 0.607 کمی بهتر است، اما مهم‌تر این است که این دقت با فقط 204 KB (در مقابل ~27 MB FP32 یا 6.8 MB INT8 برای NRMS) و پشتیبانی 14 زبان حاصل شده.</div>
+  </div>
+
+  <div class="question-block" data-correct="0">
+    <p class="question-text"><span class="q-num">۲</span> MRR=1/3 به چه معناست؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> اولین مقاله کلیک‌شده در رتبه ۳ قرار گرفته</div>
+      <div class="option"><div class="opt-letter">ب</div> یک سوم مقالات را درست رتبه‌بندی کرده</div>
+      <div class="option"><div class="opt-letter">ج</div> سه بار آزمون شده</div>
+      <div class="option"><div class="opt-letter">د</div> AUC آن 0.333 است</div>
+    </div>
+    <div class="explanation">MRR = 1/rank. اگر MRR = 1/3 ≈ 0.333، یعنی اولین مقاله کلیک‌شده به طور متوسط در رتبه ۳ از top قرار گرفته.</div>
+  </div>
+
+  <div class="question-block" data-correct="1">
+    <p class="question-text"><span class="q-num">۳</span> چرا زبان گرجی (kat) کمترین AUC را دارد؟</p>
+    <div class="options">
+      <div class="option"><div class="opt-letter">الف</div> گرجی پیچیده‌تر است</div>
+      <div class="option"><div class="opt-letter">ب</div> ترجمه NLLB برای گرجی کیفیت کمتری دارد (کم‌منبع)</div>
+      <div class="option"><div class="opt-letter">ج</div> مدل ما گرجی را نمی‌فهمد</div>
+      <div class="option"><div class="opt-letter">د</div> دیتاست xMIND گرجی کمتری دارد</div>
+    </div>
+    <div class="explanation">NLLB-3.3B برای زبان‌های کم‌منبع مثل گرجی داده آموزشی کمتری داشته، پس کیفیت ترجمه پایین‌تر است. وقتی ترجمه ضعیف باشد، anchor embedding با متن فاصله می‌گیرد.</div>
+  </div>
+
+  <div class="question-block" data-correct="-1">
+    <p class="question-text"><span class="q-num">۴</span> چرا ما MINDsmall dev ارزیابی می‌کنیم و نه MINDsmall test؟</p>
+    <div class="open-answer">
+      <textarea placeholder="جواب خود را بنویسید..."></textarea>
+      <div class="explanation" style="display:none">برچسب‌های MINDsmall test به صورت عمومی در دسترس نیستند. فقط از طریق سیستم ارزیابی رسمی Microsoft قابل ارزیابی است. پس محققان با MINDsmall dev کار می‌کنند. نتایج MINDlarge-test از مقاله اصلی NRMS به عنوان مرجع خارجی ذکر می‌شود.</div>
+      <button class="reveal-btn">نمایش جواب</button>
+    </div>
+  </div>
+
+  <div class="quiz-result"><div class="result-score"></div><div class="result-msg"></div></div>
+</section>
+
+<!-- Practice -->
+<section class="practice-section">
+  <h2>💻 تمرین عملی</h2>
+  <h3>تمرین ۶.۱ — بارگذاری و نمایش نتایج</h3>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">کپی</button></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cmt"># ماتریس نتایج</span>
+df = pd.<span class="fn">read_csv</span>(<span class="str">"artifacts/results_matrix.csv"</span>)
+<span class="fn">print</span>(df.<span class="fn">to_string</span>(index=<span class="kw">False</span>))
+
+<span class="cmt"># بهترین مدل</span>
+best = df.<span class="fn">loc</span>[df[<span class="str">"auc"</span>].<span class="fn">idxmax</span>()]
+<span class="fn">print</span>(<span class="str">f"\nبهترین AUC: {best['auc']:.3f} → {best['arm']}/{best['precision']}"</span>)
+
+<span class="cmt"># بهترین تعادل دقت-اندازه</span>
+df[<span class="str">"efficiency"</span>] = df[<span class="str">"auc"</span>] / df[<span class="str">"size_kb"</span>]
+best_eff = df.<span class="fn">loc</span>[df[<span class="str">"efficiency"</span>].<span class="fn">idxmax</span>()]
+<span class="fn">print</span>(<span class="str">f"بهترین کارایی: {best_eff['arm']}/{best_eff['precision']}"</span>)</pre>
+  </div>
+</section>
+
+<nav class="chapter-nav">
+  <a class="nav-btn secondary" href="../05-quantization/index.html">← فصل ۵: فشرده‌سازی</a>
+  <a class="nav-btn" href="../07-deployment/index.html">فصل ۷: استقرار →</a>
+</nav>
+</div>
+</main>
+</div>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
