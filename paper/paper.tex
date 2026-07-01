@@ -33,7 +33,7 @@ microcontroller-constrained, and binary-aware) and evaluate each at full, 8-bit
 and 1-bit precision, measuring ranking quality on MIND against flash, RAM and an
 energy estimate. The 8-bit constrained model scores 0.610 AUC in 204\,KB, matching
 a 27\,MB NRMS baseline (0.607) at about one part in 130 of its size; lifting the
-size limit reaches 0.647 in 790\,KB. A naive 1-bit model is close to useless
+size limit reaches 0.647 in 790\,KB. A naive 1-bit model barely beats chance
 (0.52), but ReActNet-style training from a distilled start recovers it to 0.572 in
 186\,KB. Along the way we find that the distilled initialisation is worth $+3.3$
 AUC, that results vary little between seeds (std below 0.012), that the embedding
@@ -51,8 +51,8 @@ News apps increasingly run their personalisation on the phone or the sensor node
 rather than in the cloud, which is attractive for privacy: the record of what a
 user reads never leaves the device. Two difficulties come with that setting. A
 model that starts from nothing for each new user recommends poorly until it has
-seen enough clicks, and the standard neural recommenders --- NRMS~\cite{wu2019nrms},
-NAML~\cite{wu2019naml} and their relatives --- represent a title with a
+seen enough clicks, and the standard neural recommenders (NRMS~\cite{wu2019nrms},
+NAML~\cite{wu2019naml} and their relatives) represent a title with a
 word-embedding matrix. That matrix is large: GloVe-300d over 30--100k words is
 already 37--120\,MB, one table per language, and none of it fits a
 microcontroller's few megabytes of flash.
@@ -66,12 +66,12 @@ to reproduce the embeddings of a frozen multilingual
 teacher~\cite{reimers2020multilingual}, so that a translated title lands near its
 English original.
 
-The contribution is threefold. A byte-level content encoder removes the
+We contribute three things. A byte-level content encoder removes the
 embedding-table memory wall and covers fourteen languages with a single model
-under two megabytes. Around it we benchmark three architecture searches ---
-unconstrained, microcontroller-constrained and binary-aware --- at three
+under two megabytes. Around it we benchmark three architecture searches
+(unconstrained, microcontroller-constrained and binary-aware) at three
 precisions, reporting accuracy alongside flash, RAM and energy. Finally we make the
-binary case, otherwise close to unusable, work: ReActNet activations and Bi-Real
+binary case, otherwise near chance, work: ReActNet activations and Bi-Real
 shortcuts started from the distilled weights, together with the seed-variance,
 embedding-truncation and cold-start checks a reader will want. We are not aware of
 an earlier byte-level, table-free news recommender examined jointly over
@@ -87,7 +87,7 @@ impression by AUC, MRR and nDCG; their published test AUC on the large split run
 from about 0.65 for DKN to 0.68 for NRMS~\cite{wu2020mind}. Language-model
 recommenders (PLM-NR, Fastformer, UNBERT) do better, around
 0.70--0.73~\cite{wu2023survey}, but only by wrapping a BERT-sized encoder of several
-hundred megabytes, so they are beside the point on a microcontroller; we keep NRMS
+hundred megabytes, so they are out of reach on a microcontroller; we keep NRMS
 as the strongest baseline that is actually small.
 The tools we borrow are vocabulary-free character and byte
 models~\cite{clark2022canine}, cross-lingual
@@ -134,7 +134,7 @@ We use MINDsmall~\cite{wu2020mind}: fifty thousand users, about 157k training an
 73k development impressions over 51k articles, together with the fourteen NLLB
 translations of xMIND~\cite{iana2024xmind,nllb2022}. xMIND provides only translated
 titles, keyed to the same article ids, so we reuse the English behaviour logs and
-swap the text. This is worth stating plainly: every recommender we train, and the
+swap the text. To be clear: every recommender we train, and the
 NRMS baseline, sees only English clicks, and the other languages appear only at
 evaluation. The multilingual numbers are therefore a test of cross-lingual
 transfer in the content encoder, not of native-language personalisation. We stay on
@@ -181,7 +181,7 @@ Bin.\,$\mu$NAS & Binary$^\dagger$ & \textbf{0.546} & \textbf{0.273} & \textbf{0.
 \end{table}
 
 Table~\ref{tab:matrix} collects the nine combinations (the three arms found the
-architectures 256-4-384, 64-5-384 and 96-2-384). Two patterns stand out. Moving
+architectures 256-4-384, 64-5-384 and 96-2-384). Two patterns emerge. Moving
 from full to eight-bit precision costs essentially nothing in accuracy --- it
 sometimes helps, the usual quantisation-aware regularisation --- while cutting the
 energy estimate by seven to thirty-six times and the size by a further one and a
@@ -192,7 +192,7 @@ bits is small at this scale. Measured on the laptop, a single title takes 0.34,
 under 0.7\,ms on the GPU, well inside a 50\,ms budget, with the CPU time tracking
 the multiply-accumulate count.
 
-Our reproduced NRMS is a useful yardstick: 92\% of its 7.08 million parameters are
+Our reproduced NRMS anchors the comparison: 92\% of its 7.08 million parameters are
 the embedding table (27\,MB, or 6.8\,MB in eight bits at the same accuracy), and it
 reaches 0.607. The byte encoder matches that at 204\,KB, thirty-three times smaller
 than even eight-bit NRMS, and beats it at 0.647 once the size limit is lifted. Across the
@@ -202,27 +202,27 @@ where the script is distinct and the translations poorer; Georgian at 0.491 is
 essentially chance, a reminder that this is transfer and not native
 personalisation.
 
-Three smaller experiments answer the natural questions. Starting the encoder from
+Three smaller experiments round out the picture. Starting the encoder from
 the distilled weights rather than from scratch raises AUC from 0.600 to 0.633 at a
 fixed architecture, so the gain is from distillation, not capacity; this is the
-model we deploy. Over three seeds the eight-bit run gives $0.624\pm0.004$, and no
-configuration varies by more than 0.012. Truncating the output from 384 to 64
+model we deploy. Over three seeds the eight-bit AUC moves by at most 0.012 (standard deviation
+0.004), so the single-seed numbers are stable. Truncating the output from 384 to 64
 dimensions barely changes its similarity to the teacher (0.454 to 0.459), so a
 memory-bound device can keep the first 64. And with a user's history blanked to
 mimic a newcomer the history-based score falls to chance (0.500), whereas ranking
 by the exported topic prior brings a cold user back to 0.551.
 
-The improved binary model deserves its own line. Sign-binarising the naive way
+Sign-binarising the naive way
 leaves it near chance (0.521); with the ReActNet activations, the Bi-Real shortcuts
 and the distilled start it reaches 0.572 in 186\,KB, within 0.035 AUC of the
 full-precision baseline at two orders of magnitude less memory. It is the smallest
 option we have, although eight bits is the more accurate one, and on an
 accuracy-versus-footprint view the eight-bit Micro-NAS point (0.610, 204\,KB,
-2.3\uJ) is the sweet spot while unconstrained eight-bit leads on accuracy (0.647,
+2.3\uJ) is the best size--accuracy trade-off while unconstrained eight-bit leads on accuracy (0.647,
 790\,KB).
 
 \section{Limitations}
-The obvious gap is hardware. We timed the models on the laptop, computed their
+The main gap is hardware. We timed the models on the laptop, computed their
 sizes and RAM, and estimated energy from the Horowitz figures, but we ran nothing
 on the Pi~5 or the STM32H7, and the energy estimate in particular ignores the SRAM
 and memory traffic that tends to dominate on a Cortex-M. Eight-bit inference has a
