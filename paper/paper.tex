@@ -1,7 +1,7 @@
 % paper.tex — LLNCS (ApplePies: Applications in Electronics Pervading Industry,
 %             Environment and Society; Springer LNEE)
 % Compile: pdflatex paper && bibtex paper && pdflatex paper && pdflatex paper
-\documentclass[runningheads]{llncs}
+\documentclass{llncs}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
 \usepackage{booktabs}
@@ -12,13 +12,14 @@
 \newcommand{\uJ}{\,$\mu$J}
 \begin{document}
 
-\title{A Byte-Level Multilingual News Recommender for Microcontrollers:
-       NAS, Micro-NAS and Binarized Micro-NAS across Flash, RAM and Energy}
+\title{A Byte-Level Multilingual News Recommender for Microcontrollers}
 \titlerunning{Byte-Level Multilingual News Recommender}
 \author{}
 \authorrunning{}
 \institute{}
 \maketitle
+\pagestyle{empty}
+\thispagestyle{empty}
 
 \begin{abstract}
 Running a news recommender on the device itself keeps a reader's clicks private,
