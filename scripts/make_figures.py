@@ -17,7 +17,7 @@ figdir = Path("paper/figures"); figdir.mkdir(parents=True, exist_ok=True)
 m = pd.read_csv(art / "results_matrix.csv")
 
 # Fig 1: AUC vs size and AUC vs energy, per arm.
-fig, ax = plt.subplots(1, 2, figsize=(11, 4.2))
+fig, ax = plt.subplots(1, 2, figsize=(11, 3.2))
 for arm in m["arm"].unique():
     s = m[m["arm"] == arm]
     ax[0].scatter(s["size_kb"], s["auc"], s=60, label=arm)
