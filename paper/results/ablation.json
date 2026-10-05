@@ -1,0 +1,23 @@
+{
+  "arch": {
+    "byte_embed_dim": 64,
+    "channels": 64,
+    "depth": 5,
+    "out_dim": 384
+  },
+  "epochs": 10,
+  "scratch": {
+    "auc": 0.5999,
+    "mrr": 0.2933,
+    "ndcg@5": 0.2728,
+    "ndcg@10": 0.3426,
+    "n_impressions": 73152
+  },
+  "distilled_init": {
+    "auc": 0.6332,
+    "mrr": 0.3449,
+    "ndcg@5": 0.3311,
+    "ndcg@10": 0.3903,
+    "n_impressions": 73152
+  }
+}

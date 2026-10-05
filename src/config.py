@@ -30,6 +30,21 @@ def load_config(path: str | Path | None = None) -> dict:
     return cfg
 
 
+def use_run_dir(cfg: dict, name: str) -> str:
+    """Send every output of this run to ``artifacts/runs/<name>``.
+
+    Smoke runs and paper runs then never share a folder, so a quick pass cannot
+    overwrite the tables or checkpoints of a full one. Protocol-independent
+    caches stay in ``cache_dir`` and frozen paper numbers in ``results_dir``;
+    only ``scripts/freeze_results.py`` writes there.
+    """
+    root = Path(cfg["paths"].setdefault("artifacts_root", cfg["paths"]["artifacts_dir"]))
+    run = root / "runs" / name
+    run.mkdir(parents=True, exist_ok=True)
+    cfg["paths"]["artifacts_dir"] = str(run)
+    return str(run)
+
+
 def resolve_langs(cfg: dict) -> list[str]:
     """Return the concrete list of xMIND language codes to evaluate."""
     return list(cfg["data"]["xmind_langs"])

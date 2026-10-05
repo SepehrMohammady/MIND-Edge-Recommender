@@ -2,10 +2,11 @@
 ONNX export -> latency/energy. Tiny settings."""
 import torch
 
-from src.config import load_config
+from src.config import load_config, use_run_dir
 from src import experiment, export, measure_energy
 
 cfg = load_config()
+use_run_dir(cfg, "smoke")
 arch = {"channels": 64, "depth": 2, "out_dim": 128}
 
 m = experiment.train_for_arch(cfg, arch, epochs=1, max_train_impressions=400)

@@ -2,13 +2,14 @@
 import pathlib
 import torch
 
-from src.config import load_config
+from src.config import load_config, use_run_dir
 from src import recommender, quantize
 from src.nas.search import build_encoder
 from src.binary import BinaryByteCNNEncoder
 from src.student import ByteCNNEncoder
 
 cfg = load_config()
+use_run_dir(cfg, "smoke")
 device = "cuda" if torch.cuda.is_available() else "cpu"
 arch = {"channels": 32, "depth": 2, "out_dim": 128}
 

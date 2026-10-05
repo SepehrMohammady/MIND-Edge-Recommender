@@ -1,9 +1,10 @@
 """Tiny sanity check for the NAS search and the NRMS baseline."""
-from src.config import load_config
+from src.config import load_config, use_run_dir
 from src.nas import search
 from src import baseline_nrms
 
 cfg = load_config()
+use_run_dir(cfg, "smoke")
 
 # --- NAS (micro_nas / INT8, tiny budget) ---
 fit = search.make_distill_fitness(cfg, "int8", n_train=3000, n_val=1000, epochs=1, batch=256)

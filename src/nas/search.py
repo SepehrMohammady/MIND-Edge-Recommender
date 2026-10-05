@@ -30,16 +30,21 @@ def build_encoder(cfg: dict, arch: dict) -> ByteCNNEncoder:
 
 
 def estimate_ram_kb(arch: dict, cfg: dict, precision: str) -> float:
-    """Peak activation buffer proxy = channels x seq_len x bytes/elem."""
+    """Peak activation proxy: input + output buffer of the widest layer.
+
+    The first projection reads (byte_embed_dim x L) and writes (channels x L);
+    every block reads and writes (channels x L). Activations are assumed to be
+    stored at the deployment precision (1 byte for the INT8 and binary arms),
+    which the weight-only simulation in ``quantize.py`` does not exercise."""
     bytes_el = {"fp32": 4, "int8": 1, "binary": 1}[precision]
-    return arch["channels"] * cfg["data"]["max_title_bytes"] * bytes_el / 1024
+    c, e = arch["channels"], cfg["student"]["byte_embed_dim"]
+    return max(e + c, 2 * c) * cfg["data"]["max_title_bytes"] * bytes_el / 1024
 
 
 def arch_cost(cfg: dict, arch: dict, precision: str) -> dict:
     enc = quantize.convert_to_quant(build_encoder(cfg, arch), precision)
     ex = torch.zeros(1, cfg["data"]["max_title_bytes"], dtype=torch.long)
-    fp = quantize.quant_fp_fraction(enc)
-    foot = footprint.summarize(enc, ex, precision, cfg, fp_fraction=fp)
+    foot = footprint.summarize(enc, ex, cfg, precision=precision)
     foot["ram_kb"] = round(estimate_ram_kb(arch, cfg, precision), 2)
     return foot
 

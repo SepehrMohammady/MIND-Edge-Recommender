@@ -8,10 +8,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.config import load_config
+from src.config import load_config, use_run_dir
+from src.seed import seed_everything
 from src import data_xmind, experiment, export
 
 cfg = load_config()
+use_run_dir(cfg, "full")
+seed_everything(cfg["seed"])
 cfg["train"]["distill_epochs"] = 15
 cfg["train"]["epochs"] = 8
 art = Path(cfg["paths"]["artifacts_dir"])

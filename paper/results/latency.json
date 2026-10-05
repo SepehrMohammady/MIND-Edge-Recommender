@@ -1,0 +1,17 @@
+[
+  {
+    "arch": "NAS",
+    "gpu_ms": 0.5721,
+    "cpu_onnx_ms": 0.3405
+  },
+  {
+    "arch": "Micro-NAS",
+    "gpu_ms": 0.6508,
+    "cpu_onnx_ms": 0.1856
+  },
+  {
+    "arch": "Bin.uNAS",
+    "gpu_ms": 0.4333,
+    "cpu_onnx_ms": 0.0992
+  }
+]

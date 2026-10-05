@@ -4,11 +4,12 @@ logic bugs before the full runs. Run:  python -m scripts.smoke_test
 """
 import torch
 
-from src.config import load_config
+from src.config import load_config, use_run_dir
 from src import recommender, footprint
 from src.student import ByteCNNEncoder
 
 cfg = load_config()
+use_run_dir(cfg, "smoke")
 print("torch", torch.__version__, "| cuda", torch.cuda.is_available(),
       "| cap", torch.cuda.get_device_capability() if torch.cuda.is_available() else None)
 
