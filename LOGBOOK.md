@@ -126,19 +126,19 @@ The subcategory histogram, which has no network, is above the reduced NRMS (0.60
 June Micro-NAS INT8 model (0.610) on all three metrics. The frozen teacher scores 0.5748 on
 average over the 14 translations, 0.014 below its English score.
 
-## 2026-10-05 17:05 — P1 batch running in two processes
+## 2026-10-05 17:04 — P1 batch running in two processes
 
 - Process A: seeds 42 then 2. Process B: seed 1. Stages per seed: teacher bound, NRMS (GloVe
   and reduced), student (scratch / distilled, English / mixed-language clicks), all evaluated
   in 15 languages. Logs in `logs/p1_seed*.log`.
-- A first single-process launch at 16:54 was stopped at 17:04 to split the work; its two
+- A first single-process launch at 16:54 was stopped at 17:03 to split the work; its two
   finished records (heuristics, frozen teacher seed 42) are kept.
 - Memory limits the parallelism: each process holds about 4.3 GB and the machine was at 81 %
   with two. GPU memory is not the limit (2.6 of 8 GB).
 - `logs/gpu_monitor.csv`: nvidia-smi sample every 30 s from 17:08.
 - Expected duration: about 1.9 h per seed and process.
 
-## 2026-10-05 17:20 — Paper synchronised with the result files
+## 2026-10-05 17:12 — Paper synchronised with the result files (commit 9440b80)
 
 - `paper/paper.tex` rewritten where it disagreed with the artifacts: abstract, method
   (weight-only quantization, what distillation is used for), setup (budgets enforced, seeds),
@@ -163,3 +163,20 @@ average over the 14 translations, 0.014 below its English score.
   0.5888 / 0.5748).
 - GPU samples at 17:10 during NRMS training in both processes: 98 % utilisation, 5.3 GB,
   80 to 82 °C, 93 W.
+
+## 2026-10-05 17:15 — FeedWell-Edge moved to the FeedWell 1.18.2 code base (branch, not built)
+
+Repository `FeedWell-Edge`, branch `rebuild-on-feedwell-1.18`, commit 145b3b3, pushed.
+
+- Merged upstream FeedWell main (v1.18.2, 49 commits since the 1.6.22 base). Eight files
+  conflicted: the four version files, `AppSettingsContext.js`, `ArticleReaderScreen.js`,
+  `FeedListScreen.js` (7 hunks) and `SettingsScreen.js` (4 hunks).
+- The on-device learning layer of v2.0.5 is carried over unchanged. In the feed list,
+  upstream's deterministic date sort and priority feeds stay; with learning enabled and
+  "newest" selected the learned score orders the list first.
+- Version 2.1.0, versionCode 2.
+- Checked: all 88 JavaScript files parse (Babel parser), the three JSON files load. Not
+  checked: no `npm install`, no Gradle build, not run on a phone. A Gradle build was not
+  started because the two training processes hold 8.6 GB and 5 GB of RAM were free.
+- Open: the application id is still `com.feedwell.app`, the same as the Play Store app. A
+  separate id is needed to install both on one phone.
