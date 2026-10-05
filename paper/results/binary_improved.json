@@ -11,5 +11,16 @@
     "ndcg@5": 0.2723,
     "ndcg@10": 0.3365,
     "n_impressions": 73152
+  },
+  "cost": {
+    "precision": "binary",
+    "params": 109248,
+    "macs": 8413184,
+    "macs_fp32": 548864,
+    "macs_quantized": 7864320,
+    "size_kb": 194.25,
+    "size_mb": 0.1897,
+    "energy_uj_per_inf": 3.0902,
+    "ram_kb": 16.0
   }
 }

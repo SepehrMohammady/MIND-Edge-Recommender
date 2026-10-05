@@ -70,6 +70,11 @@ def load_stage(stage: str) -> dict:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
 
+def finished(stage: str, key: str) -> bool:
+    """Re-read the stage file each time: another process may be filling it."""
+    return key in load_stage(stage)
+
+
 def save_run(stage: str, key: str, settings: dict, results: dict, started: float) -> None:
     """Record one finished run in the stage file and in the experiment log."""
     record = runlog.append(cfg, f"p1/{stage}/{key}", settings, results, started)
@@ -118,7 +123,6 @@ def stage_heuristics(_seeds) -> None:
 
 def stage_teacher(seeds) -> None:
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    done = load_stage("teacher")
     pad = torch.zeros(1, cfg["teacher"]["embed_dim"])
     train_vecs = torch.cat([pad, torch.from_numpy(teacher.build_anchors(cfg, "train")[1])])
     dev_vecs, loaded = {}, {}
@@ -136,7 +140,7 @@ def stage_teacher(seeds) -> None:
     for seed in seeds:
         for project in (False, True):
             key = f"teacher_{'linear' if project else 'frozen'}/seed{seed}"
-            if key in done:
+            if finished("teacher", key):
                 continue
             started = time.time()
             cfg["seed"] = seed
@@ -162,7 +166,6 @@ def stage_teacher(seeds) -> None:
 
 
 def stage_student(seeds) -> None:
-    done = load_stage("student")
     ex = torch.zeros(1, cfg["data"]["max_title_bytes"], dtype=torch.long)
     cost = footprint.summarize(build_encoder(cfg, ARCH), ex, cfg, precision="fp32")
     for seed in seeds:
@@ -193,7 +196,7 @@ def stage_student(seeds) -> None:
         }
         for name, spec in runs.items():
             key = f"{name}/seed{seed}"
-            if key in done:
+            if finished("student", key):
                 continue
             started = time.time()
             settings = {"arch": ARCH, "epochs": EPOCHS, "encoder_cost": cost, **spec}
@@ -231,11 +234,10 @@ def stage_student(seeds) -> None:
 
 
 def stage_nrms(seeds) -> None:
-    done = load_stage("nrms")
     for seed in seeds:
         for variant in ("glove", "reduced"):
             key = f"nrms_{variant}/seed{seed}"
-            if key in done:
+            if finished("nrms", key):
                 continue
             started = time.time()
             cfg["seed"] = seed
