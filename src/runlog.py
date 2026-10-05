@@ -27,14 +27,24 @@ def _git(*args: str) -> str | None:
         return None
 
 
+_ENV: dict = {}
+
+
 def environment() -> dict:
-    return {
-        "python": platform.python_version(),
-        "torch": torch.__version__,
-        "device": torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu",
-        "commit": _git("rev-parse", "--short", "HEAD"),
-        "dirty": bool(_git("status", "--porcelain", "--untracked-files=no")),
-    }
+    """Software, hardware and code version of this process. Read once, at the
+    first record, so a commit made while a long batch is running does not change
+    what its later records report. ``dirty`` looks at the code only (src/,
+    scripts/, config.yaml), not at the paper or the result files."""
+    if not _ENV:
+        _ENV.update({
+            "python": platform.python_version(),
+            "torch": torch.__version__,
+            "device": torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu",
+            "commit": _git("rev-parse", "--short", "HEAD"),
+            "dirty": bool(_git("status", "--porcelain", "--untracked-files=no", "--",
+                               "src", "scripts", "config.yaml")),
+        })
+    return dict(_ENV)
 
 
 def append(cfg: dict, name: str, settings: dict, results: dict, started: float) -> dict:
