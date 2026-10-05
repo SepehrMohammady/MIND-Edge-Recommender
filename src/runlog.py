@@ -65,6 +65,15 @@ def append(cfg: dict, name: str, settings: dict, results: dict, started: float) 
     return record
 
 
+def logbook(title: str, body: str) -> None:
+    """Append a dated entry to LOGBOOK.md, the human-readable journal: what was
+    done, why, how long it took and what came out. Scripts call it when a batch
+    ends; decisions and manual steps are added by hand in the same format."""
+    stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    with open(ROOT / "LOGBOOK.md", "a", encoding="utf-8") as fh:
+        fh.write(f"\n## {stamp} — {title}\n\n{body.strip()}\n")
+
+
 def read(cfg: dict) -> list[dict]:
     path = Path(cfg["paths"]["results_dir"]) / "experiments.jsonl"
     if not path.exists():

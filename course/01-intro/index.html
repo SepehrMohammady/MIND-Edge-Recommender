@@ -150,14 +150,19 @@
 <!-- ─── Section 6: Results ─── -->
 <h2>۱.۶ نتایج اصلی پروژه</h2>
 
+<div class="callout callout-warn">
+  <div class="callout-title">⚠️ یادداشت بازبینی — ۵ اکتبر ۲۰۲۶</div>
+  نتایج ژوئن ۲۰۲۶ دوباره با فایل‌های خروجی سنجیده شد. شمارش MAC و برآورد انرژیِ ردیف‌های INT8 و Binary اشتباه بود و اصلاح شده است؛ عددهای انرژی این دوره به‌روز شده‌اند. مدل‌های جدول نتایج فقط با کلیک‌های انگلیسی آموزش دیده‌اند و کارایی encoderِ distill‌شده روی ۱۴ زبانِ xMIND هنوز در حال اندازه‌گیری است. baselineِ NRMS با GloVe و اندازه‌گیری روی بردهای STM32 و گوشی اندروید هم در دست انجام است. تا پایان این آزمایش‌ها، مقایسه با NRMS و بخش چندزبانه در فصل‌های ۱، ۶ و ۷ موقتی است. شرح کامل در فایل <code>LOGBOOK.md</code> در مخزن پروژه آمده است.
+</div>
+
 <div class="table-wrap">
 <table>
   <thead><tr><th>مدل</th><th>AUC</th><th>اندازه</th><th>انرژی</th><th>زبان‌ها</th></tr></thead>
   <tbody>
     <tr><td>NRMS baseline (FP32 / INT8)</td><td>0.607</td><td><span class="badge-warn">~27 MB / 6.8 MB</span></td><td>زیاد</td><td>فقط انگلیسی</td></tr>
-    <tr><td>NAS / INT8</td><td><strong>0.647</strong></td><td>790 KB</td><td>4.65 µJ</td><td><span class="badge-good">14 زبان</span></td></tr>
-    <tr><td>Micro-NAS / INT8 ⭐</td><td><strong>0.610</strong></td><td><span class="badge-good">204 KB</span></td><td>2.30 µJ</td><td><span class="badge-good">14 زبان</span></td></tr>
-    <tr><td>Micro-NAS / Binary</td><td>0.521</td><td>186 KB</td><td>2.25 µJ</td><td><span class="badge-good">14 زبان</span></td></tr>
+    <tr><td>NAS / INT8</td><td><strong>0.647</strong></td><td>790 KB</td><td>17.91 µJ</td><td><span class="badge-good">14 زبان</span></td></tr>
+    <tr><td>Micro-NAS / INT8 ⭐</td><td><strong>0.610</strong></td><td><span class="badge-good">204 KB</span></td><td>3.16 µJ</td><td><span class="badge-good">14 زبان</span></td></tr>
+    <tr><td>Micro-NAS / Binary</td><td>0.521</td><td>186 KB</td><td>2.72 µJ</td><td><span class="badge-good">14 زبان</span></td></tr>
   </tbody>
 </table>
 </div>

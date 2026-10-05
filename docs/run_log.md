@@ -40,3 +40,18 @@ matrix numbers). Per-stage timing appended below by the script.
 - [47.2m] matryoshka: {'64': 0.459, '128': 0.4577, '256': 0.4555, '384': 0.4539}
 - [54.0m] coldstart: with_history=0.5908 masked=0.5 topic_prior=0.551
 - [54.0m] REVIEWS2 DONE
+
+## Status of these numbers after the 2026-10-05 audit
+
+- Ranking metrics above are as measured in June (single runs; `run_full.py` did
+  not seed PyTorch).
+- The MAC and energy values of the INT8 and binary rows in
+  `results_summary.json` are wrong (the counter skipped quantized layers).
+  Corrected cost columns are in `paper/results/results_matrix.csv`
+  (`scripts/recompute_costs.py`).
+- The improved binary model is 194 KB by the same size rule, not 186 KB.
+- The Matryoshka cosines and the 0.551 cold-start figure are not used in the
+  paper any more: the first was measured on a two-epoch student from a smoke
+  run, the second on all users of the first 8000 impressions.
+- Runs from 2026-10-05 on are recorded in `paper/results/experiments.jsonl` and
+  summarised in `LOGBOOK.md`.

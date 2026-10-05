@@ -22,7 +22,8 @@ every knob is set from `config.yaml` / this notebook.
 **Map:** setup → data → teacher → student/distillation → NAS (3 arms) →
 train → precision sweep → baseline → ablation → multilingual → latency/energy →
 export → plots. Architecture axis: NAS → Micro-NAS → binarized-Micro-NAS.
-Precision axis: FP32 → INT8 → Binary. Targets: RTX 5070 → Raspberry Pi 5 → STM32H7.""")
+Precision axis: FP32 → INT8 → Binary (simulated on weights). Targets: STM32 boards and an
+Android phone; training runs on an RTX 5070 laptop.""")
 
 # ── 1. Setup ──────────────────────────────────────────────────────────────────
 md("""## 1. Setup
@@ -33,7 +34,8 @@ root = pathlib.Path.cwd()
 root = root if (root / "src").exists() else root.parent
 sys.path.insert(0, str(root))
 import pandas as pd, torch
-from src.config import load_config
+from src.config import load_config, use_run_dir
+from src.seed import seed_everything
 from src import experiment, export, measure_energy, data_mind, data_xmind
 cfg = load_config()
 print("device:", "cuda" if torch.cuda.is_available() else "cpu", "| artifacts:", cfg["paths"]["artifacts_dir"])""")
@@ -47,8 +49,10 @@ code("""{k: cfg[k] for k in ["data", "teacher", "student", "nas", "quant", "trai
 # ── 3. Run scale ──────────────────────────────────────────────────────────────
 md("""## 3. Run scale
 `QUICK=True` runs a fast smoke pass (few epochs / small NAS / capped impressions)
-so the whole notebook executes in minutes. Set `QUICK=False` for the full
-paper-grade run. This single switch drives every heavy cell below.""")
+so the whole notebook executes in minutes. Set `QUICK=False` for the full run.
+This single switch drives every heavy cell below. Outputs go to
+`artifacts/runs/quick` or `artifacts/runs/full`, so a smoke pass never overwrites
+a full one, and the run is seeded from `config.yaml`.""")
 code("""QUICK = True
 if QUICK:
     cfg["train"]["distill_epochs"], cfg["train"]["epochs"] = 2, 2
@@ -57,6 +61,8 @@ if QUICK:
 else:
     NAS = dict(generations=cfg["nas"]["generations"], population=cfg["nas"]["population"])
     EVAL_IMPR, QAT, TRAIN_IMPR, DISTILL_EP = None, 2, None, 15
+use_run_dir(cfg, "quick" if QUICK else "full")
+seed_everything(cfg["seed"])
 QUICK""")
 
 # ── 4. Datasets ───────────────────────────────────────────────────────────────
@@ -152,8 +158,8 @@ experiment.eval_languages(cfg, deploy, max_impressions=EVAL_IMPR or 2000)""")
 
 # ── 15. Latency & energy ──────────────────────────────────────────────────────
 md("""## 15. Measured latency & energy (laptop)
-GPU latency + NVML energy; ONNX CPU latency uses the same path that runs on the
-Pi 5 aarch64 wheel (pair with an INA219 for real Pi/STM32 power).""")
+GPU latency and NVML energy on the laptop. Board and phone measurements are a
+separate step (ST Edge AI for STM32, the FeedWell-Edge app for Android).""")
 code("""ex = torch.zeros(8, cfg["data"]["max_title_bytes"], dtype=torch.long)
 print("GPU latency ms:", round(measure_energy.latency_torch(deploy.news_encoder, ex), 4))
 print("Energy:", measure_energy.energy_nvml(deploy.news_encoder, ex, n=200))""")
@@ -168,8 +174,8 @@ print(export.export_artifacts(cfg, deploy.news_encoder.cpu(), langs))""")
 # ── 17. Export all arms ───────────────────────────────────────────────────────
 md("""## 17. Export every arm + comparison manifest
 Export one ONNX per arm and a `models_manifest.json` so the app can pick a
-trade-off. (INT8/Binary are *simulated* for measurement; the deployed ONNX is the
-FP32 graph that the target runtime — e.g. X-CUBE-AI — quantizes itself.)""")
+trade-off. INT8 and Binary are *simulated* on weights; the exported ONNX is the
+FP32 graph. A full-integer export is a later step.""")
 code("""arm_label = {"nas": "nas", "micro_nas": "micro_nas", "binarized_micro_nas": "bin_unas"}
 to_export = {(arm_label[a], "fp32"): m.news_encoder.cpu() for a, m in models.items()}
 print(export.export_all(cfg, to_export, langs))""")
@@ -185,23 +191,22 @@ ax[0].set(xlabel="size (KB)", ylabel="AUC"); ax[1].set(xlabel="energy (uJ/inf)",
 ax[1].set_xscale("log"); ax[0].legend(); [a.grid(alpha=.3) for a in ax]; plt.tight_layout(); plt.show()""")
 
 # ── 19. Reproduce paper numbers ───────────────────────────────────────────────
-md("""## 19. Reproduce the paper's headline numbers
-Load the cached full-run summary (`scripts/run_full.py`) — the numbers reported
-in `paper/`.""")
-code("""p = pathlib.Path(cfg["paths"]["artifacts_dir"]) / "results_summary.json"
-if p.exists():
-    s = json.load(open(p))
-    print("best archs:", s["best_arch"]); print("NRMS baseline:", s["baseline"])
-    display(pd.DataFrame(s["matrix"])[["arm", "precision", "auc", "size_kb", "energy_uj"]])
-else:
-    print("Run `python -m scripts.run_full` for the full paper-grade numbers.")""")
+md("""## 19. The paper's numbers
+Frozen result files in `paper/results/`: the June 2026 full run with cost columns
+recomputed by `scripts/recompute_costs.py`. `scripts/check_numbers.py` compares
+them with `paper/paper.tex`.""")
+code("""res = pathlib.Path(cfg["paths"]["results_dir"])
+s = json.load(open(res / "results_summary.json"))
+print("best archs:", s["best_arch"]); print("NRMS baseline (reduced):", s["baseline"])
+pd.read_csv(res / "results_matrix.csv")[["arm", "precision", "auc", "size_kb", "macs", "energy_uj"]]""")
 
 # ── 20. Conclusions ───────────────────────────────────────────────────────────
-md("""## 20. Conclusions
-- One byte-level model fits the STM32H7 budget and serves all 14 languages.
-- INT8 Micro-NAS is the measured sweet spot; Binary is footprint-motivated.
-- Distillation makes the tiny model competitive (see the ablation).
-- Artifacts in `artifacts/`; the write-up in `paper/`.""")
+md("""## 20. Where things stand
+- A 256-row byte vocabulary replaces the word table; the encoder is a few hundred kilobytes.
+- INT8 and 1-bit rows are weight-only simulations; sizes and energy are estimates until a
+  full-integer model is exported and measured on a board.
+- Initialising from the distilled student helps (see the ablation).
+- Frozen numbers in `paper/results/`, run outputs in `artifacts/runs/`, journal in `LOGBOOK.md`.""")
 
 nb["cells"] = cells
 out = Path("notebooks"); out.mkdir(exist_ok=True)
