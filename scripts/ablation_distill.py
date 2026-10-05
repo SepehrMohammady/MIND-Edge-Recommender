@@ -9,10 +9,13 @@ fine-tuned). Thin wrapper over experiment.run_ablation. Saves artifacts/ablation
 import json
 from pathlib import Path
 
-from src.config import load_config
+from src.config import load_config, use_run_dir
+from src.seed import seed_everything
 from src import experiment
 
 cfg = load_config()
+use_run_dir(cfg, "ablation")
+seed_everything(cfg["seed"])
 out = experiment.run_ablation(cfg, distill_epochs=12, train_epochs=cfg["train"]["epochs"])
 Path(cfg["paths"]["artifacts_dir"], "ablation.json").write_text(
     json.dumps(out, indent=2), encoding="utf-8")

@@ -1,0 +1,15 @@
+{
+  "arch": {
+    "byte_embed_dim": 64,
+    "channels": 64,
+    "depth": 5,
+    "out_dim": 384
+  },
+  "result": {
+    "auc": 0.5723,
+    "mrr": 0.291,
+    "ndcg@5": 0.2723,
+    "ndcg@10": 0.3365,
+    "n_impressions": 73152
+  }
+}

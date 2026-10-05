@@ -1,0 +1,22 @@
+{
+  "binary_multiseed": {
+    "seeds": [
+      0.5172,
+      0.5398,
+      0.5462
+    ],
+    "mean": 0.5344,
+    "std": 0.0124
+  },
+  "matryoshka": {
+    "64": 0.459,
+    "128": 0.4577,
+    "256": 0.4555,
+    "384": 0.4539
+  },
+  "coldstart": {
+    "with_history": 0.5908,
+    "masked_history": 0.5,
+    "topic_prior": 0.551
+  }
+}

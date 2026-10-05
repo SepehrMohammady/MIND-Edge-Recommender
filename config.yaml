@@ -8,8 +8,10 @@
 seed: 42
 
 paths:
-  data_dir: data           # downloaded datasets
-  artifacts_dir: artifacts # exported models, JSON priors, results tables
+  data_dir: data             # downloaded datasets
+  artifacts_dir: artifacts   # run outputs: checkpoints, exports, scratch tables (not versioned)
+  cache_dir: artifacts/cache # caches independent of the run protocol (teacher anchors)
+  results_dir: paper/results # frozen result files quoted by the paper (versioned)
   logs_dir: logs
 
 # ---------------------------------------------------------------------------
@@ -96,9 +98,13 @@ targets:
   pi5:     {flash_kb: null, ram_kb: null, energy: ina219}
   stm32h7: {flash_kb: 2048, ram_kb: 1024, energy: analytical}
 
-# Horowitz ISSCC-2014 (45nm) per-op energy in pJ (relative proxy; label as such)
+# Per-operation energy in pJ (relative proxy; label as such).
+# fp32_mac and int8_mac are multiply + add from Horowitz, ISSCC 2014 (45 nm):
+# 3.7 + 0.9 and 0.2 + 0.03. Horowitz gives no 1-bit figure; binary_op follows the
+# operation-count convention of XNOR-Net / Bi-Real Net (64 binary operations per
+# 32-bit one), i.e. fp32_mac / 64. It is a convention, not a measurement.
 energy_pj:
   fp32_mac: 4.6
   int8_mac: 0.23
-  binary_op: 0.0072      # ~ (fp32_mac / 64) XNOR+popcount proxy
+  binary_op: 0.0719
   sram_read_32b: 5.0

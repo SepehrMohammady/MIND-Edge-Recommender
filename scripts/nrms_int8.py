@@ -9,10 +9,13 @@ from pathlib import Path
 
 import torch
 
-from src.config import load_config
+from src.config import load_config, use_run_dir
+from src.seed import seed_everything
 from src import baseline_nrms
 
 cfg = load_config()
+use_run_dir(cfg, "nrms_int8")
+seed_everything(cfg["seed"])
 EP = 8  # match the full-run baseline
 
 

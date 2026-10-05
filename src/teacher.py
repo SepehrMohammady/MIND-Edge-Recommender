@@ -35,9 +35,10 @@ def embed_texts(model, texts: list[str], batch_size: int) -> np.ndarray:
 def build_anchors(cfg: dict, split: str) -> tuple[list[str], np.ndarray]:
     """Compute (and cache) English-title anchor embeddings for one split.
 
-    Returns ``(nids, embeddings)`` aligned by index. Cached under artifacts/.
+    Returns ``(nids, embeddings)`` aligned by index. Cached under ``cache_dir``
+    (the anchors depend only on the dataset and the teacher, not on the run).
     """
-    art = Path(cfg["paths"]["artifacts_dir"])
+    art = Path(cfg["paths"].get("cache_dir", cfg["paths"]["artifacts_dir"]))
     npy = art / f"teacher_anchor_{cfg['data']['mind_size']}_{split}.npy"
     ids = art / f"teacher_anchor_{cfg['data']['mind_size']}_{split}.nids.txt"
     if npy.exists() and ids.exists():
@@ -53,3 +54,23 @@ def build_anchors(cfg: dict, split: str) -> tuple[list[str], np.ndarray]:
     np.save(npy, emb)
     ids.write_text(" ".join(nids), encoding="utf-8")
     return nids, emb
+
+
+def build_lang_embeddings(cfg: dict, split: str, lang: str, model=None) -> np.ndarray:
+    """Teacher embeddings of the ``lang`` titles of one split, aligned with the
+    news order of ``build_anchors`` (and cached next to the anchors). Used for
+    the frozen-teacher bound of cross-lingual transfer; ``lang='en'`` returns
+    the anchors themselves."""
+    nids, anchors = build_anchors(cfg, split)
+    if lang in (None, "en"):
+        return anchors
+    art = Path(cfg["paths"].get("cache_dir", cfg["paths"]["artifacts_dir"]))
+    npy = art / f"teacher_{cfg['data']['mind_size']}_{split}_{lang}.npy"
+    if npy.exists():
+        return np.load(npy)
+    from src import data_xmind
+    news = data_xmind.localized_news(cfg, lang, split)
+    emb = embed_texts(model or get_teacher(cfg), [news[n]["title"] for n in nids],
+                      cfg["teacher"]["batch_size"])
+    np.save(npy, emb)
+    return emb

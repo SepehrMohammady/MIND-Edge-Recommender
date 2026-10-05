@@ -94,32 +94,79 @@ def _mrl_loss(pred, target, dims):
     return loss / len(dims)
 
 
+_DISTILL_CACHE: dict = {}
+
+
+def distill_tensors(cfg: dict, split: str = "train"):
+    """``build_distill_data`` as device tensors, built once per process:
+    (bytes int16 (M, L), target index (M,), anchors (N, D))."""
+    device = "cuda" if torch.cuda.is_available() and cfg["train"]["device"] == "cuda" else "cpu"
+    key = (cfg["paths"]["data_dir"], cfg["data"]["mind_size"], split,
+           cfg["data"]["max_title_bytes"], tuple(data_xmind.available_langs(cfg)), device)
+    if key not in _DISTILL_CACHE:
+        bytes_np, tgt_np, anchors = build_distill_data(cfg, split)
+        _DISTILL_CACHE[key] = (torch.tensor(bytes_np, device=device),
+                               torch.tensor(tgt_np, dtype=torch.long, device=device),
+                               torch.tensor(anchors, device=device))
+    return _DISTILL_CACHE[key]
+
+
+def distill_encoder(cfg: dict, encoder: nn.Module, epochs: int | None = None,
+                    max_titles: int | None = None, dims=(64, 128, 256, 384),
+                    batch: int = 512, tag: str = "distill") -> nn.Module:
+    """Distil ``encoder`` (any module mapping byte ids to ``out_dim`` vectors)
+    to the teacher anchors with the Matryoshka cosine loss. English and every
+    available xMIND translation of a title share the English anchor.
+    ``max_titles`` draws a seeded random subset for short runs."""
+    X, T, anchors = distill_tensors(cfg, "train")
+    device = X.device
+    gen = torch.Generator(device=device)
+    gen.manual_seed(int(cfg["seed"]))
+    if max_titles and max_titles < len(X):
+        keep = torch.randperm(len(X), device=device, generator=gen)[:max_titles]
+        X, T = X[keep], T[keep]
+    encoder = encoder.to(device).train()
+    opt = torch.optim.AdamW(encoder.parameters(), lr=cfg["train"]["distill_lr"])
+    dims = tuple(d for d in dims if d <= encoder.out_dim)
+    for ep in range(epochs or cfg["train"]["distill_epochs"]):
+        perm = torch.randperm(len(X), device=device, generator=gen)
+        total, steps = 0.0, 0
+        for i in range(0, len(X) - batch + 1, batch):
+            b = perm[i:i + batch]
+            pred = F.normalize(encoder(X[b].long()), dim=-1)
+            loss = _mrl_loss(pred, anchors[T[b]], dims)
+            opt.zero_grad(set_to_none=True)
+            loss.backward()
+            opt.step()
+            total += loss.item()
+            steps += 1
+        print(f"[{tag}] epoch {ep+1}  loss={total/max(steps, 1):.4f}", flush=True)
+    return encoder
+
+
+@torch.no_grad()
+def teacher_similarity(cfg: dict, encoder: nn.Module, split: str = "dev",
+                       dims=(64, 128, 256, 384), max_titles: int = 8000) -> dict:
+    """Mean cosine between the student's and the teacher's embedding of the
+    English ``split`` titles, on nested prefixes of the vector."""
+    nids, anchors = teacher.build_anchors(cfg, split)
+    news = data_mind.read_news(cfg, split)
+    device = next(encoder.parameters()).device
+    L = cfg["data"]["max_title_bytes"]
+    X = torch.tensor([text_to_bytes(news[n]["title"], L) for n in nids[:max_titles]],
+                     dtype=torch.long, device=device)
+    A = torch.tensor(anchors[:max_titles], device=device)
+    encoder.eval()
+    P = torch.cat([encoder(X[i:i + 1024]) for i in range(0, len(X), 1024)])
+    return {str(d): round(F.cosine_similarity(P[:, :d], A[:, :d], dim=-1).mean().item(), 4)
+            for d in dims if d <= P.shape[1]}
+
+
 def train_student(cfg: dict, dims=(64, 128, 256, 384)) -> ByteCNNEncoder:
     """Distill a ByteCNNEncoder to the teacher anchors; save to artifacts/."""
-    device = "cuda" if torch.cuda.is_available() and cfg["train"]["device"] == "cuda" else "cpu"
-    bytes_np, tgt_np, anchors = build_distill_data(cfg, "train")
-    anchors_t = torch.tensor(anchors, device=device)
-
-    ds = torch.utils.data.TensorDataset(torch.tensor(bytes_np, dtype=torch.long),
-                                        torch.tensor(tgt_np, dtype=torch.long))
-    dl = torch.utils.data.DataLoader(ds, batch_size=512, shuffle=True, drop_last=True)
-
     s = cfg["student"]
-    model = ByteCNNEncoder(s["byte_embed_dim"], s["channels"], s["depth"], s["out_dim"]).to(device)
-    opt = torch.optim.AdamW(model.parameters(), lr=cfg["train"]["distill_lr"])
-    dims = tuple(d for d in dims if d <= s["out_dim"])
-
-    model.train()
-    for ep in range(cfg["train"]["distill_epochs"]):
-        total = 0.0
-        for ids, ti in dl:
-            ids, target = ids.to(device), anchors_t[ti.to(device)]
-            pred = F.normalize(model(ids), dim=-1)
-            loss = _mrl_loss(pred, target, dims)
-            opt.zero_grad(); loss.backward(); opt.step()
-            total += loss.item()
-        print(f"[distill] epoch {ep+1}/{cfg['train']['distill_epochs']}  loss={total/len(dl):.4f}")
-
+    model = ByteCNNEncoder(s["byte_embed_dim"], s["channels"], s["depth"], s["out_dim"])
+    model = distill_encoder(cfg, model, dims=dims)
     out = Path(cfg["paths"]["artifacts_dir"]) / "student.pt"
     torch.save(model.state_dict(), out)
     print(f"[distill] saved -> {out}")

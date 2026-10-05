@@ -3,7 +3,8 @@
 Run this BEFORE any training so a later loss of internet cannot interrupt
 experiments::
 
-    python -m src.download
+    python -m src.download                  # download, unzip, write the manifest
+    python -m src.download --manifest-only  # re-hash what is already on disk
 
 Everything is driven by ``config.yaml`` (dataset size, language list, paths).
 
@@ -14,6 +15,9 @@ Sources (verified 2026-06-18)
 * xMIND : ``aiana94/xMINDsmall`` / ``aiana94/xMINDlarge`` (CC-BY-NC-SA-4.0).
           Ships ONLY translated ``title``/``abstract`` keyed by MIND ``nid``;
           MIND ``behaviors.tsv`` is reused unchanged and joined on ``nid``.
+* utils : ``MIND<size>_utils.zip`` from the same mirror: the word table and the
+          GloVe-initialised embedding matrix of the reference NRMS code, used by
+          the NRMS baseline (``src/baseline_nrms.py``).
 
 A SHA256 manifest is written to ``data/manifest.json`` for reproducibility.
 """
@@ -21,6 +25,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 import zipfile
 from pathlib import Path
 
@@ -49,7 +54,8 @@ def download_mind(cfg: dict) -> dict:
     out_dir = data_dir / "mind" / size
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    patterns = [f"MIND{size}_{s}.zip" for s in MIND_SPLITS[size]]
+    parts = MIND_SPLITS[size] + ["utils"]
+    patterns = [f"MIND{size}_{s}.zip" for s in parts]
     print(f"[MIND] downloading {patterns} from {MIND_REPO} ...")
     snapshot_download(
         repo_id=MIND_REPO,
@@ -59,7 +65,7 @@ def download_mind(cfg: dict) -> dict:
     )
 
     manifest = {}
-    for split in MIND_SPLITS[size]:
+    for split in parts:
         zip_path = raw_dir / f"MIND{size}_{split}.zip"
         dest = out_dir / split
         dest.mkdir(parents=True, exist_ok=True)
@@ -68,6 +74,26 @@ def download_mind(cfg: dict) -> dict:
             zf.extractall(dest)
         manifest[f"mind_{size}_{split}.zip"] = _sha256(zip_path)
     return manifest
+
+
+def xmind_manifest(cfg: dict) -> dict:
+    """sha256 of every xMIND parquet/tsv file on disk."""
+    out_dir = Path(cfg["paths"]["data_dir"]) / "xmind" / cfg["data"]["mind_size"]
+    manifest = {}
+    for f in sorted(out_dir.rglob("*")):
+        if f.is_file() and ".cache" not in f.parts and (
+                f.name.endswith((".parquet", ".parquet.gzip", ".tsv", ".csv"))):
+            manifest[f"xmind/{f.relative_to(out_dir).as_posix()}"] = _sha256(f)
+    return manifest
+
+
+def mind_manifest(cfg: dict) -> dict:
+    """sha256 of the MIND zips already on disk."""
+    size = cfg["data"]["mind_size"]
+    raw_dir = Path(cfg["paths"]["data_dir"]) / "mind_raw"
+    return {f"mind_{size}_{part}.zip": _sha256(raw_dir / f"MIND{size}_{part}.zip")
+            for part in MIND_SPLITS[size] + ["utils"]
+            if (raw_dir / f"MIND{size}_{part}.zip").exists()}
 
 
 def download_xmind(cfg: dict) -> dict:
@@ -80,25 +106,25 @@ def download_xmind(cfg: dict) -> dict:
     repo = XMIND_REPO[size]
     print(f"[xMIND] snapshotting {repo} (all languages) ...")
     snapshot_download(repo_id=repo, repo_type="dataset", local_dir=str(out_dir))
-
-    # Manifest = sha256 of every parquet/tsv file pulled.
-    manifest = {}
-    for f in sorted(out_dir.rglob("*")):
-        if f.is_file() and ".cache" not in f.parts and (
-                f.name.endswith((".parquet", ".parquet.gzip", ".tsv", ".csv"))):
-            manifest[f"xmind/{f.relative_to(out_dir).as_posix()}"] = _sha256(f)
-    return manifest
+    return xmind_manifest(cfg)
 
 
 def main() -> None:
     cfg = load_config()
     manifest = {}
-    manifest.update(download_mind(cfg))
-    manifest.update(download_xmind(cfg))
+    if "--manifest-only" in sys.argv:
+        manifest.update(mind_manifest(cfg))
+        manifest.update(xmind_manifest(cfg))
+    else:
+        manifest.update(download_mind(cfg))
+        manifest.update(download_xmind(cfg))
 
     manifest_path = Path(cfg["paths"]["data_dir"]) / "manifest.json"
     with open(manifest_path, "w", encoding="utf-8") as fh:
         json.dump(manifest, fh, indent=2, sort_keys=True)
+    # data/ is not versioned; keep a tracked copy so a fresh clone can be checked.
+    tracked = Path(__file__).resolve().parents[1] / "docs" / "data_manifest.json"
+    tracked.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"\n[OK] datasets ready. SHA256 manifest -> {manifest_path}")
     print(f"     {len(manifest)} files pinned.")
 
