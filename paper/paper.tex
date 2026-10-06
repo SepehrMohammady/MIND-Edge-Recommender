@@ -38,16 +38,17 @@ families of architecture (unconstrained, budget-constrained and binary-aware) an
 evaluate each at full precision and with inner-layer weights at eight bits and at
 one bit, measuring ranking quality on MIND against estimated flash, RAM and
 energy. With eight-bit weights the constrained model scores 0.610 AUC at an
-estimated 204\,KB and the unconstrained one 0.647 at 790\,KB. For reference, a
-reduced NRMS with a 27\,MB word table scores 0.607 and a per-user category
-histogram with no network 0.598. Initialising the encoder by distillation from a
-frozen multilingual sentence-transformer adds 3.3 AUC points. A naive one-bit
-model stays near chance (0.521); ReActNet blocks started from the distilled
-weights bring it to 0.572 at 194\,KB. Seeded reruns differ from the matrix run by
-up to 0.02 AUC, so smaller gaps are not resolved. The matrix models were trained
-on English clicks only and transfer little to the fourteen xMIND translations
-(0.522 on average). \TODO{per-language results of the distilled encoder; latency
-and energy on STM32 boards and an Android phone}. Code and artefacts are released.
+estimated 204\,KB and the unconstrained one 0.647 at 790\,KB. For reference,
+NRMS with GloVe vectors scores 0.664 over three seeds, a reduced NRMS with a
+random 256-dimensional table 0.604, and a per-user category histogram with no
+network 0.598. At the constrained architecture, starting from weights distilled
+from a frozen multilingual sentence-transformer adds 0.011 AUC (0.629 against
+0.618), and training on clicks shown in a random xMIND language raises the mean
+over fourteen translations from 0.557 to 0.589 at a cost of 0.020 in English. A
+naive one-bit model stays near chance (0.521); ReActNet blocks started from the
+distilled weights bring it to 0.572 at 194\,KB. Seeded reruns differ from the
+matrix run by up to 0.02 AUC, so smaller gaps are not resolved. \TODO{latency and
+energy on STM32 boards and an Android phone}. Code and artefacts are released.
 \keywords{Edge AI \and Neural Architecture Search \and Binarized Neural Networks
 \and Multilingual News Recommendation \and TinyML \and Knowledge Distillation}
 \end{abstract}
@@ -139,7 +140,8 @@ titles a user has clicked, embedding both with the same encoder
 embedding, a few depthwise-separable one-dimensional convolutions, a masked
 average over positions, and a linear projection. An additive-attention encoder
 summarises the user's history, and the score is the dot product of the two
-vectors, trained with one positive and four negatives per step (AdamW). A frozen
+vectors, trained with one positive and four negatives redrawn at every step
+(AdamW). A frozen
 \texttt{paraphrase-multilingual-MiniLM-L12-v2}~\cite{wang2020minilm} supplies a
 384-dimensional target for each English title, and because the xMIND titles are
 translations of those same articles the distillation loss maps every translation
@@ -197,6 +199,9 @@ initialisation in the matrix run was not, which the seeded reruns of
 Sect.~\ref{sec:results} quantify. The downloaded data is pinned by checksum, and
 the code, notebook, result files and a dependency lock are
 released.\footnote{\url{https://github.com/SepehrMohammady/MIND-Edge-Recommender}}
+Table~\ref{tab:matrix} comes from the June run, which drew the negatives once; the
+experiments of Table~\ref{tab:p1} use the loop of Sect.~3, which redraws them at
+every step, and report the mean and standard deviation over three seeds.
 
 \section{Results}\label{sec:results}
 \begin{table}[t]
@@ -245,33 +250,45 @@ the constrained model and 64\,KB for the unconstrained one. On the laptop a titl
 takes 0.10--0.34\,ms on CPU (onnxruntime) and under 0.7\,ms on GPU for the three
 full-precision architectures.
 
-Three reference points place these numbers. Our NRMS reproduction, a reduced
-variant with a randomly initialised 256-dimensional word table, reaches 0.607;
-92\% of its 7.08 million parameters are the table (27\,MB, or 6.8\,MB in eight bits
-at the same accuracy). NRMS with GloVe vectors is reported at 0.656 on
-MIND-small~\cite{mao2022digat}; \TODO{our GloVe rerun}. Two scorers with no network
-set a floor: popularity gives 0.525, and a histogram of the reader's clicks over
-MIND's category labels 0.598, or 0.617 with the finer subcategory labels. The
-eight-bit constrained encoder (0.610) is thus level with the reduced NRMS at about
-135 times less storage, but also within 0.02 of a label histogram; the
-unconstrained one (0.647) clears both. Feeds outside MIND carry no such editorial
-labels, which is the case a content encoder is for.
+\input{tab_p1}
+Table~\ref{tab:p1} places these numbers. Our NRMS reproduction in the reduced
+configuration of the June run (a randomly initialised 256-dimensional word table;
+92\% of its 7.08 million parameters are the table, 27\,MB) averages 0.604 over
+three seeds with a spread of 0.010, which covers the 0.607 of the matrix run. In
+the reference configuration shipped with MIND (GloVe-initialised 300-dimensional
+table, twenty heads) NRMS reaches 0.664, in line with the 0.656 reported for this
+split~\cite{mao2022digat}. Two scorers with no network set a floor: popularity
+gives 0.525, and a histogram of the reader's clicks over MIND's category labels
+0.598, or 0.617 with the finer subcategory labels. The reference byte-CNN trained
+on English clicks scores 0.618 from a random start and 0.629 from the distilled
+weights, so distillation is worth 0.011 here, less than the 0.033 of the June
+ablation, which drew negatives once and trained for ten epochs. The gap to GloVe
+NRMS is 0.036 with 165 times fewer parameters, and the distilled encoder is 0.011
+above the subcategory histogram, which has no network at all. Feeds outside MIND
+carry no such editorial labels, which is the case a content encoder is for.
 
-The matrix models saw only English bytes. Read through the full-precision
-constrained model, the fourteen translated dev sets score between 0.491 (Georgian)
-and 0.556 (Haitian Creole), 0.522 on average, against 0.605 in English: without
-multilingual training almost nothing transfers. The distilled encoder is the one
-built for this; \TODO{its per-language scores}.
+Cross-lingual transfer depends on how the encoder is trained (last column of
+Table~\ref{tab:p1}). Trained from a random start on English clicks it reads the
+fourteen translated dev sets at 0.528 on average, close to chance; the June matrix
+models are of this kind. The distilled student alone, frozen under a trained user
+encoder, scores 0.572 across languages against 0.573 in English, so the
+distillation does carry the teacher's language alignment (the teacher itself:
+0.575 against 0.589). Fine-tuning the distilled encoder on English clicks raises
+English to 0.629 but leaves the translations at 0.557; showing the same clicks in
+a random xMIND language instead keeps 0.589 across languages, from 0.538
+(Georgian) to 0.609 (Finnish), for 0.609 in English. A trainable linear map on
+the frozen teacher reaches 0.590 across languages with the whole teacher behind
+it; the 68k-parameter byte-CNN comes within 0.001 of that figure.
 
-Three further measurements qualify the table. Starting the encoder from distilled
-weights rather than from scratch raises AUC from 0.600 to 0.633 at a fixed
-architecture (64-5-384, full precision), so the gain comes from distillation, not
-capacity. Three seeded reruns of the eight-bit constrained model score 0.630,
-0.622 and 0.621; the matrix run, whose initialisation was not seeded, scored
-0.610, so we read gaps below about 0.02 in Table~\ref{tab:matrix} as unresolved.
-For the 3\% of impressions whose reader has no history, a history-based score ties
-every candidate (0.500 by construction); popularity gives 0.529 there and the
-population's category distribution 0.533.
+Two further points qualify the tables. Three seeded reruns of the eight-bit
+constrained model score 0.630, 0.622 and 0.621; the matrix run, whose
+initialisation was not seeded, scored 0.610, so we read gaps below about 0.02 in
+Table~\ref{tab:matrix} as unresolved. For the 3\% of impressions whose reader has
+no history, a history-based score ties every candidate (0.500 by construction);
+popularity gives 0.529 there and the population's category distribution 0.533. By
+history length, the distilled encoder trained on English clicks scores 0.615 for
+readers with one to five clicks, 0.633 for six to twenty and 0.638 beyond, against
+0.622, 0.664 and 0.688 for GloVe NRMS: the gap widens with history.
 
 Binarising the inner weights the naive way
 leaves the constrained model near chance (0.521). Replacing its blocks with full
@@ -297,8 +314,10 @@ Engine~\cite{bannink2021lce}, and the Cortex-M7 has no popcount instruction, so 
 make no speed claim for binary and treat it only as a way to save space. The
 energy figure ignores SRAM and memory traffic, which can dominate on a Cortex-M.
 The constrained search enforced its flash and RAM budgets but not the operation
-budget, the NRMS reference is a reduced variant, and the cross-lingual result so
-far is negative. Finally, a byte sequence is about five times longer than the word
+budget, and the precision matrix predates the training loop of
+Table~\ref{tab:p1}, so it will be rerun with it. Even after mixed-language
+training the translations stay 0.020 below English and 0.039 below the
+English-only encoder. Finally, a byte sequence is about five times longer than the word
 sequence, trading flash for computation, and all of this is on the small MIND
 split.
 
@@ -309,9 +328,10 @@ machine-generated. Replacing the word-embedding table with a byte-level encoder
 removes the largest item of a news recommender's storage and gives every language
 the same 256-row vocabulary. With eight-bit weights the constrained encoder
 reaches 0.610 AUC at an estimated 204\,KB; the one-bit model, started from
-distilled weights, reaches 0.572 at 194\,KB. What is still missing:
-\TODO{per-language results of the distilled encoder, a full-integer model, board
-and phone measurements, and a one-bit runtime} --- that is where we take it next.
+distilled weights, reaches 0.572 at 194\,KB; trained on clicks shown in a random
+language, the distilled byte-CNN reads fourteen languages at 0.589 AUC on average.
+What is still missing: \TODO{a full-integer model, board and phone measurements,
+and a one-bit runtime} --- that is where we take it next.
 
 \bibliographystyle{splncs04}
 \bibliography{references}

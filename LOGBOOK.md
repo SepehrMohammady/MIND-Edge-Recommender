@@ -264,3 +264,19 @@ Reading of the table above (two seeds):
   Lane-Change work is to be avoided.
 - Launcher bug: `-Seeds 1,2` was bound to the single seed 12. Fixed (strings split on
   commas); seed 1 started at 18:44 to complete three seeds.
+
+## 2026-10-06 20:50 — P1 complete (seeds 42, 12, 1); paper updated
+
+- Seed 1 ran 18:43 to 20:49 (126 min, one process, GPU free). `scripts/summarize_p1.py` writes
+  the seed aggregates to `paper/results/p1_summary.json`; `scripts/make_tables.py` writes
+  Table 2 of the paper (`paper/tab_p1.tex`) from them.
+- Three-seed means (EN AUC / mean over 14 translations): NRMS GloVe 0.664±0.003 (11.29 M
+  params); NRMS reduced 0.604±0.010; byte-CNN 64-5-384 (68 k): scratch 0.618 / 0.528,
+  distilled start 0.629 / 0.557, distilled start + mixed-language clicks 0.609 / 0.589,
+  frozen distilled student 0.573 / 0.572; frozen teacher 0.589 / 0.575, + linear map
+  0.618 / 0.590. Full table: `python -m scripts.log_report p1/`.
+- Paper: abstract, setup, results (new Table 2, baselines, cross-lingual and history-bucket
+  paragraphs), limitations and conclusion rewritten around these numbers; the June Table 1
+  stays, marked as the earlier loop. `check_numbers.py` extended to the new values; PDF 9
+  pages. Course notice updated.
+- Notebook re-executed in QUICK mode after the batch (`scripts/make_notebook.py`).

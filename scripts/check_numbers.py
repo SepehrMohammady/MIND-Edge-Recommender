@@ -62,8 +62,6 @@ mi8, ni8 = cell[("micro_nas", "int8")], cell[("nas", "int8")]
 nrms = summary["baseline"]["auc"]
 expect(f"scores {f(mi8.auc, 3)} AUC at an estimated {f(mi8.size_kb, 0)}\\,KB", "abstract, constrained INT8")
 expect(f"{f(ni8.auc, 3)} at {f(ni8.size_kb, 0)}\\,KB", "abstract, unconstrained INT8")
-expect(f"word table scores {f(nrms, 3)}", "abstract, reduced NRMS")
-expect(f"reaches {f(nrms, 3)};", "results, reduced NRMS")
 
 # ---- search space, run time, costs
 space = cfg["nas"]["search_space"]
@@ -120,18 +118,9 @@ if not mi8.auc - heur["category"]["all"]["auc"] < 0.02:
 # ---- languages (June matrix model)
 lang = pd.read_csv(RES / "lang_matrix.csv").set_index("lang")["auc"]
 x = lang.drop("en")
-expect(f"between {f(x.min(), 3)} (Georgian) and {f(x.max(), 3)} (Haitian Creole), {f(x.mean(), 3)} on average",
-       "per-language range")
-expect(f"against {f(cell[('micro_nas', 'fp32')].auc, 3)} in English", "English AUC of that model")
-expect(f"({f(x.mean(), 3)} on average)", "abstract, mean over translations")
-if x.idxmin() != "kat" or x.idxmax() != "hat":
-    missing.append("lowest/highest language is not Georgian/Haitian Creole")
 
 # ---- ablation, seeds, binary
 abl = load("ablation.json")
-expect(f"from {f(abl['scratch']['auc'], 3)} to {f(abl['distilled_init']['auc'], 3)}", "distillation ablation")
-expect(f"adds {f(100 * (abl['distilled_init']['auc'] - abl['scratch']['auc']), 1)} AUC points",
-       "abstract, distillation gain")
 log = (ROOT / "docs" / "run_log.md").read_text(encoding="utf-8")
 m = re.search(r"seeds 42/1/2 AUC: \*\*([\d.]+), ([\d.]+), ([\d.]+)\*\*", log)
 if m:
@@ -151,6 +140,61 @@ expect(f"{f(nrms - imp['result']['auc'], 3)} below the reduced", "improved binar
 expect(f"The {f(imp['result']['auc'] - naive, 2)} gain", "binary gain")
 expect(f"standard deviation of {f(load('reviews2.json')['binary_multiseed']['std'], 3)}", "binary seed spread")
 
+# ---- P1 aggregates (three seeds)
+P = load("p1_summary.json")
+
+
+def m(key, field="en_auc"):
+    return P[key][field]["mean"]
+
+
+ng, nr = m("nrms/nrms_glove"), m("nrms/nrms_reduced")
+sc, ft, mx = m("student/scratch_en"), m("student/distill_ft_en"), m("student/distill_ft_mixed")
+fz, tf, tl = m("student/distill_frozen"), m("teacher/teacher_frozen"), m("teacher/teacher_linear")
+x = {k: m(k, "xlang_auc") for k in ("student/scratch_en", "student/distill_ft_en", "student/distill_ft_mixed",
+                                   "student/distill_frozen", "teacher/teacher_frozen", "teacher/teacher_linear")}
+expect(f"GloVe vectors scores {f(ng, 3)} over three seeds", "abstract, GloVe NRMS")
+expect(f"random 256-dimensional table {f(nr, 3)}", "abstract, reduced NRMS")
+expect(f"adds {f(ft - sc, 3)} AUC ({f(ft, 3)} against {f(sc, 3)})", "abstract, distillation gain")
+expect(f"from {f(x['student/distill_ft_en'], 3)} to {f(x['student/distill_ft_mixed'], 3)} at a cost of "
+       f"{f(ft - mx, 3)} in English", "abstract, mixed-language training")
+expect(f"averages {f(nr, 3)} over\nthree seeds with a spread of {f(P['nrms/nrms_reduced']['en_auc']['std'], 3)}"
+       .replace("\n", " "), "reduced NRMS mean and spread")
+expect(f"NRMS reaches {f(ng, 3)}", "GloVe NRMS mean")
+expect(f"scores {f(sc, 3)} from a random start and {f(ft, 3)} from the distilled", "scratch vs distilled")
+expect(f"distillation is worth {f(ft - sc, 3)} here", "distillation gain")
+abl = load("ablation.json")
+expect(f"less than the {f(abl['distilled_init']['auc'] - abl['scratch']['auc'], 3)} of the June", "June ablation gain")
+ratio = P["nrms/nrms_glove"]["settings"]["params"] / P["student/scratch_en"]["encoder_cost"]["params"]
+expect(f"gap to GloVe NRMS is {f(ng - ft, 3)} with {ratio:.0f} times fewer parameters", "gap and parameter ratio")
+expect(f"distilled encoder is {f(ft - heur['subcategory']['all']['auc'], 3)} above the subcategory", "vs subcategory")
+expect(f"dev sets at {f(x['student/scratch_en'], 3)} on average", "scratch cross-lingual")
+expect(f"scores {f(x['student/distill_frozen'], 3)} across languages against {f(fz, 3)} in English", "frozen student")
+expect(f"(the teacher itself: {f(x['teacher/teacher_frozen'], 3)} against {f(tf, 3)})", "frozen teacher")
+expect(f"raises English to {f(ft, 3)} but leaves the translations at {f(x['student/distill_ft_en'], 3)}", "ft_en")
+pl = P["student/distill_ft_mixed"]["per_language"]
+lo, hi = min(pl, key=lambda k: pl[k]["mean"]), max(pl, key=lambda k: pl[k]["mean"])
+names = {"kat": "Georgian", "fin": "Finnish"}
+expect(f"keeps {f(x['student/distill_ft_mixed'], 3)} across languages, from {f(pl[lo]['mean'], 3)} "
+       f"({names.get(lo, lo)}) to {f(pl[hi]['mean'], 3)} ({names.get(hi, hi)}), for {f(mx, 3)} in English",
+       "mixed-language per-language range")
+expect(f"reaches {f(x['teacher/teacher_linear'], 3)} across languages", "teacher linear cross-lingual")
+expect(f"comes within {f(abs(x['teacher/teacher_linear'] - x['student/distill_ft_mixed']), 3)} of that figure",
+       "byte-CNN vs teacher-linear cross-lingual")
+b = P["student/distill_ft_en"]["buckets"]
+g = P["nrms/nrms_glove"]["buckets"]
+expect(f"scores {f(b['1-5']['mean'], 3)} for readers with one to five clicks, {f(b['6-20']['mean'], 3)} for six to "
+       f"twenty and {f(b['>20']['mean'], 3)} beyond, against {f(g['1-5']['mean'], 3)}, {f(g['6-20']['mean'], 3)} and "
+       f"{f(g['>20']['mean'], 3)} for GloVe NRMS", "history buckets")
+expect(f"translations stay {f(mx - x['student/distill_ft_mixed'], 3)} below English and "
+       f"{f(ft - x['student/distill_ft_mixed'], 3)} below the English-only encoder", "limitations gaps")
+expect(f"fourteen languages at {f(x['student/distill_ft_mixed'], 3)} AUC on average", "conclusion cross-lingual")
+if len(P["student/distill_ft_en"]["seeds"]) != 3:
+    missing.append("the text says three seeds; p1_summary has a different count")
+TAB = (ROOT / "paper" / "tab_p1.tex").read_text(encoding="utf-8")
+if "Generated by scripts/make_tables.py" not in TAB:
+    missing.append("paper/tab_p1.tex was not written by scripts/make_tables.py")
+
 # ---- reduced NRMS size: checked once the P1 record exists
 p1_nrms = RES / "p1_nrms.json"
 reduced = [v for k, v in (load("p1_nrms.json") if p1_nrms.exists() else {}).items()
@@ -159,7 +203,7 @@ if reduced:
     st = reduced[0]["settings"]
     expect(f"{f(100 * st['embedding_params'] / st['params'], 0)}\\% of its {f(st['params'] / 1e6, 2)} million",
            "reduced NRMS parameters")
-    expect(f"({f(st['size_mb_fp32'], 0)}\\,MB", "reduced NRMS size")
+    expect(f"the table, {f(st['size_mb_fp32'], 0)}\,MB)", "reduced NRMS size")
 else:
     notes.append("reduced-NRMS parameter count (92%, 7.08 M, 27 MB) has no result file yet; "
                  "it is checked once p1_nrms.json holds an nrms_reduced run")
