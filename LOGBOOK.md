@@ -220,3 +220,47 @@ Repository `FeedWell-Edge`, branch `rebuild-on-feedwell-1.18`, commit 145b3b3, p
 | 10 | Paper B: app + on-device adaptation (+ pilot) | 6, 7 | PhD Y2–Y3 | later |
 
 Critical path 1 → 2 → 3 → 4 → 5 → 8; the app track (6) runs beside it once step 4 yields a model.
+
+## 2026-10-06 18:44 — P1 results, seeds 42 and 12 (seed 1 running)
+
+| run | finished (local) | minutes | EN AUC | mean AUC, 14 languages | GPU util. | commit |
+|---|---|--:|--:|--:|--:|---|
+| p1/heuristics | 2026-10-05 16:55 | 1.1 | - | - | - | f5b7a0a* |
+| p1/teacher/teacher_frozen/seed42 | 2026-10-05 17:03 | 7.2 | 0.5888 | 0.5748 | - | f5b7a0a* |
+| p1/teacher/teacher_frozen/seed1 | 2026-10-05 17:08 | 5.1 | 0.589 | 0.5747 | 16% | c5957fa* |
+| p1/teacher/teacher_linear/seed42 | 2026-10-05 17:08 | 5.1 | 0.6203 | 0.5923 | 16% | c5957fa* |
+| p1/nrms/nrms_glove/seed42 | 2026-10-06 11:17 | 23.9 | 0.6603 | - | 95% | d42e82b |
+| p1/nrms/nrms_reduced/seed42 | 2026-10-06 11:31 | 13.8 | 0.5943 | - | 89% | d42e82b |
+| p1/student/scratch_en/seed42 | 2026-10-06 11:48 | 17.4 | 0.6203 | 0.5254 | 80% | d42e82b |
+| p1/student/distill_frozen/seed42 | 2026-10-06 11:56 | 7.2 | 0.5675 | 0.5712 | 47% | d42e82b |
+| p1/student/distill_ft_en/seed42 | 2026-10-06 12:12 | 16.7 | 0.6284 | 0.5565 | 88% | d42e82b |
+| p1/student/distill_ft_mixed/seed42 | 2026-10-06 12:34 | 21.5 | 0.6139 | 0.5955 | 85% | d42e82b |
+| p1/student/scratch_mixed/seed42 | 2026-10-06 12:54 | 20.6 | 0.5791 | 0.557 | 85% | d42e82b |
+| p1/teacher/teacher_frozen/seed12 | 2026-10-06 12:58 | 3.9 | 0.589 | 0.5745 | 11% | d42e82b |
+| p1/teacher/teacher_linear/seed12 | 2026-10-06 13:02 | 3.4 | 0.6172 | 0.5906 | 22% | d42e82b |
+| p1/nrms/nrms_glove/seed12 | 2026-10-06 13:24 | 22.1 | 0.6662 | - | 93% | d42e82b |
+| p1/nrms/nrms_reduced/seed12 | 2026-10-06 13:36 | 12.1 | 0.6186 | - | 91% | d42e82b |
+| p1/student/scratch_en/seed12 | 2026-10-06 13:53 | 16.8 | 0.6154 | 0.5277 | 87% | d42e82b |
+| p1/student/distill_frozen/seed12 | 2026-10-06 14:01 | 7.7 | 0.5768 | 0.571 | 39% | d42e82b |
+| p1/student/distill_ft_en/seed12 | 2026-10-06 14:18 | 17.4 | 0.6252 | 0.5597 | 79% | d42e82b |
+| p1/student/distill_ft_mixed/seed12 | 2026-10-06 14:41 | 23.4 | 0.5975 | 0.5872 | 82% | d42e82b |
+| p1/student/scratch_mixed/seed12 | 2026-10-06 18:41 | 239.9 | 0.5805 | 0.5563 | 99% | d42e82b |
+
+20 runs, 486 min of compute (8.1 h). A commit marked * had uncommitted code changes when the process started.
+
+Reading of the table above (two seeds):
+- NRMS with the reference GloVe configuration: 0.660 and 0.666. The June "0.607" was the
+  reduced variant (0.594 and 0.619 under the new loop, 0.024 apart between seeds).
+- Reference byte-CNN 64-5-384, English clicks: scratch 0.620 / 0.615; distilled start
+  0.628 / 0.625 (+0.009 on average, smaller than the +0.033 of the June ablation, which used
+  fixed negatives and 10 epochs).
+- Cross-lingual (mean of 14 translations): scratch 0.525 / 0.528 (no transfer); distilled
+  start + English clicks 0.557 / 0.560; distilled start + clicks shown in a random language
+  0.596 / 0.587 at an English cost of 0.015 to 0.028. Frozen distilled student alone 0.571;
+  frozen teacher 0.575; teacher + linear map 0.592 / 0.591.
+- The last run (scratch_mixed, seed 12) took 240 min instead of 21: from about 16:30 another
+  process held 5.7 GB of the 8 GB GPU memory (samples: 100 % utilisation at 30 W, 50 °C),
+  so the training process ran from shared memory. Not a code problem; GPU sharing with the
+  Lane-Change work is to be avoided.
+- Launcher bug: `-Seeds 1,2` was bound to the single seed 12. Fixed (strings split on
+  commas); seed 1 started at 18:44 to complete three seeds.
