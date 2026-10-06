@@ -202,3 +202,21 @@ Repository `FeedWell-Edge`, branch `rebuild-on-feedwell-1.18`, commit 145b3b3, p
   `rebuild-on-feedwell-1.18` (FeedWell-Edge commit after 145b3b3), pushed; not built.
 - The Lane-Change project has priority on the machine and on the WSL µNAS environment;
   this project keeps to one training process and no builds without asking.
+
+## 2026-10-06 11:10 — Schedule (agreed order)
+
+| # | Step | Needs | Effort | Status |
+|---|---|---|---|---|
+| 0 | Audit + repair (cost model, seeds, artifacts, paper sync) | – | done | done 2026-10-05 |
+| 1 | P1 experiments: teacher bound, GloVe NRMS, scratch vs distilled, EN vs mixed-language clicks, 15 langs, 3 seeds | laptop GPU | ~7 h | running |
+| 2 | Paper update with P1 numbers; notebook re-run; course sync | 1 | 1 day | next |
+| 3 | Real µNAS search: byte-CNN in the lab µNAS fork (WSL), budgets for H7B3I-DK + F401RE, INT8 TFLite out; 120-grid exhaustive run as reference | 2; WSL free (Lane-Change first) | 2–3 days + search | waits |
+| 4 | Real quantized models: full-int8 TFLite (weights + activations, AUC from the exported file); 1-bit via Larq → LCE or CBin-NN | 3 | 2–3 days | |
+| 5 | Board numbers: ST Edge AI Developer Cloud (H7B3I-DK, F401RE) latency / flash / RAM; energy with the lab probe; 1-bit on a board | 4; ST login | 2 days | |
+| 6 | FeedWell-Edge: npm + Gradle build, install com.feedwelledge.app; encoder inside the app (same .tflite), title embedding + user vector; phone latency / battery | 4; laptop slot + phone | 1 week | branch ready |
+| 7 | Offline replay: MIND clicks in time order through the app learner | 2 | 2–3 days | optional for paper A |
+| 8 | Paper A final: encoder + µNAS × precision + boards; 6 pages if ApplePies 2027 | 2–5; authors; venue | 1 week | |
+| 9 | Houriyeh's thesis chapters | 2–6; her deadline | ? | |
+| 10 | Paper B: app + on-device adaptation (+ pilot) | 6, 7 | PhD Y2–Y3 | later |
+
+Critical path 1 → 2 → 3 → 4 → 5 → 8; the app track (6) runs beside it once step 4 yields a model.
