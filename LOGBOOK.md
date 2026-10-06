@@ -180,3 +180,15 @@ Repository `FeedWell-Edge`, branch `rebuild-on-feedwell-1.18`, commit 145b3b3, p
   started because the two training processes hold 8.6 GB and 5 GB of RAM were free.
 - Open: the application id is still `com.feedwell.app`, the same as the Play Store app. A
   separate id is needed to install both on one phone.
+
+## 2026-10-05 17:37 — Laptop froze under the two-process batch; restarted 2026-10-06 10:55
+
+- The GPU sampler shows 98 % utilisation, 83 to 86 °C and 87 to 97 W from 17:08 until its
+  last sample at 17:36:37; two training processes held 8.6 GB of RAM. The desktop stopped
+  responding at the lock screen and the machine was switched off.
+- Lost: NRMS-GloVe seed 42 and teacher-linear seed 1, both in their last epoch. Nothing on
+  disk was damaged: the four run records and the three stage files parse, the repository
+  was clean, FeedWell-Edge was already pushed.
+- Restart as ONE process at below-normal priority (`scripts/launch_p1.ps1`): seed 42 for
+  all stages first, then seeds 1 and 2. Finished runs are skipped. Expected: about 2.5 h
+  for seed 42, then about 5 h for the other two seeds. GPU sampler resumed.
