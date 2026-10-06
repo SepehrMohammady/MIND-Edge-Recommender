@@ -192,3 +192,13 @@ Repository `FeedWell-Edge`, branch `rebuild-on-feedwell-1.18`, commit 145b3b3, p
 - Restart as ONE process at below-normal priority (`scripts/launch_p1.ps1`): seed 42 for
   all stages first, then seeds 1 and 2. Finished runs are skipped. Expected: about 2.5 h
   for seed 42, then about 5 h for the other two seeds. GPU sampler resumed.
+
+## 2026-10-06 11:05 — Decisions (Sepehr) and FeedWell-Edge app identity
+
+- Offline replay of click logs is acceptable as the evaluation of the on-device learner;
+  the app may stay out of the first paper. Decide after the current experiments.
+- FeedWell-Edge installs as `com.feedwelledge.app` ("FeedWell Edge", scheme
+  `feedwelledge://`), next to the Play Store app. Done on branch
+  `rebuild-on-feedwell-1.18` (FeedWell-Edge commit after 145b3b3), pushed; not built.
+- The Lane-Change project has priority on the machine and on the WSL µNAS environment;
+  this project keeps to one training process and no builds without asking.
