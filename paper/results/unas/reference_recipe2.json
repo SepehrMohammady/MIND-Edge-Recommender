@@ -1,0 +1,53 @@
+[
+ {
+  "arch": "64-5-384",
+  "seed": 42,
+  "val_error": 0.6911534070968628,
+  "test_error": 0.6906140446662903,
+  "val_cos": 0.3088465929031372,
+  "params": 52544,
+  "peak_mem_bytes": 16384,
+  "model_size_bytes": 51264,
+  "macs": 3309568,
+  "epochs_max": 15,
+  "minutes": 2.01,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "64-5-384",
+  "seed": 1,
+  "val_error": 0.714232325553894,
+  "test_error": 0.7296653091907501,
+  "val_cos": 0.28576767444610596,
+  "params": 52544,
+  "peak_mem_bytes": 16384,
+  "model_size_bytes": 51264,
+  "macs": 3309568,
+  "epochs_max": 15,
+  "minutes": 1.49,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "64-5-384",
+  "seed": 2,
+  "val_error": 0.7192891836166382,
+  "test_error": 0.7180252969264984,
+  "val_cos": 0.2807108163833618,
+  "params": 52544,
+  "peak_mem_bytes": 16384,
+  "model_size_bytes": 51264,
+  "macs": 3309568,
+  "epochs_max": 15,
+  "minutes": 1.64,
+  "input_shape": [
+   128,
+   65
+  ]
+ }
+]
