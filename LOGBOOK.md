@@ -306,3 +306,26 @@ Reading of the table above (two seeds):
   check and layout fixes 12:30–12:37.
 - Open for Sepehr/Houriyeh: UniGe logo (drop `figures/logo_unige.png` into the thesis folder),
   final read-through, upload by the candidate.
+
+## 2026-10-07 15:13 — Integer model exported and measured; board benchmarks started on the ST Edge AI Developer Cloud
+
+- `scripts/deploy_int8.py` (run under the DIMIR venv, whose torch loads; the MIND venv's torch is blocked by
+  Smart App Control today): the trained 64-5-384 encoder (October programme, distilled start, English clicks,
+  seed 42) exported to ONNX with batch 1, then quantised with ONNX Runtime static quantisation (QDQ, per-channel
+  symmetric int8 weights, int8 activations, Conv/Gemm/MatMul; 512 training titles for calibration). Dev AUC
+  through the saved user encoder: PyTorch 0.6284, ONNX FP32 0.6283, ONNX INT8 QDQ 0.6223 (MRR 0.341 vs 0.344,
+  nDCG@10 0.385 vs 0.387); cosine between FP32 and INT8 news vectors 0.990 mean, 0.937 min. Files in
+  `artifacts/stedgeai/models` (FP32 275 KB, INT8 157 KB incl. the FP32 byte table); results in
+  `paper/results/deploy_int8.json`. Whole script 1.1 min.
+- `scripts/onnx_static.py`: batch-1 copies (and int32-input variants) of the June/quick ONNX exports of the
+  other two architectures, verified bit-identical to the originals with ONNX Runtime.
+- `scripts/stedgeai_cloud.py`: wrapper around ST's model-zoo client (vendored in DIMIR/Materials). Login with
+  the student account's password failed in the client's SSO step (my.st.com timing out, then a 200 without a
+  redirect); the token cached by the September DIMIR session on this laptop belongs to the same account and
+  still refreshes, so the runs use it. No password stored anywhere. Cloud tool: ST Edge AI Core 4.0.1-20581.
+- Local `stedgeai.exe` (C:/ST/STEdgeAI/4.0) is blocked by Smart App Control (DLL), so everything runs on the cloud.
+- analyze, Micro-NAS INT8 QDQ (int64 input accepted): 3,389,828 MACC, weights 120,260 B, activations 33,796 B,
+  flash total 169,638 B incl. 48,838 B kernel library, RAM 37,908 B.
+- Benchmarks queued (background, log `artifacts/stedgeai/benchmark.log`, results
+  `paper/results/stedgeai_cloud/`): the three architectures at FP32 and INT8 on STM32H7B3I-DK; the two small
+  ones also on NUCLEO-F401RE.

@@ -397,3 +397,47 @@ tex += ["\\end{longtable}"]
 (TAB / "data_manifest.tex").write_text("\n".join(tex) + "\n", encoding="utf-8")
 print("thesis additions written: memory_wall.png, binary_recovery.png, p1_seeds.tex, p1_runs.tex, reference_points.tex, "
       "june_matrix_full.tex, june_languages.tex, data_manifest.tex", "| manifest entries", len(files))
+
+# ---------------------------------------------------------------- board measurements (ST Edge AI Developer Cloud)
+runs_file = RES / "stedgeai_cloud" / "runs.jsonl"
+dep_file = RES / "deploy_int8.json"
+if runs_file.exists():
+    runs = [json.loads(l) for l in runs_file.read_text(encoding="utf-8").splitlines() if l.strip()]
+    bench = {}
+    for r in runs:
+        if r.get("cmd") == "benchmark" and r.get("duration_ms", -1) and r.get("duration_ms", -1) > 0:
+            bench[(r["model"], r["board"])] = r          # last successful run per model and board
+    MODELS = [("micro_nas_64-5-384_distilled_fp32_b1.onnx", "Micro-NAS 64-5-384", "FP32"),
+              ("micro_nas_64-5-384_distilled_int8qdq_b1.onnx", "Micro-NAS 64-5-384", "INT8"),
+              ("content_encoder_bin_unas_fp32_b1.onnx", "Binary-aware 96-2-384", "FP32"),
+              ("content_encoder_bin_unas_int8qdq_b1.onnx", "Binary-aware 96-2-384", "INT8"),
+              ("content_encoder_nas_fp32_b1.onnx", "NAS 256-4-384", "FP32"),
+              ("content_encoder_nas_int8qdq_b1.onnx", "NAS 256-4-384", "INT8")]
+    BOARDS = [("STM32H7B3I-DK", "H7B3I-DK"), ("NUCLEO-F401RE", "F401RE")]
+    tex = ["\\begin{tabular}{llrrrrrr}", "\\toprule",
+           "Architecture & Precision & Board & Weights (KB) & Flash total (KB) & RAM (KB) & MACC & Latency (ms)\\\\", "\\midrule"]
+    prev = None
+    for fname, arch, prec in MODELS:
+        for board, short in BOARDS:
+            r = bench.get((fname, board))
+            if r is None:
+                continue
+            if prev and arch != prev:
+                tex.append("\\midrule")
+            prev = arch
+            tex.append(f"{arch} & {prec} & {short} & {f(r['weights_bytes'] / 1024, 1)} & {f(r['rom_bytes'] / 1024, 1)} & "
+                       f"{f(r['ram_bytes'] / 1024, 1)} & {r['macc'] / 1e6:.2f}\\,M & {f(r['duration_ms'], 2)}\\\\")
+    tex += ["\\bottomrule", "\\end{tabular}"]
+    (TAB / "board_benchmarks.tex").write_text("\n".join(tex) + "\n", encoding="utf-8")
+    print("board table rows:", len(bench))
+if dep_file.exists():
+    D = json.loads(dep_file.read_text(encoding="utf-8"))
+    tex = ["\\begin{tabular}{lrcccc}", "\\toprule", "Model file & Size (KB) & AUC & MRR & nDCG@5 & nDCG@10\\\\", "\\midrule"]
+    for key, name in (("torch_fp32", "PyTorch, full precision (reference)"), ("onnx_fp32", "ONNX, full precision"),
+                      ("onnx_int8qdq", "ONNX, 8-bit QDQ (integer kernels)")):
+        m = D[key]
+        size = f(D["files"][key]["bytes"] / 1024, 1) if key in D["files"] else "--"
+        tex.append(f"{name} & {size} & {f(m['auc'])} & {f(m['mrr'])} & {f(m['ndcg@5'])} & {f(m['ndcg@10'])}\\\\")
+    tex += ["\\bottomrule", "\\end{tabular}"]
+    (TAB / "deploy_int8.tex").write_text("\n".join(tex) + "\n", encoding="utf-8")
+    print("deploy table written; cosine", D["cosine_fp32_vs_int8"])
