@@ -203,10 +203,35 @@ if reduced:
     st = reduced[0]["settings"]
     expect(f"{f(100 * st['embedding_params'] / st['params'], 0)}\\% of its {f(st['params'] / 1e6, 2)} million",
            "reduced NRMS parameters")
-    expect(f"the table, {f(st['size_mb_fp32'], 0)}\,MB)", "reduced NRMS size")
+    expect(f"the table, {f(st['size_mb_fp32'], 0)}\\,MB)", "reduced NRMS size")
 else:
     notes.append("reduced-NRMS parameter count (92%, 7.08 M, 27 MB) has no result file yet; "
                  "it is checked once p1_nrms.json holds an nrms_reduced run")
+
+# deployed integer file and board measurements (scripts/deploy_boards.py, scripts/stedgeai_cloud.py)
+dep_file, runs_file = RES / "deploy_int8.json", RES / "stedgeai_cloud" / "runs.jsonl"
+if dep_file.exists() and runs_file.exists():
+    dep = load("deploy_int8.json")
+    bench = {}
+    for line in runs_file.read_text(encoding="utf-8").splitlines():
+        r = json.loads(line)
+        if r.get("cmd") == "benchmark" and "_body_" in r.get("model", "") and (r.get("duration_ms") or -1) > 0:
+            bench[(r["model"], r["board"])] = r
+    h8 = bench[("micro_nas_64-5-384_body_int8qdq.onnx", "STM32H7B3I-DK")]
+    h32 = bench[("micro_nas_64-5-384_body_fp32.onnx", "STM32H7B3I-DK")]
+    f8 = bench[("micro_nas_64-5-384_body_int8qdq.onnx", "NUCLEO-F401RE")]
+    f32 = bench[("micro_nas_64-5-384_body_fp32.onnx", "NUCLEO-F401RE")]
+    expect(f"scores {f(dep['onnx_int8qdq']['auc'], 3)} ({f(dep['onnx_fp32']['auc'], 3)} at full precision)", "abstract, integer file")
+    expect(f"scores {f(dep['onnx_int8qdq']['auc'], 3)} AUC against {f(dep['onnx_fp32']['auc'], 3)}", "results, integer file")
+    expect(f"runs in {f(h8['duration_ms'], 1)}\\,ms per title on an STM32H7B3I-DK", "H7 latency")
+    expect(f"and {f(f8['duration_ms'], 0)}\\,ms on a NUCLEO-F401RE", "F401 latency")
+    expect(f"{f(h32['duration_ms'] / h8['duration_ms'], 1)} times faster than at full precision ({f(h32['duration_ms'], 1)}\\,ms)", "H7 speed-up")
+    expect(f"with {f(h8['weights_bytes'] / 1024, 1)}\\,KB of weights, {f(h8['rom_bytes'] / 1024, 1)}\\,KB of flash", "H7 flash")
+    expect(f"and {f(h8['ram_bytes'] / 1024, 1)}\\,KB of RAM, plus the {f(dep['byte_table_bytes'] / 1024, 1)}\\,KB byte table", "H7 RAM, table")
+    expect(f"takes {f(f8['duration_ms'], 0)}\\,ms, no faster than full precision there ({f(f32['duration_ms'], 0)}\\,ms)", "F401 comparison")
+    expect(f"costs {Decimal(f(dep['onnx_fp32']['auc'], 3)) - Decimal(f(dep['onnx_int8qdq']['auc'], 3))} AUC", "integer-only loss")
+else:
+    notes.append("board results not present; deploy and board sentences unchecked")
 
 for line in notes:
     print("note:", line)

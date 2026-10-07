@@ -101,8 +101,33 @@ def main():
             else:
                 for board in sys.argv[3:]:
                     t1 = time.time()
-                    res = ai.benchmark(CliParameters(model=name), board_name=board, timeout=2500)
+                    try:
+                        res = ai.benchmark(CliParameters(model=name), board_name=board, timeout=2500)
+                    except Exception as e:
+                        # keep the server's own account of the failed run next to the results
+                        raw = None
+                        try:
+                            svc = ai.backend.benchmark_service
+                            bid = svc.trigger_benchmark(CliParameters(model=name), board, ai.backend.version)
+                            for _ in range(600):
+                                raw = svc._get_run(bid)
+                                if isinstance(raw, dict) and raw.get("state", "").lower() in ("done", "error"):
+                                    break
+                                time.sleep(2)
+                        except Exception as e2:
+                            raw = {"debug_error": str(e2)}
+                        (OUT / f"{path.stem}__{board}__failed.json").write_text(json.dumps(jsonable(raw), indent=1), encoding="utf-8")
+                        log({"when": time.strftime("%Y-%m-%dT%H:%M:%S"), "cmd": cmd, "model": name, "tool": version,
+                             "board": board, "failed": str(e)[:300]})
+                        print(board, "FAILED:", str(e)[:300])
+                        if isinstance(raw, dict):
+                            print("server state:", raw.get("state"), "| message:", str(raw.get("message", ""))[:500])
+                            for k in ("error", "errors", "log", "logs", "stderr", "report"):
+                                if raw.get(k):
+                                    print(f"server {k}:", str(raw.get(k))[:1500])
+                        continue
                     s = summary_benchmark(res)
+                    s["board"] = board                     # the client reports an empty device name
                     (OUT / f"{path.stem}__{board}.json").write_text(json.dumps(jsonable(res), indent=1), encoding="utf-8")
                     log({"when": time.strftime("%Y-%m-%dT%H:%M:%S"), "cmd": cmd, "model": name, "tool": version,
                          "minutes": round((time.time() - t1) / 60, 2), **s})
