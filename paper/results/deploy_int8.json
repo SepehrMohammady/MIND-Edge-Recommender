@@ -1,0 +1,45 @@
+{
+ "checkpoint": "artifacts\\runs\\p1\\distill_ft_en_seed42.pt",
+ "calibration_titles": 512,
+ "files": {
+  "onnx_fp32": {
+   "path": "artifacts\\stedgeai\\models\\micro_nas_64-5-384_distilled_fp32_b1.onnx",
+   "bytes": 275251
+  },
+  "onnx_int8qdq": {
+   "path": "artifacts\\stedgeai\\models\\micro_nas_64-5-384_distilled_int8qdq_b1.onnx",
+   "bytes": 157105
+  }
+ },
+ "torch_fp32": {
+  "auc": 0.6283595853247713,
+  "mrr": 0.3442358084955293,
+  "ndcg@5": 0.3227289201717627,
+  "ndcg@10": 0.386577665005164,
+  "n_impressions": 73152
+ },
+ "onnx_fp32": {
+  "auc": 0.6283328909824281,
+  "mrr": 0.344261305895091,
+  "ndcg@5": 0.3227458257220629,
+  "ndcg@10": 0.3865942100075012,
+  "n_impressions": 73152,
+  "encode_minutes": 0.29
+ },
+ "onnx_int8qdq": {
+  "auc": 0.6222637326170727,
+  "mrr": 0.3412628703250922,
+  "ndcg@5": 0.3208304064816399,
+  "ndcg@10": 0.38457669096502467,
+  "n_impressions": 73152,
+  "encode_minutes": 0.25
+ },
+ "cosine_fp32_vs_int8": {
+  "mean": 0.989750862121582,
+  "min": 0.9369133710861206,
+  "p05": 0.9802679419517517
+ },
+ "minutes": 1.06,
+ "torch": "2.11.0+cu128",
+ "onnxruntime": "1.27.0"
+}

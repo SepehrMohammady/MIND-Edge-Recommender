@@ -1,0 +1,1 @@
+{"when": "2026-10-07T15:11:56", "cmd": "analyze", "model": "micro_nas_64-5-384_distilled_int8qdq_b1.onnx", "tool": "4.0.1-20581 7ed50de05", "minutes": 0.16, "macc": 3389828, "weights_bytes": 120260, "activations_bytes": 33796, "rom_bytes": 169638, "ram_bytes": 37908, "io_bytes": 0, "library_flash_bytes": 48838, "library_ram_bytes": 4112, "date": "2026-10-07T13:11:52+0000"}
