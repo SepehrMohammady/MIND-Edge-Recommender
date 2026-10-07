@@ -30,6 +30,8 @@ setup() {
   cp "$REPO/unas/mind_config.py" "$FORK/configs/mind_config.py"
   cp "$REPO/unas/cnn1d_gap.py" "$FORK/configs/cnn1d_gap.py"
   cp "$REPO/unas/safe_saver.py" "$FORK/configs/safe_saver.py"
+  # fresh trainer from the shared fork (read only), then the MIND patch
+  cp "$FORK_SRC/uNAS/model_trainer.py" "$FORK/uNAS/model_trainer.py"
   python3 "$REPO/unas/patch_trainer.py" "$FORK/uNAS/model_trainer.py"
   grep -q "from .mind_dataset import MIND_Embedding_Dataset" "$FORK/dataset/__init__.py" \
     || printf '\nfrom .mind_dataset import MIND_Embedding_Dataset\n' >> "$FORK/dataset/__init__.py"

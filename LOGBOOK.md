@@ -422,3 +422,17 @@ Critical path: 3, 4, 5, then 8. Step 6 can start now, since the integer encoder 
   None of the three fits either MAC budget. Error bound = 1 - 0.343 = 0.657.
 - Queue (`unas/run_queue.sh`): H7 search, F401 search (150 candidates each, population 40, sample 12,
   one worker), harvests, then the 30-architecture grid of the hand-designed family. Estimate 11-12 h.
+
+## 2026-10-07 17:45 — First H7 search stopped (wrong metric in the Ray worker); trainer patch v2; queue relaunched
+
+- 17:35 the queue started; by 17:41 rescoring saved candidates on the CPU showed the logged numbers were
+  wrong: candidate 1 logged validation and test cosine 0.2659 / 0.2659, its saved model scores 0.2706 / 0.2736.
+  Cause: in the Ray worker `tf.keras` is the legacy Keras 2 package (tfmot imported first); the Keras 2 metric
+  object handed to the Keras 3 model was wrapped as a function whose running mean never resets, so it lagged
+  (0.005 on validation, 0.03 on training) and the test pass repeated it. The loss in the same log equals the
+  rescored cosine. In the single-process reference runs the metric equalled the loss, so they stay valid.
+- Fix (`unas/patch_trainer.py` v2): Keras 3 loss and metric objects; val_error = 1 + min(val_loss), test_error
+  = 1 + test loss; early stopping on val_loss; the patch is applied to a fresh copy of the shared fork's trainer.
+  Smoke search (3 candidates, 6 epochs): metric = loss in the worker, test errors differ from validation ones.
+- The stopped run is kept as `~/uNAS_mind/artifacts/mind_h7_flawed_metric` and not used.
+- 17:45 queue relaunched (H7, F401, harvests, grid), selection watcher relaunched after it.

@@ -55,9 +55,11 @@ def training_config(dataset, epochs=None):
     # The learning rate is annealed after epoch 5: with a constant rate the validation cosine of one
     # model moved by +-0.04 between epochs and by 0.028 between seeds (second recipe), so the best
     # epoch's score was noisy.
+    # Early stopping watches val_loss (= minus the validation mean cosine), the quantity the fitness
+    # uses (unas/patch_trainer.py explains why the metric is not used).
     cbs = lambda: [
         keras.callbacks.LearningRateScheduler(lr_schedule),
-        keras.callbacks.EarlyStopping(monitor="val_cos", mode="max", patience=PATIENCE, min_delta=0.002,
+        keras.callbacks.EarlyStopping(monitor="val_loss", mode="min", patience=PATIENCE, min_delta=0.002,
                                       restore_best_weights=True, start_from_epoch=START_STOPPING),
         keras.callbacks.TerminateOnNaN(),
     ]
