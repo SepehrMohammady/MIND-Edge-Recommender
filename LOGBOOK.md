@@ -396,3 +396,29 @@ Reading of the table above (two seeds):
 | 10 | Paper B: app and on-device adaptation, with pilot | 6, 7; days of real use | PhD Y2–Y3 | later; app behavioural results go here |
 
 Critical path: 3, 4, 5, then 8. Step 6 can start now, since the integer encoder from step 4 exists.
+
+## 2026-10-07 17:34 — Step 3 started: µNAS search of the encoder in the lab fork
+
+- Boundaries checked at 17:00: GPU idle, WSL stopped (no Lane-Change job running), 936 GB free.
+  The shared fork `~/uNAS` carries the Lane-Change-MCU patches and configs, so the search runs in a
+  copy, `~/uNAS_mind`; `git status` of the shared fork is unchanged after setup. Venv `~/dmir_nas`
+  (TF 2.21, Keras 3.12, GPU visible) used as it is.
+- PyTorch was blocked again in the MIND venv at 17:04 (Windows application control, `shm.dll`), although
+  Smart App Control is reported off. The byte table was extracted with the DIMIR venv's torch and the
+  export made torch-free (`scripts/unas_export_data.py`).
+- Adapter in `unas/` (README there): input = 128 byte ids through the distilled student's fixed byte
+  table plus a padding-mask channel (128, 65); target = teacher anchor of the English title (384-d);
+  rows in all 15 languages; fitness = 1 - validation mean cosine plus the fork's faithful costs; one
+  search per board (H7: 256 KiB, 128 KiB, 2 M MACs; F401: 128 KiB, 48 KiB, 1 M MACs).
+- Training recipe, three attempts on the June winners in the fork's space:
+
+  | recipe | rows | epochs | 64-5-384 val cos, seeds 42/1/2 | note |
+  |---|--:|---|---|---|
+  | 1 | 32,000 | 10, patience 3 | 0.170 / 0.178 / 0.170 | best epoch = epoch 1 (BatchNorm lag); rejected |
+  | 2 | 96,000 | 15, stop from 5 | 0.309 / 0.286 / 0.281 | val moves +-0.04 per epoch; rejected |
+  | 3 | 96,000 | 15, lr 1e-3 then x0.7/epoch | 0.345 / 0.342 / 0.343 | search recipe, ~2.2 min per model |
+
+  Recipe 3, other June winners: 256-4-384 0.478 (374 KiB, 36.2 M MACs, 6.3 min); 96-2-384 0.330.
+  None of the three fits either MAC budget. Error bound = 1 - 0.343 = 0.657.
+- Queue (`unas/run_queue.sh`): H7 search, F401 search (150 candidates each, population 40, sample 12,
+  one worker), harvests, then the 30-architecture grid of the hand-designed family. Estimate 11-12 h.

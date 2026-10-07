@@ -1,0 +1,87 @@
+[
+ {
+  "arch": "64-5-384",
+  "seed": 42,
+  "val_error": 0.6551785469055176,
+  "test_error": 0.6548216044902802,
+  "val_cos": 0.3448214530944824,
+  "params": 52544,
+  "peak_mem_bytes": 16384,
+  "model_size_bytes": 51264,
+  "macs": 3309568,
+  "epochs_max": 15,
+  "minutes": 2.28,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "64-5-384",
+  "seed": 1,
+  "val_error": 0.6583357155323029,
+  "test_error": 0.6551514863967896,
+  "val_cos": 0.34166428446769714,
+  "params": 52544,
+  "peak_mem_bytes": 16384,
+  "model_size_bytes": 51264,
+  "macs": 3309568,
+  "epochs_max": 15,
+  "minutes": 2.19,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "64-5-384",
+  "seed": 2,
+  "val_error": 0.6571090221405029,
+  "test_error": 0.6532590985298157,
+  "val_cos": 0.34289097785949707,
+  "params": 52544,
+  "peak_mem_bytes": 16384,
+  "model_size_bytes": 51264,
+  "macs": 3309568,
+  "epochs_max": 15,
+  "minutes": 2.2,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "256-4-384",
+  "seed": 42,
+  "val_error": 0.521973043680191,
+  "test_error": 0.5206402540206909,
+  "val_cos": 0.47802695631980896,
+  "params": 386944,
+  "peak_mem_bytes": 65536,
+  "model_size_bytes": 382848,
+  "macs": 36208640,
+  "epochs_max": 15,
+  "minutes": 6.29,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "96-2-384",
+  "seed": 42,
+  "val_error": 0.6700375378131866,
+  "test_error": 0.6671664118766785,
+  "val_cos": 0.32996246218681335,
+  "params": 63744,
+  "peak_mem_bytes": 24576,
+  "model_size_bytes": 62976,
+  "macs": 3280896,
+  "epochs_max": 15,
+  "minutes": 2.19,
+  "input_shape": [
+   128,
+   65
+  ]
+ }
+]
