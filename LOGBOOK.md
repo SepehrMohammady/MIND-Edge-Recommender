@@ -378,3 +378,21 @@ Reading of the table above (two seeds):
   89 pages, no errors, `check_thesis_numbers` 0 failures. PDF: `H.E. Thesis/Thesis_Emadoleslami_2026-10-07.pdf`.
 - Paper: TODOs for the integer export and the board numbers replaced by the measured values (energy and phone
   stay TODO); `check_numbers.py` extended and passes; 9 pages.
+
+## 2026-10-07 16:58 — Schedule, updated
+
+| # | Step | Needs | Effort | Status |
+|---|---|---|---|---|
+| 0 | Audit and repair (cost model, seeds, artifacts, paper sync) | – | done | done 10-05 |
+| 1 | P1 experiments: teacher bound, GloVe NRMS, scratch vs distilled, EN vs mixed-language clicks, 15 languages x 3 seeds | laptop GPU | 10.2 h of runs | done 10-06 |
+| 2 | Paper update with P1 numbers, notebook re-run, course sync | 1 | 1 day | done 10-06; course again 10-07 |
+| 3 | Real µNAS search in the lab fork (WSL), budgets for H7B3I-DK and F401RE, MAC bound with the corrected counter; 120-grid exhaustive run as reference; matrix rerun over 3 seeds | WSL slot | 2–3 days + search | next |
+| 4 | Integer and 1-bit models, accuracy from the exported file | 3 | 2–3 days | INT8 done for 64-5-384 (0.622 vs 0.628, 10-07); µNAS winners and 1-bit open |
+| 5 | Board numbers: latency, flash, RAM; energy with the lab probe; 1-bit on a board | 4; ST session; probe | 2 days | latency/flash/RAM done 10-07 (H7 31.19 ms, F401 449.64 ms); energy and 1-bit open |
+| 6 | FeedWell-Edge: build, install, encoder inside the app, phone latency and battery | 4; phone | 1 week | build, install, smoke test done 10-07; encoder in app and phone timing open |
+| 7 | Offline replay: MIND clicks in time order through the app learner | 2 | 2–3 days | not started; optional for paper A |
+| 8 | Paper A final | 3–5; authors; venue | 1 week | draft current (9 pp, P1 and board numbers); final after 3–5, 6 pp if ApplePies 2027 |
+| 9 | Houriyeh's thesis | – | done | delivered 10-07 (89 pp); her read-through and upload, deadline 10-08 |
+| 10 | Paper B: app and on-device adaptation, with pilot | 6, 7; days of real use | PhD Y2–Y3 | later; app behavioural results go here |
+
+Critical path: 3, 4, 5, then 8. Step 6 can start now, since the integer encoder from step 4 exists.
