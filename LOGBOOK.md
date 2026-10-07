@@ -329,3 +329,52 @@ Reading of the table above (two seeds):
 - Benchmarks queued (background, log `artifacts/stedgeai/benchmark.log`, results
   `paper/results/stedgeai_cloud/`): the three architectures at FP32 and INT8 on STM32H7B3I-DK; the two small
   ones also on NUCLEO-F401RE.
+
+## 2026-10-07 16:16 — Board measurements, integer export, app smoke test, thesis and paper updated
+
+- Smart App Control was turned off by Sepehr this afternoon; torch loads again in the MIND venv
+  (the integer export ran under the DIMIR venv before that).
+- Integer export (`scripts/deploy_boards.py`, replaces deploy_int8.py and onnx_static.py, 0.8 min):
+  64-5-384 encoder, October checkpoint (distilled start, English clicks, seed 42), exported without the
+  byte-table lookup (caller gathers the 257 x 64 table, 65,792 B, and passes embedded sequence + mask),
+  then ONNX Runtime static quantisation to QDQ int8 (per-channel weights, int8 activations, 512 training
+  titles). Dev AUC: PyTorch 0.6284, ONNX FP32 0.6283, ONNX INT8 0.6223 (MRR 0.341, nDCG@10 0.385);
+  FP32/INT8 news-vector cosine mean 0.990, min 0.937. Same files for 256-4-384 and 96-2-384 with random
+  weights (latency and footprint do not depend on the weight values).
+- Board runs, ST Edge AI Developer Cloud, Core 4.0.1-20581 (`scripts/stedgeai_cloud.py`), 15:38-16:03:
+
+  | file | board | ms | weights KB | flash KB | RAM KB |
+  |---|---|--:|--:|--:|--:|
+  | 64-5-384 INT8 | H7B3I-DK | 31.19 | 53.2 | 77.7 | 49.4 |
+  | 64-5-384 INT8 | F401RE | 449.64 | 53.2 | 78.0 | 44.5 |
+  | 64-5-384 FP32 | H7B3I-DK | 76.99 | 200.0 | 210.0 | 70.9 |
+  | 64-5-384 FP32 | F401RE | 444.08 | 200.0 | 210.2 | 65.7 |
+  | 96-2-384 INT8 | H7B3I-DK | 58.57 | 63.9 | 84.7 | 67.6 |
+  | 96-2-384 INT8 | F401RE | 431.30 | 63.9 | 84.8 | 59.3 |
+  | 96-2-384 FP32 | H7B3I-DK | 84.14 | 245.6 | 254.6 | 84.9 |
+  | 96-2-384 FP32 | F401RE | 397.22 | 245.6 | 254.8 | 65.7 |
+  | 256-4-384 INT8 | H7B3I-DK | 649.41 | 381.5 | 411.3 | 188.5 |
+  | 256-4-384 FP32 | H7B3I-DK | 837.37 | 1494.5 | 1504.2 | 180.7 |
+
+  On-target check of the generated C code against the reference: relative error 0 (INT8), < 1e-5 (FP32).
+  The 256-4-384 model needs more than the F401RE's 96 KB of RAM. INT8 is 2.5x faster than FP32 on the
+  Cortex-M7 for 64-5-384, no faster on the Cortex-M4. No energy (the cloud reports time and memory only).
+- Two earlier deployment variants were dropped: int64 byte ids (the on-target validation feeds random floats,
+  the Gather got out-of-range indices) and float ids rescaled inside the graph (ran: 34.8 / 189 ms, but the
+  on-target check failed, relative error 0.48 INT8 / 0.43 FP32). Their reports are kept in
+  `paper/results/stedgeai_cloud/` (`*_fid_*`, `*__failed.json`).
+- Cloud access: the password given today failed in the client's scripted SSO step (my.st.com timing out);
+  the session token cached in the home directory from September (same account) refreshes and was used.
+  The password is not stored anywhere; account ids were stripped from the saved reports.
+- App smoke test, FeedWell Edge 2.1.0 on the test phone, 16:00-16:08: feed added through the URL field
+  (BBC News), articles listed, preview and reader opened and scrolled, Settings shows local learning on;
+  after a refresh the 7-day local summary counts the test events. The engine's event hooks are identical to
+  the pre-rebuild code. Test data stays on the phone and is not used anywhere. Behavioural results need days of
+  real use; for the thesis only the current state is described, the app study is for the paper.
+- Thesis (`H.E. Thesis/src`): Figures 1.1, 2.1, 2.9, 4.1 and the overview diagram redrawn without overlaps;
+  column widths of Tables 1.2, 1.1, 2.3, 3.1, 3.2 and others fixed; UniGe vertical colour logo on the title page
+  (SVG converted to PDF with svglib); second style pass; new Section 5.8 "Measurements on the Boards" with two
+  tables and a figure; abstract, contributions, threats, limitations, conclusion and future work updated.
+  89 pages, no errors, `check_thesis_numbers` 0 failures. PDF: `H.E. Thesis/Thesis_Emadoleslami_2026-10-07.pdf`.
+- Paper: TODOs for the integer export and the board numbers replaced by the measured values (energy and phone
+  stay TODO); `check_numbers.py` extended and passes; 9 pages.

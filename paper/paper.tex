@@ -47,8 +47,11 @@ from a frozen multilingual sentence-transformer adds 0.011 AUC (0.629 against
 over fourteen translations from 0.557 to 0.589 at a cost of 0.020 in English. A
 naive one-bit model stays near chance (0.521); ReActNet blocks started from the
 distilled weights bring it to 0.572 at 194\,KB. Seeded reruns differ from the
-matrix run by up to 0.02 AUC, so smaller gaps are not resolved. \TODO{latency and
-energy on STM32 boards and an Android phone}. Code and artefacts are released.
+matrix run by up to 0.02 AUC, so smaller gaps are not resolved. Exported as an
+integer-only file, the distilled constrained encoder scores 0.622 (0.628 at full
+precision) and runs in 31.2\,ms per title on an STM32H7B3I-DK and 450\,ms on a
+NUCLEO-F401RE. \TODO{energy on the boards and timing on an Android phone}. Code
+and artefacts are released.
 \keywords{Edge AI \and Neural Architecture Search \and Binarized Neural Networks
 \and Multilingual News Recommendation \and TinyML \and Knowledge Distillation}
 \end{abstract}
@@ -191,10 +194,11 @@ STM32H7 holds. A bound of 2\,M multiply-accumulates was also set, but the counte
 of that run skipped the quantised layers, so both constrained winners (3.29\,M and
 3.26\,M) exceed it; \TODO{rerun the constrained search with the corrected count}.
 Everything runs on one laptop: an Intel Core Ultra~9 275HX with an eight-gigabyte
-RTX~5070 Laptop GPU and 32\,GB of memory, PyTorch~2.12 on CUDA~13. The intended
-targets are STM32 microcontrollers and an Android phone;
-\TODO{board and phone measurements}, and this draft reports laptop timings and
-analytical estimates only. Negative sampling and the search are seeded; network
+RTX~5070 Laptop GPU and 32\,GB of memory, PyTorch~2.12 on CUDA~13. The targets
+are STM32 microcontrollers and an Android phone. Board latency, flash and RAM
+come from the ST Edge AI Developer Cloud (ST Edge AI Core 4.0.1) on an
+STM32H7B3I-DK (Cortex-M7, 280\,MHz) and a NUCLEO-F401RE (Cortex-M4, 84\,MHz);
+\TODO{phone timing and board energy}. Negative sampling and the search are seeded; network
 initialisation in the matrix run was not, which the seeded reruns of
 Sect.~\ref{sec:results} quantify. The downloaded data is pinned by checksum, and
 the code, notebook, result files and a dependency lock are
@@ -300,15 +304,27 @@ accuracy-versus-footprint view (Fig.~\ref{fig:pareto}) eight-bit Micro-NAS (0.61
 204\,KB, 3.2\uJ) has the lowest cost at the accuracy of the reduced NRMS, while
 unconstrained eight-bit leads on accuracy (0.647, 790\,KB).
 
+For the boards, the trained constrained encoder (distilled start, English clicks)
+was exported to ONNX without its byte-table lookup, which the caller performs, and
+quantised to an 8-bit QDQ model with ONNX Runtime (per-channel 8-bit weights,
+8-bit activations, 512 training titles for calibration). The integer file scores
+0.622 AUC against 0.628 for the same weights at full precision. On the
+STM32H7B3I-DK it runs in 31.2\,ms per title, 2.5 times faster than at full
+precision (77.0\,ms), with 53.2\,KB of weights, 77.7\,KB of flash including the
+runtime and 49.4\,KB of RAM, plus the 64.3\,KB byte table; on the NUCLEO-F401RE it
+takes 450\,ms, no faster than full precision there (444\,ms). The board's own check
+of the generated code against the reference model gave zero error.
+
 \section{Limitations}
-The main gap is hardware. We timed the full-precision models on the laptop and
-estimated size, RAM and energy from parameter and operation counts, but ran
-nothing on a microcontroller or a phone. The quantisation is simulated on weights
-only: activations, the byte embedding and the outer layers stay in floating point,
-so the eight-bit and one-bit rows may overstate accuracy and their sizes are not
-those of an integer-only file; \TODO{full-integer export, with accuracy measured
-from the exported model}. Eight-bit inference has a direct path to STM32 boards
-through quantised ONNX or TFLite models and ST Edge AI. The one-bit path needs a
+The main gap is hardware. We timed the matrix models on the laptop and estimated
+size, RAM and energy from parameter and operation counts; only the deployed
+encoders ran on the boards, and nothing ran on a phone. In the matrix the
+quantisation is simulated on weights only: activations, the byte embedding and the
+outer layers stay in floating point, so the eight-bit and one-bit rows may
+overstate accuracy and their sizes are not those of an integer-only file; for the
+constrained encoder the integer-only export costs 0.006 AUC, and the matrix is to
+be rerun with integer exports. Eight-bit inference runs on STM32 boards through
+quantised ONNX models and ST Edge AI, as measured above. The one-bit path needs a
 binary runtime such as CBin-NN~\cite{sakr2024cbinnn} or Larq Compute
 Engine~\cite{bannink2021lce}, and the Cortex-M7 has no popcount instruction, so we
 make no speed claim for binary and treat it only as a way to save space. The
@@ -327,11 +343,12 @@ touches no personal data beyond the public logs, and the translations are
 machine-generated. Replacing the word-embedding table with a byte-level encoder
 removes the largest item of a news recommender's storage and gives every language
 the same 256-row vocabulary. With eight-bit weights the constrained encoder
-reaches 0.610 AUC at an estimated 204\,KB; the one-bit model, started from
+reaches 0.610 AUC at an estimated 204\,KB, and as an integer-only file it runs in
+31.2\,ms per title on an STM32H7B3I-DK; the one-bit model, started from
 distilled weights, reaches 0.572 at 194\,KB; trained on clicks shown in a random
 language, the distilled byte-CNN reads fourteen languages at 0.589 AUC on average.
-What is still missing: \TODO{a full-integer model, board and phone measurements,
-and a one-bit runtime} --- that is where we take it next.
+What is still missing: \TODO{board energy, phone timing and a one-bit runtime}
+--- that is where we take it next.
 
 \bibliographystyle{splncs04}
 \bibliography{references}

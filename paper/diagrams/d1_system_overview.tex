@@ -8,20 +8,20 @@
   \node[data, right=of teacher] (anchors) {384-d anchors\\one per English title};
   % student
   \node[model, below=10mm of teacher] (student) {Byte-level char-CNN\\256-row vocabulary, 68\,k params};
-  \node[model, right=of student] (rec) {Recommender\\user encoder + dot product};
+  \node[model, right=18mm of student] (rec) {Recommender\\user encoder + dot product};
   \node[data, right=of rec] (clicks) {MIND click logs\\1 clicked + 4 shown};
   \draw[arr] (clicks) -- node[lbl, above] {train} (rec);
   % precision
   \node[model, below=10mm of student] (search) {Architecture search\\3 arms: NAS / Micro-NAS / binary-aware};
-  \node[model, right=of search] (quant) {Precision\\FP32 / INT8 / 1-bit};
+  \node[model, right=16mm of search] (quant) {Precision\\FP32 / INT8 / 1-bit};
   % outputs
-  \node[outp, below=10mm of search] (export) {Export\\ONNX (FP32), TFLite INT8 (planned)};
-  \node[outp, right=of export] (targets) {Targets\\STM32H7 / F4 boards, Android (FeedWell-Edge)};
+  \node[outp, below=10mm of search] (export) {Export\\ONNX, FP32 and 8-bit QDQ};
+  \node[outp, right=of export] (targets) {Targets\\STM32H7B3I-DK and NUCLEO-F401RE (measured),\\Android phone (FeedWell-Edge)};
   % arrows
-  \draw[arr] (mind) -- node[lbl, right] {titles} (teacher);
+  \draw[arr] (mind) -- node[lbl, right, pos=0.22] {titles} (teacher);
   \draw[arr] (teacher) -- node[lbl, above] {embed} (anchors);
   \draw[arr] (anchors.south) -- ++(0,-4mm) -| node[lbl, below, pos=0.25] {distil (cosine, Matryoshka)} (student.north);
-  \draw[arr] (xmind) -- node[lbl, right] {translations share\\the English anchor} (anchors);
+  \draw[arr] (xmind) -- node[lbl, right, pos=0.3] {translations share\\the English anchor} (anchors);
   \draw[arr] (student) -- node[lbl, above] {news vectors} (rec);
   \draw[arr] (student) -- node[lbl, right] {candidates} (search);
   \draw[arr] (search) -- node[lbl, above] {per arm} (quant);

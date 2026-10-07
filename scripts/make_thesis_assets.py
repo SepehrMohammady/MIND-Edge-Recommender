@@ -407,15 +407,15 @@ if runs_file.exists():
     for r in runs:
         if r.get("cmd") == "benchmark" and r.get("duration_ms", -1) and r.get("duration_ms", -1) > 0:
             bench[(r["model"], r["board"])] = r          # last successful run per model and board
-    MODELS = [("micro_nas_64-5-384_distilled_fp32_b1.onnx", "Micro-NAS 64-5-384", "FP32"),
-              ("micro_nas_64-5-384_distilled_int8qdq_b1.onnx", "Micro-NAS 64-5-384", "INT8"),
-              ("content_encoder_bin_unas_fp32_b1.onnx", "Binary-aware 96-2-384", "FP32"),
-              ("content_encoder_bin_unas_int8qdq_b1.onnx", "Binary-aware 96-2-384", "INT8"),
-              ("content_encoder_nas_fp32_b1.onnx", "NAS 256-4-384", "FP32"),
-              ("content_encoder_nas_int8qdq_b1.onnx", "NAS 256-4-384", "INT8")]
+    MODELS = [("micro_nas_64-5-384_body_fp32.onnx", "Micro-NAS 64-5-384", "FP32"),
+              ("micro_nas_64-5-384_body_int8qdq.onnx", "Micro-NAS 64-5-384", "INT8"),
+              ("bin_unas_96-2-384_body_fp32.onnx", "Binary-aware 96-2-384", "FP32"),
+              ("bin_unas_96-2-384_body_int8qdq.onnx", "Binary-aware 96-2-384", "INT8"),
+              ("nas_256-4-384_body_fp32.onnx", "NAS 256-4-384", "FP32"),
+              ("nas_256-4-384_body_int8qdq.onnx", "NAS 256-4-384", "INT8")]
     BOARDS = [("STM32H7B3I-DK", "H7B3I-DK"), ("NUCLEO-F401RE", "F401RE")]
     tex = ["\\begin{tabular}{llrrrrrr}", "\\toprule",
-           "Architecture & Precision & Board & Weights (KB) & Flash total (KB) & RAM (KB) & MACC & Latency (ms)\\\\", "\\midrule"]
+           "Architecture & Precision & Board & Weights (KB) & Flash total (KB) & RAM (KB) & MAC & Latency (ms)\\\\", "\\midrule"]
     prev = None
     for fname, arch, prec in MODELS:
         for board, short in BOARDS:
@@ -430,6 +430,36 @@ if runs_file.exists():
     tex += ["\\bottomrule", "\\end{tabular}"]
     (TAB / "board_benchmarks.tex").write_text("\n".join(tex) + "\n", encoding="utf-8")
     print("board table rows:", len(bench))
+
+    # F8: latency on the two boards, full precision against 8-bit, per architecture
+    ARCHS = [("Micro-NAS\n64-5-384", "micro_nas_64-5-384"), ("Binary-aware\n96-2-384", "bin_unas_96-2-384"),
+             ("NAS\n256-4-384", "nas_256-4-384")]
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.0), sharey=False)
+    for a, (board, title) in zip(axes, (("STM32H7B3I-DK", "STM32H7B3I-DK, Cortex-M7, 280 MHz"),
+                                        ("NUCLEO-F401RE", "NUCLEO-F401RE, Cortex-M4, 84 MHz"))):
+        xs = range(len(ARCHS))
+        for k, (prec, color, off) in enumerate((("fp32", C1, -0.19), ("int8qdq", C2, 0.19))):
+            for x, (_, stem) in zip(xs, ARCHS):
+                r = bench.get((f"{stem}_body_{prec}.onnx", board))
+                if r is None:
+                    if k == 0:
+                        a.text(x, 3, "does not fit\nin 96 KB RAM", ha="center", va="bottom", fontsize=7, color=MUTED)
+                    continue
+                a.bar(x + off, r["duration_ms"], width=0.36, color=color, zorder=3,
+                      label=("FP32" if prec == "fp32" else "INT8 (QDQ)") if x == 0 else None)
+                a.text(x + off, r["duration_ms"] * 1.08, f"{r['duration_ms']:.0f}", ha="center", va="bottom", fontsize=7)
+        a.set_yscale("log")
+        a.set_ylim(1, 3000)
+        a.set_xlim(-0.6, len(ARCHS) - 0.4)
+        a.set_xticks(list(xs))
+        a.set_xticklabels([n for n, _ in ARCHS], fontsize=7.5)
+        a.set_title(title, fontsize=8.5)
+        despine(a)
+    axes[0].set_ylabel("latency per title (ms, log)")
+    axes[0].legend(loc="upper left", frameon=False, fontsize=7.5)
+    fig.tight_layout()
+    fig.savefig(FIG / "board_latency.png", dpi=300, facecolor=SURFACE)
+    print("board latency figure written")
 if dep_file.exists():
     D = json.loads(dep_file.read_text(encoding="utf-8"))
     tex = ["\\begin{tabular}{lrcccc}", "\\toprule", "Model file & Size (KB) & AUC & MRR & nDCG@5 & nDCG@10\\\\", "\\midrule"]

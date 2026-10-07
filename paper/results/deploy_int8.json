@@ -1,14 +1,16 @@
 {
  "checkpoint": "artifacts\\runs\\p1\\distill_ft_en_seed42.pt",
+ "input": "embedded sequence (1, 64, 128) and padding mask (1, 1, 128); the 257 x 64 byte table (65,792 B) is applied by the caller",
+ "byte_table_bytes": 65792,
  "calibration_titles": 512,
  "files": {
   "onnx_fp32": {
-   "path": "artifacts\\stedgeai\\models\\micro_nas_64-5-384_distilled_fp32_b1.onnx",
-   "bytes": 275251
+   "path": "artifacts\\stedgeai\\models\\micro_nas_64-5-384_body_fp32.onnx",
+   "bytes": 208970
   },
   "onnx_int8qdq": {
-   "path": "artifacts\\stedgeai\\models\\micro_nas_64-5-384_distilled_int8qdq_b1.onnx",
-   "bytes": 157105
+   "path": "artifacts\\stedgeai\\models\\micro_nas_64-5-384_body_int8qdq.onnx",
+   "bytes": 90893
   }
  },
  "torch_fp32": {
@@ -24,7 +26,7 @@
   "ndcg@5": 0.3227458257220629,
   "ndcg@10": 0.3865942100075012,
   "n_impressions": 73152,
-  "encode_minutes": 0.29
+  "encode_minutes": 0.27
  },
  "onnx_int8qdq": {
   "auc": 0.6222637326170727,
@@ -32,14 +34,26 @@
   "ndcg@5": 0.3208304064816399,
   "ndcg@10": 0.38457669096502467,
   "n_impressions": 73152,
-  "encode_minutes": 0.25
+  "encode_minutes": 0.27
  },
  "cosine_fp32_vs_int8": {
   "mean": 0.989750862121582,
   "min": 0.9369133710861206,
   "p05": 0.9802679419517517
  },
- "minutes": 1.06,
+ "other_architectures": {
+  "nas_256-4-384": {
+   "fp32": "artifacts\\stedgeai\\models\\nas_256-4-384_body_fp32.onnx",
+   "int8qdq": "artifacts\\stedgeai\\models\\nas_256-4-384_body_int8qdq.onnx",
+   "weights": "random"
+  },
+  "bin_unas_96-2-384": {
+   "fp32": "artifacts\\stedgeai\\models\\bin_unas_96-2-384_body_fp32.onnx",
+   "int8qdq": "artifacts\\stedgeai\\models\\bin_unas_96-2-384_body_int8qdq.onnx",
+   "weights": "random"
+  }
+ },
+ "minutes": 0.84,
  "torch": "2.11.0+cu128",
  "onnxruntime": "1.27.0"
 }

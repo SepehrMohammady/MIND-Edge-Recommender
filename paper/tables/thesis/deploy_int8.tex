@@ -1,0 +1,9 @@
+\begin{tabular}{lrcccc}
+\toprule
+Model file & Size (KB) & AUC & MRR & nDCG@5 & nDCG@10\\
+\midrule
+PyTorch, full precision (reference) & -- & 0.628 & 0.344 & 0.323 & 0.387\\
+ONNX, full precision & 204.1 & 0.628 & 0.344 & 0.323 & 0.387\\
+ONNX, 8-bit QDQ (integer kernels) & 88.8 & 0.622 & 0.341 & 0.321 & 0.385\\
+\bottomrule
+\end{tabular}

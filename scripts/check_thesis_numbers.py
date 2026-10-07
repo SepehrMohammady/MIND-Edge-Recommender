@@ -188,6 +188,46 @@ for C, D, out in ((256, 4, 384), (64, 5, 384), (96, 2, 384)):
 expect(f"{q[64]}%", "quantisable share constrained")
 expect(f"{q[256]}%", "quantisable share unconstrained")
 
+# --- deployed integer file and board measurements (present once the deployment scripts have run)
+dep_path = RES / "deploy_int8.json"
+if dep_path.exists():
+    DEP = json.loads(dep_path.read_text(encoding="utf-8"))
+    expect(f(DEP["onnx_fp32"]["auc"]), "deployed fp32 AUC")
+    expect(f(DEP["onnx_int8qdq"]["auc"]), "deployed int8 AUC")
+    expect(dd(DEP["onnx_fp32"]["auc"], DEP["onnx_int8qdq"]["auc"]), "int8 loss")
+    expect(f(DEP["onnx_int8qdq"]["mrr"]), "deployed int8 MRR")
+    expect(f(DEP["onnx_int8qdq"]["ndcg@10"]), "deployed int8 nDCG@10")
+    expect(f(DEP["cosine_fp32_vs_int8"]["mean"], 2), "cosine mean")
+    expect(f(DEP["cosine_fp32_vs_int8"]["min"]), "cosine min")
+    expect(str(DEP["calibration_titles"]), "calibration titles")
+runs_path = RES / "stedgeai_cloud" / "runs.jsonl"
+if runs_path.exists():
+    bench = {}
+    for line in runs_path.read_text(encoding="utf-8").splitlines():
+        r = json.loads(line)
+        if r.get("cmd") == "benchmark" and "_body_" in r.get("model", "") and (r.get("duration_ms") or -1) > 0:
+            bench[(r["model"], r["board"])] = r
+    for (model, board), r in bench.items():
+        expect(f(r["duration_ms"], 2), f"latency {model} {board}")
+        expect(f(r["weights_bytes"] / 1024, 1), f"weights {model} {board}")
+        expect(f(r["ram_bytes"] / 1024, 1), f"ram {model} {board}")
+    m8h = bench[("micro_nas_64-5-384_body_int8qdq.onnx", "STM32H7B3I-DK")]
+    m32h = bench[("micro_nas_64-5-384_body_fp32.onnx", "STM32H7B3I-DK")]
+    m8f = bench[("micro_nas_64-5-384_body_int8qdq.onnx", "NUCLEO-F401RE")]
+    table_kb = DEP["byte_table_bytes"] / 1024
+    expect(f(table_kb, 1) + " KB", "byte table")
+    expect(f(m8h["rom_bytes"] / 1024, 1) + " KB", "flash image int8 H7")
+    expect(f(m8h["rom_bytes"] / 1024 + table_kb, 1) + " KB", "flash with table")
+    expect(f(m8h["cycles"] / 1e6, 2) + " million cycles", "cycles int8 H7")
+    expect(f(m8h["macc"] / 1e6, 2) + " million multiply-accumulates", "ST MAC count")
+    expect(f(m32h["duration_ms"] / m8h["duration_ms"], 1) + " times faster", "int8 speed-up H7")
+    for stem, label in (("bin_unas_96-2-384", "binary-aware"), ("nas_256-4-384", "unconstrained")):
+        sp = bench[(f"{stem}_body_fp32.onnx", "STM32H7B3I-DK")]["duration_ms"] / bench[(f"{stem}_body_int8qdq.onnx", "STM32H7B3I-DK")]["duration_ms"]
+        expect(f(sp, 1) + " times", f"int8 speed-up {label}")
+    expect(f(30 * m8h["duration_ms"] / 1000, 1) + " s on the H7", "feed of 30 on H7")
+    expect(f(30 * m8f["duration_ms"] / 1000, 1) + " s on the F401", "feed of 30 on F401")
+    expect(f(bench[("nas_256-4-384_body_int8qdq.onnx", "STM32H7B3I-DK")]["ram_bytes"] / 1024, 1) + " KB of working memory", "NAS working memory")
+
 print(f"{len(failures)} failures")
 for x in failures:
     print(" ", x)
