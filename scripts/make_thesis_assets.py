@@ -386,7 +386,7 @@ tex += ["\\midrule", "& mean of 14 & " + " & ".join(f(sum(r[k] for r in others) 
 # data manifest (appendix)
 man = json.loads(Path("docs/data_manifest.json").read_text(encoding="utf-8"))
 files = man.get("files", man)
-tex = ["\\begin{longtable}{p{4.6cm}p{9.9cm}}", "\\toprule", "File & SHA-256\\\\", "\\midrule", "\\endhead", "\\bottomrule", "\\endfoot"]
+tex = ["\\begin{longtable}{p{5.0cm}p{9.5cm}}", "\\toprule", "File & SHA-256\\\\", "\\midrule", "\\endhead", "\\bottomrule", "\\endfoot"]
 for k, v in files.items():
     if not isinstance(v, (str, dict)):
         continue
