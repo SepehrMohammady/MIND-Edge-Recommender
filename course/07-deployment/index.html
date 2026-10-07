@@ -25,7 +25,7 @@
 <header class="chapter-header">
   <div class="chapter-num">فصل ۷ از ۷</div>
   <h1>استقرار و اندازه‌گیری انرژی</h1>
-  <p class="subtitle">ONNX Export، اجرا روی Pi 5 و STM32H7، اندازه‌گیری مصرف انرژی</p>
+  <p class="subtitle">ONNX Export، اجرا روی بردهای STM32 و گوشی Android، اندازه‌گیری زمان، حافظه و انرژی</p>
   <div class="progress-wrap"><div class="progress-fill" style="width:100%"></div></div>
 </header>
 <div class="content">
@@ -54,7 +54,7 @@ content_encoder.onnx
  ┌────────────────────────────────┐
  │       ONNX Runtime             │
  ├──────────────┬─────────────────┤
- │ Windows/Linux│ aarch64 (Pi 5)  │
+ │ Windows/Linux│ Android (arm64) │
  │ CPUExecProv  │ CPUExecutionProv│
  └──────────────┴─────────────────┘</div>
 
@@ -123,14 +123,14 @@ titles = {
       <td><code>pynvml</code> — انرژی = (توان−idle) × زمان</td>
     </tr>
     <tr>
-      <td><strong>Raspberry Pi 5</strong><br>(CPU / ORT)</td>
-      <td>Wall-clock timing + INA219 sensor</td>
-      <td><code>onnxruntime</code> + سنسور فیزیکی</td>
+      <td><strong>گوشی Android</strong><br>(CPU / ORT)</td>
+      <td>Wall-clock timing</td>
+      <td><code>onnxruntime</code> روی aarch64 — هنوز زمان‌سنجی نشده</td>
     </tr>
     <tr>
-      <td><strong>STM32H7</strong><br>(MCU)</td>
-      <td>Horowitz 45nm proxy</td>
-      <td>Energy ≈ MACs × pJ/MAC — تحلیلی</td>
+      <td><strong>STM32H7B3I-DK و NUCLEO-F401RE</strong><br>(MCU)</td>
+      <td>زمان و حافظه روی برد؛ انرژی با Horowitz 45nm proxy</td>
+      <td>ST Edge AI Developer Cloud؛ Energy ≈ MACs × pJ/MAC — تحلیلی</td>
     </tr>
   </tbody>
 </table>
@@ -158,7 +158,7 @@ result = <span class="fn">energy_nvml</span>(model, x, n=<span class="num">500</
     <span class="fn">print</span>(<span class="str">f"تأخیر/inference:   {result['latency_ms']:.4f} ms"</span>)</pre>
 </div>
 
-<h3>روش ۲: اندازه‌گیری CPU با OnnxRuntime (Pi 5)</h3>
+<h3>روش ۲: اندازه‌گیری CPU با OnnxRuntime (لپ‌تاپ یا گوشی aarch64)</h3>
 <div class="code-wrap">
   <div class="code-header"><span class="code-lang">Python — OnnxRuntime timing</span><button class="copy-btn">کپی</button></div>
   <pre><span class="kw">from</span> src.measure_energy <span class="kw">import</span> latency_onnx
@@ -170,10 +170,7 @@ ms = <span class="fn">latency_onnx</span>(
 )
 <span class="fn">print</span>(<span class="str">f"تأخیر CPU: {ms:.3f} ms/inference"</span>)
 
-<span class="cmt"># روی Pi 5 با INA219:
-# import board, adafruit_ina219
-# ina = adafruit_ina219.INA219(board.I2C())
-# power_mw = ina.power  ← توان لحظه‌ای
+<span class="cmt"># روی گوشی Android همین فایل .onnx با onnxruntime-android اجرا می‌شود (هنوز زمان‌سنجی نشده)
 </span></pre>
 </div>
 
@@ -187,11 +184,34 @@ cfg = <span class="fn">load_config</span>()
 arch = {<span class="str">"channels"</span>: <span class="num">64</span>, <span class="str">"depth"</span>: <span class="num">5</span>, <span class="str">"out_dim"</span>: <span class="num">384</span>}
 
 <span class="cmt"># arch_cost از energy_pj در config.yaml استفاده می‌کند (Horowitz 45nm):</span>
-<span class="cmt">#   fp32_mac=4.6 pJ ، int8_mac=0.23 pJ ، binary_op=0.0072 pJ</span>
+<span class="cmt">#   fp32_mac=4.6 pJ ، int8_mac=0.23 pJ ، binary_op=0.0719 pJ</span>
 <span class="kw">for</span> prec <span class="kw">in</span> [<span class="str">"fp32"</span>, <span class="str">"int8"</span>, <span class="str">"binary"</span>]:
     fp = search.<span class="fn">arch_cost</span>(cfg, arch, prec)
     <span class="fn">print</span>(<span class="str">f"{prec:6s}: {fp['macs']/1e6:.2f}M MACs, {fp['size_kb']:.1f} KB, {fp['energy_uj_per_inf']} µJ"</span>)</pre>
 </div>
+
+<h3>روش ۴: اندازه‌گیری روی برد با ST Edge AI Developer Cloud</h3>
+<p>برای برد، مدل به‌صورت ONNX صادر می‌شود، اما بدون جدول embedding: کد فراخواننده ۱۲۸ سطر جدول ۲۵۷×۶۴ را برمی‌دارد و دنبالهٔ embed‌شده و ماسک padding را به شبکه می‌دهد. نسخهٔ 8-bit با کوانتیزاسیون ایستای ONNX Runtime ساخته می‌شود (وزن و activation هر دو 8-bit، فرمت QDQ). ST Edge AI Core فایل را به کد C تبدیل می‌کند و Developer Cloud آن را روی برد واقعی اجرا و زمان‌سنجی می‌کند.</p>
+<div class="code-wrap">
+  <div class="code-header"><span class="code-lang">Shell — scripts/deploy_boards.py و scripts/stedgeai_cloud.py</span><button class="copy-btn">کپی</button></div>
+  <pre><span class="cmt"># ساختن فایل‌های FP32 و 8-bit و سنجش AUC آن‌ها روی dev</span>
+python -m scripts.deploy_boards
+<span class="cmt"># اجرای فایل 8-bit روی دو برد (نشست کاربری ST لازم است)</span>
+python -m scripts.stedgeai_cloud benchmark artifacts/stedgeai/models/micro_nas_64-5-384_body_int8qdq.onnx STM32H7B3I-DK NUCLEO-F401RE</pre>
+</div>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فایل (64-5-384)</th><th>برد</th><th>زمان هر عنوان</th><th>Flash (شبکه + runtime)</th><th>RAM</th></tr></thead>
+  <tbody>
+    <tr><td>8-bit</td><td>STM32H7B3I-DK (Cortex-M7، 280 MHz)</td><td>31.19 ms</td><td>77.7 KB</td><td>49.4 KB</td></tr>
+    <tr><td>FP32</td><td>STM32H7B3I-DK</td><td>76.99 ms</td><td>210.0 KB</td><td>70.9 KB</td></tr>
+    <tr><td>8-bit</td><td>NUCLEO-F401RE (Cortex-M4، 84 MHz)</td><td>449.64 ms</td><td>78.0 KB</td><td>44.5 KB</td></tr>
+    <tr><td>FP32</td><td>NUCLEO-F401RE</td><td>444.08 ms</td><td>210.2 KB</td><td>65.7 KB</td></tr>
+  </tbody>
+</table>
+</div>
+<p>جدول بایت (64.3 KB) جداگانه در flash نگه داشته می‌شود. فایل 8-bit روی dev به AUC برابر 0.622 می‌رسد، در برابر 0.628 برای همان وزن‌ها با FP32. روی Cortex-M7 نسخهٔ 8-bit حدود 2.5 برابر سریع‌تر است؛ روی Cortex-M4 سریع‌تر نیست و سودش فقط در flash و RAM است. Developer Cloud زمان و حافظه را گزارش می‌دهد، نه انرژی؛ ستون انرژی همچنان تحلیلی است.</p>
 
 <h2>۷.۶ مسیر استقرار</h2>
 <div class="steps">
@@ -205,15 +225,15 @@ arch = {<span class="str">"channels"</span>: <span class="num">64</span>, <span 
   <div class="step">
     <div class="step-num">۲</div>
     <div class="step-body">
-      <h4>Raspberry Pi 5 (aarch64)</h4>
-      <p>نصب onnxruntime نسخه aarch64 و همان کد Python — بدون تغییر. برای اندازه‌گیری واقعی انرژی، INA219 سنسور اضافه کنید.</p>
+      <h4>گوشی Android (aarch64)</h4>
+      <p>همان فایل .onnx با onnxruntime-android اجرا می‌شود؛ برنامهٔ FeedWell-Edge میزبان مدل است. زمان‌سنجی روی گوشی هنوز انجام نشده است.</p>
     </div>
   </div>
   <div class="step">
     <div class="step-num">۳</div>
     <div class="step-body">
-      <h4>STM32H7 (MCU)</h4>
-      <p>ONNX → X-CUBE-AI برای INT8. فایل <code>.onnx</code> را import کنید و X-CUBE-AI کد C بهینه‌شده برای Cortex-M7 می‌سازد.</p>
+      <h4>STM32H7B3I-DK و NUCLEO-F401RE (MCU)</h4>
+      <p>فایل <code>.onnx</code> با گره‌های QDQ به ST Edge AI Core (X-CUBE-AI) داده می‌شود و کد C برای Cortex-M ساخته می‌شود. اعداد اندازه‌گیری‌شده در روش ۴ آمده‌اند.</p>
     </div>
   </div>
 </div>
@@ -250,15 +270,15 @@ arch = {<span class="str">"channels"</span>: <span class="num">64</span>, <span 
     <div class="explanation">روی GPU، NVML (NVIDIA Management Library) توان لحظه‌ای را در حین اجرا می‌خواند. توان idle کم می‌شود و ضرب در زمان inference → انرژی mJ می‌دهد.</div>
   </div>
 
-  <div class="question-block" data-correct="2">
-    <p class="question-text"><span class="q-num">۳</span> برای استقرار روی Pi 5، از کدام ابزار استفاده می‌شود؟</p>
+  <div class="question-block" data-correct="0">
+    <p class="question-text"><span class="q-num">۳</span> برای اجرای مدل روی برد STM32، کدام ابزار کد C می‌سازد؟</p>
     <div class="options">
-      <div class="option"><div class="opt-letter">الف</div> X-CUBE-AI</div>
+      <div class="option"><div class="opt-letter">الف</div> ST Edge AI Core (X-CUBE-AI)</div>
       <div class="option"><div class="opt-letter">ب</div> TensorFlow Lite</div>
       <div class="option"><div class="opt-letter">ج</div> ONNX Runtime (aarch64)</div>
       <div class="option"><div class="opt-letter">د</div> PyTorch Mobile</div>
     </div>
-    <div class="explanation">onnxruntime نسخه aarch64 روی Raspberry Pi 5 نصب می‌شود و مستقیماً فایل .onnx را اجرا می‌کند — همان کد Python، بدون تغییر.</div>
+    <div class="explanation">ST Edge AI Core فایل ONNX (FP32 یا 8-bit با QDQ) را به کد C برای Cortex-M تبدیل می‌کند. در این پروژه این کار از طریق ST Edge AI Developer Cloud روی STM32H7B3I-DK و NUCLEO-F401RE انجام و زمان‌سنجی شد.</div>
   </div>
 
   <div class="question-block" data-correct="-1">
