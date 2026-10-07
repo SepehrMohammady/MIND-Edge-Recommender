@@ -1,0 +1,38 @@
+\input{preamble}
+\begin{tikzpicture}[node distance=6mm and 9mm]
+  % data
+  \node[data] (mind) {MIND\\English news + click logs};
+  \node[data, right=of mind] (xmind) {xMIND\\14 translated title sets};
+  % teacher
+  \node[frozen, below=10mm of mind] (teacher) {Frozen multilingual teacher\\paraphrase-multilingual-MiniLM-L12-v2};
+  \node[data, right=of teacher] (anchors) {384-d anchors\\one per English title};
+  % student
+  \node[model, below=10mm of teacher] (student) {Byte-level char-CNN\\256-row vocabulary, 68\,k params};
+  \node[model, right=of student] (rec) {Recommender\\user encoder + dot product};
+  \node[data, right=of rec] (clicks) {MIND click logs\\1 clicked + 4 shown};
+  \draw[arr] (clicks) -- node[lbl, above] {train} (rec);
+  % precision
+  \node[model, below=10mm of student] (search) {Architecture search\\3 arms: NAS / Micro-NAS / binary-aware};
+  \node[model, right=of search] (quant) {Precision\\FP32 / INT8 / 1-bit};
+  % outputs
+  \node[outp, below=10mm of search] (export) {Export\\ONNX (FP32), TFLite INT8 (planned)};
+  \node[outp, right=of export] (targets) {Targets\\STM32H7 / F4 boards, Android (FeedWell-Edge)};
+  % arrows
+  \draw[arr] (mind) -- node[lbl, right] {titles} (teacher);
+  \draw[arr] (teacher) -- node[lbl, above] {embed} (anchors);
+  \draw[arr] (anchors.south) -- ++(0,-4mm) -| node[lbl, below, pos=0.25] {distil (cosine, Matryoshka)} (student.north);
+  \draw[arr] (xmind) -- node[lbl, right] {translations share\\the English anchor} (anchors);
+  \draw[arr] (student) -- node[lbl, above] {news vectors} (rec);
+  \draw[arr] (student) -- node[lbl, right] {candidates} (search);
+  \draw[arr] (search) -- node[lbl, above] {per arm} (quant);
+  \draw[arr] (rec) -- node[lbl, right] {trained encoder} (quant);
+  \draw[arr] (quant) -- (export);
+  \draw[arr] (export) -- (targets);
+  \begin{scope}[on background layer]
+    \node[group, fit=(mind)(xmind), label={[glbl]north west:offline data}] {};
+    \node[group, fit=(teacher)(anchors)(student)(rec)(clicks), label={[glbl]north west:offline training (laptop GPU)}] {};
+    \node[group, fit=(search)(quant), label={[glbl]north west:search and quantisation}] {};
+    \node[group, fit=(export)(targets), label={[glbl]north west:deployment}] {};
+  \end{scope}
+\end{tikzpicture}
+\end{document}

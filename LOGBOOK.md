@@ -280,3 +280,29 @@ Reading of the table above (two seeds):
   stays, marked as the earlier loop. `check_numbers.py` extended to the new values; PDF 9
   pages. Course notice updated.
 - Notebook re-executed in QUICK mode after the batch (`scripts/make_notebook.py`).
+
+## 2026-10-07 12:37 — MSc thesis of H. Emadoleslami rebuilt as a LaTeX project from the PDF draft
+
+- Input: only the 67-page PDF draft (`H.E. Thesis/Thesis_UniGe_template.pdf`); text extracted with
+  pdftotext and split into `H.E. Thesis/src/draft_parts/`. Output: `H.E. Thesis/src/` (main.tex, six
+  chapters, four appendices, references.bib, build.ps1, README) compiling to 87 pages with
+  pdflatex + bibtex (IEEEtran), no errors, no undefined references.
+- Corrections against the draft: June cost columns replaced by the recomputed ones (energy
+  166.3/17.91/12.54, 15.15/3.16/2.72, 14.98/4.35/3.96 µJ; 36.14/3.29/3.26 MMAC; RAM rule); the
+  2 MMAC bound stated as not enforced; INT8 described as weight-only simulation; NRMS GloVe 0.664
+  (three seeds) and reduced 0.604±0.010 as reference points instead of "recovers baseline 0.607";
+  three-seed October conditions, per-language table (0.528/0.557/0.589), heuristics (0.525/0.598/0.617)
+  and history buckets added; recovered binary 194 KB; conference paper (Appendix A, contribution 6)
+  removed; Raspberry Pi 5 removed as a target (STM32H7B3I-DK, NUCLEO-F401RE, Android phone instead);
+  Declaration and §1.7 per Sepehr's instruction; Appendix E placeholders filled with repositories,
+  commits, environment and the 31-file SHA-256 manifest; bibliography fixed ([19] NAS-BNN authors,
+  [20] LNEE 1553 pp. 85–90) and the GEMINI position paper verified (LNEE 1369, 2025).
+- New assets in this repo: `paper/diagrams/*.tex` (five TikZ diagrams rendered to PNG),
+  `scripts/make_thesis_assets.py` (seven charts in `paper/figures/thesis`, ten table fragments in
+  `paper/tables/thesis`, all from paper/results and the data), `scripts/check_thesis_numbers.py`
+  (every number quoted in the thesis chapters against the result files: 0 failures).
+- Style sweep against DIMIR/paper/STYLE.md: no blocklist words left in the chapters; no em-dashes.
+- Timing (file times): diagrams and charts 11:00–11:50; LaTeX writing 11:50–12:30; compile, number
+  check and layout fixes 12:30–12:37.
+- Open for Sepehr/Houriyeh: UniGe logo (drop `figures/logo_unige.png` into the thesis folder),
+  final read-through, upload by the candidate.

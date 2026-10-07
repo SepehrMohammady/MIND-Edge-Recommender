@@ -1,0 +1,29 @@
+\input{preamble}
+\begin{tikzpicture}[node distance=7mm and 9mm]
+  \node[data] (feed) {Feed list\\impressions, opens};
+  \node[data, right=of feed] (reader) {Reader\\dwell time, scroll depth,\\translate / read-aloud / notes};
+  \node[model, below=9mm of reader] (learn) {Topic-weight learner\\additive updates, clamped $[-20, 20]$};
+  \node[model, anchor=north] (log) at (feed.south |- learn.north) {Local event log\\AsyncStorage, 5,000 events,\\30--180 day retention};
+  \node[model, right=of learn] (drift) {Drift detector\\short vs long EMA per topic};
+  \node[outp, below=9mm of learn] (rank) {Feed ranking\\topic weight + drift boost\\+ freshness + unread};
+  \node[outp, anchor=north] (export) at (log.south |- rank.north) {Telemetry snapshot\\JSON, exported by the user};
+  \node[frozen, right=of rank] (future) {Planned: byte encoder\\(same model as the boards)\\title vectors + user vector};
+  \draw[arr] (feed) -- (log);
+  \draw[arr] (reader) -- (log.north east);
+  \draw[arr] (log) -- node[lbl, above] {cursor\\replay} (learn);
+  \draw[arr] (learn) -- (drift);
+  \draw[arr] (learn) -- (rank);
+  \draw[arr] (drift.south) -- (rank.north east);
+  \draw[arr] (log) -- node[lbl, right] {aggregated state} (export);
+  \draw[arr, dashed] (future) -- (rank);
+  \coordinate (lm) at ([xshift=-6mm]log.west);
+  \coordinate (fb1) at ([yshift=-4mm]rank.south);
+  \coordinate (fb2) at (lm |- fb1);
+  \coordinate (fb3) at (lm |- feed.west);
+  \coordinate (fb4) at ([yshift=-5mm]fb2);
+  \draw[arr] (rank.south) -- (fb1) -- node[lbl, below] {re-ranked feed} (fb2) -- (fb3) -- (feed.west);
+  \begin{scope}[on background layer]
+    \node[group, fit=(feed)(reader)(log)(learn)(drift)(rank)(export)(future)(fb2)(fb4), label={[glbl]north west:on the phone only (FeedWell-Edge v2.1.0); nothing leaves the device}] {};
+  \end{scope}
+\end{tikzpicture}
+\end{document}

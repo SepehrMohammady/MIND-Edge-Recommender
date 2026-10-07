@@ -1,0 +1,18 @@
+\input{preamble}
+\begin{tikzpicture}[node distance=5mm and 8mm, every node/.style={font=\small}]
+  \node[data] (in) {Title as UTF-8 bytes\\$128$ ids, 0 = pad};
+  \node[model, right=of in] (emb) {Byte embedding\\$257 \times 64$ table};
+  \node[model, right=of emb] (proj) {$1{\times}1$ conv\\$64 \to C$};
+  \node[model, right=of proj] (blk) {$D \times$ block\\depthwise $3$ + pointwise $1{\times}1$\\BatchNorm, ReLU};
+  \node[model, right=of blk] (pool) {Masked mean\\over positions};
+  \node[model, right=of pool] (head) {Linear\\$C \to 384$};
+  \node[outp, right=of head] (vec) {News vector\\384-d (first 64 usable)};
+  \draw[arr] (in) -- (emb); \draw[arr] (emb) -- (proj); \draw[arr] (proj) -- (blk);
+  \draw[arr] (blk) -- (pool); \draw[arr] (pool) -- (head); \draw[arr] (head) -- (vec);
+  \node[lbl, below=3mm of emb] {kept FP32};
+  \node[lbl, below=3mm of proj] {kept FP32};
+  \node[lbl, below=3mm of blk] {quantised weights\\(INT8 or 1-bit)};
+  \node[lbl, below=3mm of head] {kept FP32};
+  \node[lbl, below=12mm of blk, text width=11cm] {Searched: channels $C \in \{32, 64, 96, 128, 192, 256\}$, depth $D \in \{1,\dots,5\}$, output width $\{64, 128, 256, 384\}$. Reference encoder: $C=64$, $D=5$: 68,288 parameters, 3.29\,M multiply-accumulates per title.};
+\end{tikzpicture}
+\end{document}

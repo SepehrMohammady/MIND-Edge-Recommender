@@ -1,0 +1,17 @@
+\documentclass[11pt]{article}
+\usepackage[paperwidth=30cm,paperheight=30cm,margin=5mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc,shapes.geometric}
+\pagestyle{empty}
+\tikzset{
+  box/.style={draw, rounded corners=2pt, align=center, font=\small, minimum height=9mm, inner sep=4pt, fill=white},
+  data/.style={box, fill=blue!8},
+  model/.style={box, fill=orange!12},
+  outp/.style={box, fill=green!10},
+  frozen/.style={box, dashed, font=\small\itshape},
+  arr/.style={-{Latex[length=2mm]}, semithick},
+  lbl/.style={font=\scriptsize, align=center},
+  group/.style={draw, rounded corners=4pt, dashed, gray, inner sep=6pt},
+  glbl/.style={font=\scriptsize\itshape, gray, anchor=south west, inner sep=1pt}}
+\begin{document}

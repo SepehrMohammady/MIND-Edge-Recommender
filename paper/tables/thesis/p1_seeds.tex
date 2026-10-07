@@ -1,0 +1,17 @@
+\begin{tabular}{lcccccc}
+\toprule
+Condition & \multicolumn{3}{c}{English AUC} & \multicolumn{3}{c}{mean AUC, 14 languages}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+ & seed 42 & seed 12 & seed 1 & seed 42 & seed 12 & seed 1\\
+\midrule
+Frozen teacher + user encoder & 0.589 & 0.589 & 0.589 & 0.575 & 0.575 & 0.575\\
+Frozen teacher + linear map & 0.620 & 0.617 & 0.617 & 0.592 & 0.591 & 0.588\\
+NRMS, GloVe reference config. & 0.660 & 0.666 & 0.666 & -- & -- & --\\
+NRMS, reduced (random 256-d table) & 0.594 & 0.619 & 0.600 & -- & -- & --\\
+Byte-CNN, random start, EN clicks & 0.620 & 0.615 & 0.618 & 0.525 & 0.528 & 0.529\\
+Byte-CNN, random start, mixed clicks & 0.579 & 0.581 & 0.591 & 0.557 & 0.556 & 0.558\\
+Byte-CNN, distilled, frozen & 0.568 & 0.577 & 0.576 & 0.571 & 0.571 & 0.574\\
+Byte-CNN, distilled start, EN clicks & 0.628 & 0.625 & 0.632 & 0.557 & 0.560 & 0.554\\
+Byte-CNN, distilled start, mixed clicks & 0.614 & 0.598 & 0.614 & 0.596 & 0.587 & 0.585\\
+\bottomrule
+\end{tabular}
