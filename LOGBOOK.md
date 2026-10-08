@@ -470,3 +470,21 @@ Critical path: 3, 4, 5, then 8. Step 6 can start now, since the integer encoder 
   32-5-384 0.296 at 1.00 M, so the searched model is level at 0.65 M MACs.
 - Neither choice reaches the hand-designed 64-5-384 (0.343 at 3.31 M MACs): within these budgets the encoder
   gives up 0.012 (H7) and 0.045 (F401) of teacher cosine. Ranking AUC of the chosen models follows in step 4.
+
+## 2026-10-08 10:25 — Schedule, updated
+
+| # | Step | Needs | Effort | Status |
+|---|---|---|---|---|
+| 0 | Audit and repair | – | done | done 10-05 |
+| 1 | P1 experiments, 3 seeds | laptop GPU | 10.2 h of runs | done 10-06 |
+| 2 | Paper update with P1, notebook, course | 1 | 1 day | done 10-06; course 10-07 |
+| 3 | µNAS search in the lab fork, budgets for H7B3I-DK and F401RE; grid reference; seed-based choice; nine-variant matrix rerun over 3 seeds | WSL, GPU | searches 6.5 h; matrix ~9 h | searches, grid, choice done 10-08 (H7 cos 0.331 at 2.00 M MACs, F401 0.298 at 0.65 M); matrix rerun open |
+| 4 | Full training of the two chosen models; integer export; ranking AUC from the exported files; 1-bit | 3 | 1–2 days | INT8 done for 64-5-384 (0.622 vs 0.628); chosen models next; 1-bit open |
+| 5 | Board numbers: latency, flash, RAM; energy with the lab probe; 1-bit on a board | 4; ST session; probe | 1–2 days | June architectures measured 10-07; chosen models after 4; energy and 1-bit open |
+| 6 | FeedWell-Edge: encoder inside the app; phone latency and battery | 4; phone | 1 week | build, install, smoke test done 10-07; integration open |
+| 7 | Offline replay through the app learner | 2 | 2–3 days | not started; optional for paper A |
+| 8 | Paper A final | 3–5; authors; venue | 1 week | draft 9 pp with P1 and board numbers; µNAS results to add |
+| 9 | Houriyeh's thesis | – | done | delivered 10-07; her upload, deadline 10-08 |
+| 10 | Paper B: app and on-device adaptation, pilot | 6, 7; days of real use | PhD Y2–Y3 | later |
+
+Critical path: 4, then 5, then 8. The matrix rerun of step 3 can run overnight beside daytime work on 4.
