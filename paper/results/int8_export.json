@@ -440,6 +440,153 @@
     "min": 0.7864,
     "p05": 0.9984
    }
+  },
+  "hand_64-5-384/seed42": {
+   "checkpoint": "artifacts\\runs\\unas_full\\hand_64-5-384_distill_ft_en_seed42.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.6224,
+    "mrr": 0.3283,
+    "ndcg@5": 0.3131,
+    "ndcg@10": 0.3768,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.6224,
+    "mrr": 0.3283,
+    "ndcg@5": 0.3131,
+    "ndcg@10": 0.3768,
+    "n_impressions": 73152,
+    "file_bytes": 209501,
+    "file": "artifacts\\stedgeai\\models\\hand_64-5-384_seed42_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.6199,
+    "mrr": 0.3271,
+    "ndcg@5": 0.3102,
+    "ndcg@10": 0.3742,
+    "n_impressions": 73152,
+    "file_bytes": 91533,
+    "file": "artifacts\\stedgeai\\models\\hand_64-5-384_seed42_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9914,
+    "min": 0.9306,
+    "p05": 0.9811
+   },
+   "onnx_int8full": {
+    "auc": 0.6213,
+    "mrr": 0.3289,
+    "ndcg@5": 0.3126,
+    "ndcg@10": 0.376,
+    "n_impressions": 73152,
+    "file_bytes": 89409,
+    "file": "artifacts\\stedgeai\\models\\hand_64-5-384_seed42_body_int8full.onnx"
+   },
+   "cosine_fp32_vs_int8full": {
+    "mean": 0.9934,
+    "min": 0.9423,
+    "p05": 0.9858
+   },
+   "minutes": 1.17
+  },
+  "hand_64-2-384/seed42": {
+   "checkpoint": "artifacts\\runs\\unas_full\\hand_64-2-384_distill_ft_en_seed42.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.6021,
+    "mrr": 0.2962,
+    "ndcg@5": 0.2781,
+    "ndcg@10": 0.3449,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.6021,
+    "mrr": 0.2962,
+    "ndcg@5": 0.2781,
+    "ndcg@10": 0.3449,
+    "n_impressions": 73152,
+    "file_bytes": 154594,
+    "file": "artifacts\\stedgeai\\models\\hand_64-2-384_seed42_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.6054,
+    "mrr": 0.2979,
+    "ndcg@5": 0.2816,
+    "ndcg@10": 0.3472,
+    "n_impressions": 73152,
+    "file_bytes": 60817,
+    "file": "artifacts\\stedgeai\\models\\hand_64-2-384_seed42_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9984,
+    "min": 0.7429,
+    "p05": 0.9966
+   },
+   "onnx_int8full": {
+    "auc": 0.6038,
+    "mrr": 0.2976,
+    "ndcg@5": 0.281,
+    "ndcg@10": 0.3465,
+    "n_impressions": 73152,
+    "file_bytes": 60742,
+    "file": "artifacts\\stedgeai\\models\\hand_64-2-384_seed42_body_int8full.onnx"
+   },
+   "cosine_fp32_vs_int8full": {
+    "mean": 0.9984,
+    "min": 0.7384,
+    "p05": 0.9966
+   },
+   "minutes": 0.98
+  },
+  "hand_32-5-384/seed42": {
+   "checkpoint": "artifacts\\runs\\unas_full\\hand_32-5-384_distill_ft_en_seed42.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.5799,
+    "mrr": 0.2895,
+    "ndcg@5": 0.2726,
+    "ndcg@10": 0.3384,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.5799,
+    "mrr": 0.2895,
+    "ndcg@5": 0.2726,
+    "ndcg@10": 0.3384,
+    "n_impressions": 73152,
+    "file_bytes": 87249,
+    "file": "artifacts\\stedgeai\\models\\hand_32-5-384_seed42_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.5852,
+    "mrr": 0.2917,
+    "ndcg@5": 0.2771,
+    "ndcg@10": 0.3406,
+    "n_impressions": 73152,
+    "file_bytes": 55334,
+    "file": "artifacts\\stedgeai\\models\\hand_32-5-384_seed42_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9856,
+    "min": 0.9133,
+    "p05": 0.9738
+   },
+   "onnx_int8full": {
+    "auc": 0.5829,
+    "mrr": 0.2873,
+    "ndcg@5": 0.2715,
+    "ndcg@10": 0.3375,
+    "n_impressions": 73152,
+    "file_bytes": 53201,
+    "file": "artifacts\\stedgeai\\models\\hand_32-5-384_seed42_body_int8full.onnx"
+   },
+   "cosine_fp32_vs_int8full": {
+    "mean": 0.984,
+    "min": 0.9273,
+    "p05": 0.9721
+   },
+   "minutes": 1.01
   }
  },
  "summary": {
@@ -481,6 +628,33 @@
    "onnx_int8full_auc": 0.6257,
    "onnx_int8full_auc_sd": 0.0025,
    "int8full_minus_fp32_auc": -0.0028
+  },
+  "hand_64-5-384": {
+   "n": 1,
+   "torch_fp32_auc": 0.6224,
+   "onnx_fp32_auc": 0.6224,
+   "onnx_int8qdq_auc": 0.6199,
+   "int8qdq_minus_fp32_auc": -0.0025,
+   "onnx_int8full_auc": 0.6213,
+   "int8full_minus_fp32_auc": -0.0011
+  },
+  "hand_64-2-384": {
+   "n": 1,
+   "torch_fp32_auc": 0.6021,
+   "onnx_fp32_auc": 0.6021,
+   "onnx_int8qdq_auc": 0.6054,
+   "int8qdq_minus_fp32_auc": 0.0033,
+   "onnx_int8full_auc": 0.6038,
+   "int8full_minus_fp32_auc": 0.0017
+  },
+  "hand_32-5-384": {
+   "n": 1,
+   "torch_fp32_auc": 0.5799,
+   "onnx_fp32_auc": 0.5799,
+   "onnx_int8qdq_auc": 0.5852,
+   "int8qdq_minus_fp32_auc": 0.0053,
+   "onnx_int8full_auc": 0.5829,
+   "int8full_minus_fp32_auc": 0.003
   }
  },
  "versions": {
