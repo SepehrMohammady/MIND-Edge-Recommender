@@ -29,8 +29,15 @@ PREC = {"fp32": ("FP32", "o"), "int8": ("INT8", "s"), "binary": ("1-bit", "^")} 
 plt.rcParams.update({"font.size": 8, "axes.edgecolor": MUTED, "axes.labelcolor": INK,
                      "xtick.color": MUTED, "ytick.color": MUTED, "axes.linewidth": 0.6})
 
-m = pd.read_csv(res / "results_matrix.csv")
-nrms = json.loads((res / "results_summary.json").read_text(encoding="utf-8"))["baseline"]["auc"]
+# The matrix rerun (scripts/run_matrix.py, mean and population SD over seeds) replaces the June single
+# run once it exists; the dashed line is the reduced NRMS of Table 2 (three seeds).
+summary_file = res / "matrix_summary.json"
+if summary_file.exists():
+    m = pd.DataFrame(json.loads(summary_file.read_text(encoding="utf-8")))
+    nrms = json.loads((res / "p1_summary.json").read_text(encoding="utf-8"))["nrms/nrms_reduced"]["en_auc"]["mean"]
+else:
+    m = pd.read_csv(res / "results_matrix.csv")
+    nrms = json.loads((res / "results_summary.json").read_text(encoding="utf-8"))["baseline"]["auc"]
 improved = json.loads((res / "binary_improved.json").read_text(encoding="utf-8"))
 
 # Fig. 2: AUC against encoder size and against the energy proxy, per arm and precision.
@@ -40,6 +47,9 @@ for a, (xcol, xlabel) in zip(ax, (("size_kb", "encoder size (KB)"),
     for arm, (_, color) in ARMS.items():
         for prec, (_, marker) in PREC.items():
             r = m[(m["arm"] == arm) & (m["precision"] == prec)].iloc[0]
+            if "auc_sd" in r and pd.notna(r["auc_sd"]):
+                a.errorbar(r[xcol], r["auc"], yerr=r["auc_sd"], fmt="none", ecolor=color, elinewidth=0.8,
+                           capsize=1.5, zorder=2)
             a.scatter(r[xcol], r["auc"], s=46, marker=marker, color=color,
                       edgecolor=SURFACE, linewidth=0.9, zorder=3)
     x_imp = improved["cost"]["size_kb"] if xcol == "size_kb" else improved["cost"]["energy_uj_per_inf"]
