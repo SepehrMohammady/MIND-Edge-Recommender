@@ -20,7 +20,8 @@ Every (arm, precision, seed) cell is written when it finishes to
 ``paper/results/matrix_runs.json`` and ``paper/results/experiments.jsonl``;
 finished cells are skipped on restart. Checkpoints go to ``artifacts/runs/matrix``,
 so the quantized cells of an interrupted arm start from the trained FP32 model.
-Seed means are written to ``paper/results/matrix_summary.json`` at the end.
+Seed means and population standard deviations (as in Table 2) are written to
+``paper/results/matrix_summary.json`` at the end.
 
 Only one training process runs on this laptop at a time. A file
 ``artifacts/runs/matrix/PAUSE`` makes the run stop before its next cell, so that
@@ -164,7 +165,7 @@ def summarize() -> None:
             for m in ("auc", "mrr", "ndcg@10"):
                 vals = [c["results"][m] for c in cells]
                 r[m] = round(statistics.fmean(vals), 4)
-                r[f"{m}_sd"] = round(statistics.stdev(vals), 4) if len(vals) > 1 else None
+                r[f"{m}_sd"] = round(statistics.pstdev(vals), 4) if len(vals) > 1 else None   # population SD, as tab_p1
             for m in ("size_kb", "macs", "macs_fp32", "energy_uj", "ram_kb", "params"):
                 r[m] = cells[0]["results"][m]
             rows.append(r)

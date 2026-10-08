@@ -6,6 +6,9 @@ protocol) with seeds 42, 12 and 1:
   unas_h7       µNAS choice for the STM32H7B3I-DK budget   artifacts/runs/unas_full/mind_h7_distill_ft_en_seed*.pt
   unas_f401     µNAS choice for the NUCLEO-F401RE budget   artifacts/runs/unas_full/mind_f401_distill_ft_en_seed*.pt
   ref_64-5-384  hand-designed reference                    artifacts/runs/p1/distill_ft_en_seed*.pt
+  hand_<C>-<D>-384  hand-designed family in the fork's terms (fixed table, mask channel, GAP):
+                64-5-384 and the best of the step-3 grid within each budget, 64-2-384 (H7) and 32-5-384
+                (F401)                                     artifacts/runs/unas_full/hand_*_distill_ft_en_seed*.pt
 
 Export as in scripts/deploy_boards.py: the network after the byte-table lookup, inputs embedded
 sequence (1, 64, 128) and padding mask (1, 1, 128), FP32 ONNX (opset 18), then ONNX Runtime
@@ -33,7 +36,7 @@ from onnxruntime.quantization.shape_inference import quant_pre_process
 from src import data_mind, recommender
 from src.config import load_config
 from src.student import ByteCNNEncoder, _byte_matrix
-from src.unas_encoder import UnasEncoder, chosen_arch
+from src.unas_encoder import UnasEncoder, model_arch
 
 cfg = load_config()
 L = cfg["data"]["max_title_bytes"]
@@ -47,6 +50,8 @@ MODELS = {
     "unas_f401": ("mind_f401", ROOT / "artifacts/runs/unas_full/mind_f401_distill_ft_en_seed{seed}.pt"),
     "ref_64-5-384": (None, ROOT / "artifacts/runs/p1/distill_ft_en_seed{seed}.pt"),
 }
+for _arch in ("64-5-384", "64-2-384", "32-5-384"):
+    MODELS[f"hand_{_arch}"] = (f"hand_{_arch}", ROOT / f"artifacts/runs/unas_full/hand_{_arch}_distill_ft_en_seed{{seed}}.pt")
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
@@ -120,7 +125,7 @@ def ort_vectors(path, table, byte_matrix):
 def build(search):
     if search is None:
         return ByteCNNEncoder(byte_embed_dim=64, channels=64, depth=5, out_dim=384)
-    return UnasEncoder(chosen_arch(search)[1])
+    return UnasEncoder(model_arch(search)[1])
 
 
 def metrics(res):
@@ -179,7 +184,7 @@ for name in MODELS:
             "int8_minus_fp32_auc": round(statistics.fmean(r["onnx_int8qdq"]["auc"] - r["torch_fp32"]["auc"]
                                                           for r in rows), 4)}
         if len(rows) > 1:
-            summary[name]["onnx_int8qdq_auc_sd"] = round(statistics.stdev(r["onnx_int8qdq"]["auc"] for r in rows), 4)
+            summary[name]["onnx_int8qdq_auc_sd"] = round(statistics.pstdev(r["onnx_int8qdq"]["auc"] for r in rows), 4)
 done["summary"] = summary
 done["versions"] = {"torch": torch.__version__, "onnxruntime": ort.__version__, "onnx": onnx.__version__}
 RES.write_text(json.dumps(done, indent=1), encoding="utf-8")
