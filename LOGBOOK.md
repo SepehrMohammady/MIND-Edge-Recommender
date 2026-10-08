@@ -697,3 +697,29 @@ Paper (`paper/paper.tex`, 11 pages, PDF rebuilt; `scripts/check_numbers.py` pass
 - Course, lesson 7: QDQ description corrected the same way; new part "روش ۵" with the five encoders on both boards.
 
 Matrix (resumed 14:25): 64-5-384 INT8 seed 42, 0.6219 (7.3 min).
+
+## 2026-10-08 16:37 — Matrix: 64-5-384 and 96-2-384 arms done; 256-4-384 arm stopped (GPU memory spilling into RAM); allocator cap
+
+Matrix cells, resumed 14:25 (`matrix_runs.json`; AUC, seeds 42 / 1 / 2, June single run in brackets):
+
+| arm | FP32 | INT8 (simulated) | binary (simulated) |
+|---|---|---|---|
+| 64-5-384 | 0.6203 / 0.6181 / 0.6187, mean 0.619 (0.605) | 0.6219 / 0.6073 / 0.6136, mean 0.614 (0.610) | 0.5319 / 0.5573 / 0.5734, mean 0.554 (0.521) |
+| 96-2-384 | 0.6046 / 0.5977 / 0.6028, mean 0.602 (0.593) | 0.6085 / 0.5875 / 0.6061, mean 0.601 (0.601) | 0.5666 / 0.5564 / 0.5497, mean 0.558 (0.546) |
+
+The 256-4-384 arm started at 16:13. Its first epoch took 17 min (P0 measured 9.2 min per epoch). GPU at 100 % but 30-62 W
+(compute-bound runs draw 93-103 W), 7.8 of 8 GB; free RAM 1.5 of 31.5 GB, commit charge 55.8 GB. Per-process GPU counters:
+7.63 GB dedicated plus 12.76 GB shared (system RAM) for the matrix process. Stopped at 16:32 (queue and matrix; the
+18 finished cells are kept, about 19 min of the first 256-4-384 cell lost) to avoid a repeat of the freeze of 10-05.
+
+Cause, measured with a 6,000-impression run of 256-4-384 (one epoch): 3.30 GiB of tensors at the peak, 19.24 GiB
+reserved by PyTorch's caching allocator. On Windows the driver backs allocations beyond the card with system RAM instead
+of failing them, the allocator frees its cache only after a failed allocation, and the batches vary in size (distinct
+titles per step), so the cache grows without bound. With the allocator capped at 0.85 of the card
+(`torch.cuda.set_per_process_memory_fraction`): 6.68 GiB reserved, same 3.30 GiB allocated, 34 s instead of 170 s.
+
+- `src/gpu.py` (`cap_gpu_memory`, default 0.85, env MIND_GPU_FRACTION) is called by run_matrix, run_unas_full and run_p1.
+  The computation is unchanged; earlier results stand, but those runs held more RAM and time than needed (the 7.7 GB of
+  the fork-form 64-5-384 runs today, possibly the 240-min P1 run of 10-06).
+- Queue relaunched (`scripts/queue_step4.ps1`; finished jobs skip): matrix from the 256-4-384 arm, then the µNAS
+  encoders with mixed-language clicks.
