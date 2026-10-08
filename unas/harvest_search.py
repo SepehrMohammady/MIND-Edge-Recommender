@@ -8,12 +8,16 @@ INT8 weight size, MACs, architecture) and writes, for each search name given:
                                            in-budget candidate beats on validation error and
                                            all three costs at once (Pareto set)
 
-Test error is copied from the state for the record and never used for any choice.
+Test error is copied from the state for the record and never used for any choice. A candidate
+whose validation error is not a finite number (training stopped on a NaN loss) counts as failed:
+NaN breaks sorting and dominance tests (first harvest of mind_h7, 2026-10-07: one NaN candidate
+moved the best in-budget candidate out of the selection shortlist).
 
 Run in WSL inside the MIND fork copy:
     cd ~/uNAS_mind && ~/dmir_nas/bin/python /mnt/c/Projects/PhD/MIND/unas/harvest_search.py mind_h7 [mind_f401]
 """
 import json
+import math
 import os
 import pickle
 import sys
@@ -48,7 +52,8 @@ for name in sys.argv[1:]:
         rows.append({"index": i, "val_error": float(e.val_error), "val_cos": 1 - float(e.val_error),
                      "test_error": float(e.test_error), "peak_mem_bytes": pm, "model_size_bytes": ms, "macs": macs,
                      "in_budget": pm <= b["peak_mem"] and ms <= b["model_size"] and macs <= b["macs"],
-                     "failed": float(e.val_error) >= 1.0, "summary": summary(e.point.arch.architecture),
+                     "failed": not math.isfinite(float(e.val_error)) or float(e.val_error) >= 1.0,
+                     "summary": summary(e.point.arch.architecture),
                      "arch": e.point.arch.architecture})
     ok = [r for r in rows if r["in_budget"] and not r["failed"]]
 

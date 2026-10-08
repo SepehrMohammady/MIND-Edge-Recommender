@@ -436,3 +436,24 @@ Critical path: 3, 4, 5, then 8. Step 6 can start now, since the integer encoder 
   Smoke search (3 candidates, 6 epochs): metric = loss in the worker, test errors differ from validation ones.
 - The stopped run is kept as `~/uNAS_mind/artifacts/mind_h7_flawed_metric` and not used.
 - 17:45 queue relaunched (H7, F401, harvests, grid), selection watcher relaunched after it.
+
+## 2026-10-08 09:42 — Overnight queue results (step 3); NaN bug in the H7 shortlist; H7 selection rerun
+
+- Queue (`logs/nas/queue_10071745.log`): H7 search 17:45-19:29 (150 candidates, 1 h 44 min), F401 search
+  19:29-21:03 (1 h 34 min), grid of the hand-designed family 21:03-22:20, selection 22:21-22:46.
+  About one candidate per minute; GPU 40-85 %.
+- H7 search: 110 of 150 candidates within 256 KiB / 128 KiB / 2 M MACs; best single run cos 0.331 at 2.00 M MACs.
+  F401 search: 67 of 150 within 128 KiB / 48 KiB / 1 M MACs; best single run 0.298 at 0.65 M MACs.
+- Grid (hand-designed 1x1 + depthwise-separable family, seed 42): within the H7 budget the best is 64-2-384,
+  0.303 at 1.66 M MACs; within F401, 32-5-384, 0.296 at 1.00 M MACs. Unconstrained top: 256-5-384, 0.503 at 45 M.
+  None of the in-budget models reaches the error bound (hand-designed 64-5-384, 0.343 at 3.31 M MACs).
+- Bug: candidates stopped by TerminateOnNaN got val_error = NaN (1 in H7, inside the budget; 5 in F401, all
+  outside it). NaN broke the sort in `select_by_seeds.py`: the H7 shortlist missed the true eight best
+  (indices 108-146, all from late in the search). Fixed: harvest counts non-finite results as failed,
+  selection keeps finite scores only, trainer patch v3 scores a NaN run as 1.0. The F401 shortlist was not
+  affected. First H7 selection kept as `mind_h7_selection_nan_shortlist.json` (its winner, candidate 67:
+  0.317 over three seeds at 1.74 M MACs).
+- F401 selection (valid): candidate 134, mean val cos 0.2977 (SE 0.0006), test 0.298, 0.65 M MACs, 41.5 KiB,
+  5.9 KiB activations: one block of two strided layers (up to 59 filters) and the GAP head.
+- PyTorch loads again in the MIND venv this morning (2.12.1+cu130).
+- 09:42 H7 selection relaunched on the corrected shortlist (24 runs).

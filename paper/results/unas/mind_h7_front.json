@@ -1,0 +1,3643 @@
+{
+ "budget": {
+  "peak_mem": 131072,
+  "model_size": 262144,
+  "macs": 2000000
+ },
+ "front": [
+  {
+   "index": 144,
+   "val_error": 0.6685552299022675,
+   "val_cos": 0.33144477009773254,
+   "test_error": 0.6674962043762207,
+   "peak_mem_bytes": 15872.0,
+   "model_size_bytes": 53156.0,
+   "macs": 1995648.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 3,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 1,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 26,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 94,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 142,
+   "val_error": 0.6761531233787537,
+   "val_cos": 0.32384687662124634,
+   "test_error": 0.6771030128002167,
+   "peak_mem_bytes": 15232.0,
+   "model_size_bytes": 51211.0,
+   "macs": 1776768.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 3,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 1,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 21,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 94,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 140,
+   "val_error": 0.6791321337223053,
+   "val_cos": 0.3208678662776947,
+   "test_error": 0.6778195798397064,
+   "peak_mem_bytes": 14336.0,
+   "model_size_bytes": 67329.0,
+   "macs": 1928176.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 1,
+    "prepool": 2,
+    "max_filters": 97,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 93,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 19,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 94,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 97,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 129,
+   "val_error": 0.6797755062580109,
+   "val_cos": 0.32022449374198914,
+   "test_error": 0.6785318851470947,
+   "peak_mem_bytes": 15104.0,
+   "model_size_bytes": 50822.0,
+   "macs": 1732992.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 3,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 1,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 20,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 94,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 108,
+   "val_error": 0.6836974322795868,
+   "val_cos": 0.3163025677204132,
+   "test_error": 0.6848119497299194,
+   "peak_mem_bytes": 14592.0,
+   "model_size_bytes": 65649.0,
+   "macs": 1847856.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 1,
+    "prepool": 2,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 16,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 94,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 97,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 126,
+   "val_error": 0.6838928461074829,
+   "val_cos": 0.3161071538925171,
+   "test_error": 0.6842107772827148,
+   "peak_mem_bytes": 13952.0,
+   "model_size_bytes": 65079.0,
+   "macs": 1775536.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 1,
+    "prepool": 2,
+    "max_filters": 97,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 93,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 16,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 94,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 97,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 102,
+   "val_error": 0.6842064559459686,
+   "val_cos": 0.31579354405403137,
+   "test_error": 0.6823424398899078,
+   "peak_mem_bytes": 15104.0,
+   "model_size_bytes": 50497.0,
+   "macs": 1738944.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 1,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 20,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 93,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 147,
+   "val_error": 0.6860587298870087,
+   "val_cos": 0.31394127011299133,
+   "test_error": 0.6864102780818939,
+   "peak_mem_bytes": 10432.0,
+   "model_size_bytes": 53156.0,
+   "macs": 1024192.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 3,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 2,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 26,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 94,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 87,
+   "val_error": 0.6863187849521637,
+   "val_cos": 0.3136812150478363,
+   "test_error": 0.6848739087581635,
+   "peak_mem_bytes": 14720.0,
+   "model_size_bytes": 50929.0,
+   "macs": 1612800.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 1,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 17,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 97,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 127,
+   "val_error": 0.6863433718681335,
+   "val_cos": 0.31365662813186646,
+   "test_error": 0.6845870018005371,
+   "peak_mem_bytes": 14720.0,
+   "model_size_bytes": 50524.0,
+   "macs": 1692672.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 1,
+    "max_filters": 95,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 95,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 20,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 94,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 134,
+   "val_error": 0.6864569783210754,
+   "val_cos": 0.31354302167892456,
+   "test_error": 0.6851331889629364,
+   "peak_mem_bytes": 14720.0,
+   "model_size_bytes": 49655.0,
+   "macs": 1601664.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 3,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 1,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 17,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 94,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 90,
+   "val_error": 0.68692347407341,
+   "val_cos": 0.31307652592658997,
+   "test_error": 0.6861265897750854,
+   "peak_mem_bytes": 14592.0,
+   "model_size_bytes": 50533.0,
+   "macs": 1568448.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 1,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 16,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 97,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 60,
+   "val_error": 0.6871326267719269,
+   "val_cos": 0.3128673732280731,
+   "test_error": 0.6849331855773926,
+   "peak_mem_bytes": 7040.0,
+   "model_size_bytes": 28473.0,
+   "macs": 1783808.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 3,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 0,
+    "max_filters": 37,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 27,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 11,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 18,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 37,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 121,
+   "val_error": 0.6872440576553345,
+   "val_cos": 0.3127559423446655,
+   "test_error": 0.6870467066764832,
+   "peak_mem_bytes": 14464.0,
+   "model_size_bytes": 50272.0,
+   "macs": 1660672.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 1,
+    "max_filters": 94,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 93,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 20,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 94,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 23,
+   "val_error": 0.6907858550548553,
+   "val_cos": 0.30921414494514465,
+   "test_error": 0.6885834038257599,
+   "peak_mem_bytes": 14720.0,
+   "model_size_bytes": 47713.0,
+   "macs": 1600512.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 1,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 17,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 89,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 73,
+   "val_error": 0.6917774081230164,
+   "val_cos": 0.30822259187698364,
+   "test_error": 0.6928758025169373,
+   "peak_mem_bytes": 18816.0,
+   "model_size_bytes": 51294.0,
+   "macs": 1327424.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 5,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 2,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 20,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 94,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 76,
+   "val_error": 0.6960070729255676,
+   "val_cos": 0.3039929270744324,
+   "test_error": 0.6945727169513702,
+   "peak_mem_bytes": 7040.0,
+   "model_size_bytes": 27330.0,
+   "macs": 1637888.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 3,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 0,
+    "max_filters": 37,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 24,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 11,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 18,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 37,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 135,
+   "val_error": 0.6967768967151642,
+   "val_cos": 0.3032231032848358,
+   "test_error": 0.6980634927749634,
+   "peak_mem_bytes": 18816.0,
+   "model_size_bytes": 50902.0,
+   "macs": 1308608.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 2,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 20,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 94,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 118,
+   "val_error": 0.6977368891239166,
+   "val_cos": 0.3022631108760834,
+   "test_error": 0.6992648839950562,
+   "peak_mem_bytes": 18816.0,
+   "model_size_bytes": 50497.0,
+   "macs": 1307552.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 2,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 20,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 93,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 51,
+   "val_error": 0.7009654343128204,
+   "val_cos": 0.29903456568717957,
+   "test_error": 0.6987306475639343,
+   "peak_mem_bytes": 6400.0,
+   "model_size_bytes": 27488.0,
+   "macs": 1658368.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 3,
+    "conv_layers": 4,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 0,
+    "max_filters": 37,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 27,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 11,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 13,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 37,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 38,
+   "val_error": 0.7126698791980743,
+   "val_cos": 0.28733012080192566,
+   "test_error": 0.7134539186954498,
+   "peak_mem_bytes": 5952.0,
+   "model_size_bytes": 213469.0,
+   "macs": 1123867.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 3,
+    "conv_layers": 5,
+    "branches": 0,
+    "strided": 1,
+    "prepool": 3,
+    "max_filters": 116,
+    "head": "avg",
+    "dense": [
+     189,
+     199
+    ]
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 31,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 12,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 22,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 116,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "avg",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 189,
+      "activation": "relu"
+     },
+     {
+      "units": 199,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.2,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 109,
+   "val_error": 0.7137278914451599,
+   "val_cos": 0.2862721085548401,
+   "test_error": 0.7113675475120544,
+   "peak_mem_bytes": 15696.0,
+   "model_size_bytes": 43921.0,
+   "macs": 1145872.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 5,
+    "conv_layers": 6,
+    "branches": 1,
+    "strided": 2,
+    "prepool": 1,
+    "max_filters": 109,
+    "head": "gap",
+    "dense": [
+     82,
+     35
+    ]
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 25,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 109,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 109,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 82,
+      "activation": "relu"
+     },
+     {
+      "units": 35,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 15,
+   "val_error": 0.7147115170955658,
+   "val_cos": 0.2852884829044342,
+   "test_error": 0.7143222987651825,
+   "peak_mem_bytes": 3656.0,
+   "model_size_bytes": 201588.0,
+   "macs": 1597774.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 7,
+    "conv_layers": 11,
+    "branches": 2,
+    "strided": 3,
+    "prepool": 1,
+    "max_filters": 111,
+    "head": "avg",
+    "dense": [
+     166,
+     145
+    ]
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 10,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 17,
+        "1x_stride": true,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 17,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 62,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 111,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 111,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 68,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "avg",
+     "pool_size": 4
+    },
+    "dense_blocks": [
+     {
+      "units": 166,
+      "activation": "relu"
+     },
+     {
+      "units": 145,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 77,
+   "val_error": 0.7156006097793579,
+   "val_cos": 0.2843993902206421,
+   "test_error": 0.7151958346366882,
+   "peak_mem_bytes": 15840.0,
+   "model_size_bytes": 43733.0,
+   "macs": 1128530.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 5,
+    "conv_layers": 6,
+    "branches": 1,
+    "strided": 2,
+    "prepool": 1,
+    "max_filters": 110,
+    "head": "gap",
+    "dense": [
+     82,
+     35
+    ]
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 22,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 110,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 110,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 82,
+      "activation": "relu"
+     },
+     {
+      "units": 35,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 101,
+   "val_error": 0.7185117602348328,
+   "val_cos": 0.28148823976516724,
+   "test_error": 0.7192903161048889,
+   "peak_mem_bytes": 14960.0,
+   "model_size_bytes": 41178.0,
+   "macs": 1091880.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 5,
+    "conv_layers": 6,
+    "branches": 1,
+    "strided": 3,
+    "prepool": 1,
+    "max_filters": 110,
+    "head": "gap",
+    "dense": [
+     82,
+     30
+    ]
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 22,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 110,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 110,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 82,
+      "activation": "relu"
+     },
+     {
+      "units": 30,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 75,
+   "val_error": 0.7197514772415161,
+   "val_cos": 0.2802485227584839,
+   "test_error": 0.7177152633666992,
+   "peak_mem_bytes": 14552.0,
+   "model_size_bytes": 42514.0,
+   "macs": 1047332.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 5,
+    "conv_layers": 6,
+    "branches": 1,
+    "strided": 3,
+    "prepool": 1,
+    "max_filters": 107,
+    "head": "gap",
+    "dense": [
+     82,
+     35
+    ]
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 22,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 107,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 107,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 82,
+      "activation": "relu"
+     },
+     {
+      "units": 35,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 12,
+   "val_error": 0.7210783958435059,
+   "val_cos": 0.27892160415649414,
+   "test_error": 0.720170795917511,
+   "peak_mem_bytes": 14552.0,
+   "model_size_bytes": 41649.0,
+   "macs": 992292.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 5,
+    "conv_layers": 6,
+    "branches": 1,
+    "strided": 3,
+    "prepool": 1,
+    "max_filters": 107,
+    "head": "gap",
+    "dense": [
+     82,
+     35
+    ]
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 17,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 107,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 107,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 82,
+      "activation": "relu"
+     },
+     {
+      "units": 35,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 52,
+   "val_error": 0.7216238677501678,
+   "val_cos": 0.27837613224983215,
+   "test_error": 0.7203173041343689,
+   "peak_mem_bytes": 14720.0,
+   "model_size_bytes": 19777.0,
+   "macs": 1569984.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 4,
+    "branches": 1,
+    "strided": 0,
+    "prepool": 1,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 17,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 17,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 29,
+   "val_error": 0.7266032099723816,
+   "val_cos": 0.2733967900276184,
+   "test_error": 0.7262396812438965,
+   "peak_mem_bytes": 3040.0,
+   "model_size_bytes": 241304.0,
+   "macs": 710144.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 1,
+    "conv_layers": 1,
+    "branches": 0,
+    "strided": 1,
+    "prepool": 0,
+    "max_filters": 38,
+    "head": "avg",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 38,
+        "1x_stride": true,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "avg",
+     "pool_size": 4
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 54,
+   "val_error": 0.7316796481609344,
+   "val_cos": 0.26832035183906555,
+   "test_error": 0.731603354215622,
+   "peak_mem_bytes": 14080.0,
+   "model_size_bytes": 16052.0,
+   "macs": 1357824.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 4,
+    "branches": 1,
+    "strided": 0,
+    "prepool": 1,
+    "max_filters": 98,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 12,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 12,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 143,
+   "val_error": 0.7328291237354279,
+   "val_cos": 0.26717087626457214,
+   "test_error": 0.7315906286239624,
+   "peak_mem_bytes": 13312.0,
+   "model_size_bytes": 46313.0,
+   "macs": 1223150.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 5,
+    "conv_layers": 6,
+    "branches": 1,
+    "strided": 2,
+    "prepool": 1,
+    "max_filters": 124,
+    "head": "gap",
+    "dense": [
+     82,
+     35
+    ]
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 22,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 124,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 124,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 82,
+      "activation": "relu"
+     },
+     {
+      "units": 35,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 116,
+   "val_error": 0.7350756227970123,
+   "val_cos": 0.26492437720298767,
+   "test_error": 0.7322513461112976,
+   "peak_mem_bytes": 5280.0,
+   "model_size_bytes": 201420.0,
+   "macs": 477504.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 1,
+    "conv_layers": 1,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 0,
+    "max_filters": 33,
+    "head": "max",
+    "dense": [
+     138
+    ]
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 33,
+        "has_bn": false,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "max",
+     "pool_size": 4
+    },
+    "dense_blocks": [
+     {
+      "units": 138,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 36,
+   "val_error": 0.7358474135398865,
+   "val_cos": 0.2641525864601135,
+   "test_error": 0.7321519553661346,
+   "peak_mem_bytes": 8320.0,
+   "model_size_bytes": 46470.0,
+   "macs": 723392.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 2,
+    "conv_layers": 3,
+    "branches": 0,
+    "strided": 2,
+    "prepool": 1,
+    "max_filters": 64,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 64,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 19,
+   "val_error": 0.7395946085453033,
+   "val_cos": 0.26040539145469666,
+   "test_error": 0.7398935854434967,
+   "peak_mem_bytes": 12928.0,
+   "model_size_bytes": 54388.0,
+   "macs": 420551.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 4,
+    "conv_layers": 5,
+    "branches": 1,
+    "strided": 1,
+    "prepool": 0,
+    "max_filters": 7,
+    "head": "gap",
+    "dense": [
+     129
+    ]
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 7,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 7,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 129,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.2,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 137,
+   "val_error": 0.7400505244731903,
+   "val_cos": 0.2599494755268097,
+   "test_error": 0.7408560812473297,
+   "peak_mem_bytes": 638.0,
+   "model_size_bytes": 114684.0,
+   "macs": 122366.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 0,
+    "conv_layers": 0,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 0,
+    "max_filters": 0,
+    "head": "gap",
+    "dense": [
+     254
+    ]
+   },
+   "arch": {
+    "conv_blocks": [],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 254,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 132,
+   "val_error": 0.7423267960548401,
+   "val_cos": 0.2576732039451599,
+   "test_error": 0.7407923638820648,
+   "peak_mem_bytes": 5568.0,
+   "model_size_bytes": 21359.0,
+   "macs": 180770.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 5,
+    "conv_layers": 6,
+    "branches": 1,
+    "strided": 2,
+    "prepool": 1,
+    "max_filters": 22,
+    "head": "gap",
+    "dense": [
+     82,
+     35
+    ]
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 22,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 22,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 82,
+      "activation": "relu"
+     },
+     {
+      "units": 35,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 14,
+   "val_error": 0.7423326075077057,
+   "val_cos": 0.2576673924922943,
+   "test_error": 0.7417051196098328,
+   "peak_mem_bytes": 527.0,
+   "model_size_bytes": 90969.0,
+   "macs": 98592.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 0,
+    "conv_layers": 0,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 0,
+    "max_filters": 0,
+    "head": "gap",
+    "dense": [
+     170,
+     143
+    ]
+   },
+   "arch": {
+    "conv_blocks": [],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 170,
+      "activation": "relu"
+     },
+     {
+      "units": 143,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 48,
+   "val_error": 0.7439672648906708,
+   "val_cos": 0.2560327351093292,
+   "test_error": 0.743418425321579,
+   "peak_mem_bytes": 5568.0,
+   "model_size_bytes": 21183.0,
+   "macs": 166866.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 4,
+    "conv_layers": 5,
+    "branches": 1,
+    "strided": 3,
+    "prepool": 1,
+    "max_filters": 22,
+    "head": "gap",
+    "dense": [
+     82,
+     35
+    ]
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 22,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 22,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 82,
+      "activation": "relu"
+     },
+     {
+      "units": 35,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 92,
+   "val_error": 0.7454052567481995,
+   "val_cos": 0.25459474325180054,
+   "test_error": 0.7468235194683075,
+   "peak_mem_bytes": 535.0,
+   "model_size_bytes": 68334.0,
+   "macs": 76119.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 0,
+    "conv_layers": 0,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 0,
+    "max_filters": 0,
+    "head": "gap",
+    "dense": [
+     151
+    ]
+   },
+   "arch": {
+    "conv_blocks": [],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 151,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 148,
+   "val_error": 0.7456619441509247,
+   "val_cos": 0.2543380558490753,
+   "test_error": 0.7455613911151886,
+   "peak_mem_bytes": 6240.0,
+   "model_size_bytes": 21359.0,
+   "macs": 114002.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 5,
+    "conv_layers": 6,
+    "branches": 1,
+    "strided": 2,
+    "prepool": 2,
+    "max_filters": 22,
+    "head": "gap",
+    "dense": [
+     82,
+     35
+    ]
+   },
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 22,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 22,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 82,
+      "activation": "relu"
+     },
+     {
+      "units": 35,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 86,
+   "val_error": 0.7457801699638367,
+   "val_cos": 0.25421983003616333,
+   "test_error": 0.7457960247993469,
+   "peak_mem_bytes": 495.0,
+   "model_size_bytes": 68961.0,
+   "macs": 76640.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 0,
+    "conv_layers": 0,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 0,
+    "max_filters": 0,
+    "head": "gap",
+    "dense": [
+     146,
+     111
+    ]
+   },
+   "arch": {
+    "conv_blocks": [],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 146,
+      "activation": "relu"
+     },
+     {
+      "units": 111,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 84,
+   "val_error": 0.7463871836662292,
+   "val_cos": 0.25361281633377075,
+   "test_error": 0.7461020648479462,
+   "peak_mem_bytes": 530.0,
+   "model_size_bytes": 66084.0,
+   "macs": 73874.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 0,
+    "conv_layers": 0,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 0,
+    "max_filters": 0,
+    "head": "gap",
+    "dense": [
+     146
+    ]
+   },
+   "arch": {
+    "conv_blocks": [],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 146,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 47,
+   "val_error": 0.7465456128120422,
+   "val_cos": 0.25345438718795776,
+   "test_error": 0.7471817135810852,
+   "peak_mem_bytes": 527.0,
+   "model_size_bytes": 64734.0,
+   "macs": 72527.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 0,
+    "conv_layers": 0,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 0,
+    "max_filters": 0,
+    "head": "gap",
+    "dense": [
+     143
+    ]
+   },
+   "arch": {
+    "conv_blocks": [],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 143,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 99,
+   "val_error": 0.7465639710426331,
+   "val_cos": 0.25343602895736694,
+   "test_error": 0.7471909523010254,
+   "peak_mem_bytes": 522.0,
+   "model_size_bytes": 62484.0,
+   "macs": 70282.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 0,
+    "conv_layers": 0,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 0,
+    "max_filters": 0,
+    "head": "gap",
+    "dense": [
+     138
+    ]
+   },
+   "arch": {
+    "conv_blocks": [],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 138,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 21,
+   "val_error": 0.7585625946521759,
+   "val_cos": 0.2414374053478241,
+   "test_error": 0.7575450837612152,
+   "peak_mem_bytes": 502.0,
+   "model_size_bytes": 53484.0,
+   "macs": 61302.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 0,
+    "conv_layers": 0,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 0,
+    "max_filters": 0,
+    "head": "gap",
+    "dense": [
+     118
+    ]
+   },
+   "arch": {
+    "conv_blocks": [],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 118,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.2,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  },
+  {
+   "index": 131,
+   "val_error": 0.7648410648107529,
+   "val_cos": 0.23515893518924713,
+   "test_error": 0.7632899880409241,
+   "peak_mem_bytes": 449.0,
+   "model_size_bytes": 25344.0,
+   "macs": 33280.0,
+   "in_budget": true,
+   "failed": false,
+   "summary": {
+    "conv_blocks": 0,
+    "conv_layers": 0,
+    "branches": 0,
+    "strided": 0,
+    "prepool": 0,
+    "max_filters": 0,
+    "head": "gap",
+    "dense": []
+   },
+   "arch": {
+    "conv_blocks": [],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   }
+  }
+ ]
+}

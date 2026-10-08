@@ -23,7 +23,9 @@ Usage:  python3 patch_trainer.py ~/uNAS_mind/uNAS/model_trainer.py
 import sys
 from pathlib import Path
 
-MARK = "# MIND embedding task v2"
+MARK = "# MIND embedding task v3"
+# v3 (2026-10-08): NaN-safe. A run stopped by TerminateOnNaN has NaN in its loss history; the
+# best finite epoch counts, and a run with no finite epoch scores 1.0 (worst), instead of NaN.
 
 COMPILE_OLD = "        if dataset.num_classes < 2:#Regression\n"
 COMPILE_NEW = (
@@ -42,8 +44,11 @@ EVAL_NEW = "        test_loss, test_acc = model.evaluate(test, verbose=0)\n"
 ERROR_OLD = "        if(dataset.num_classes>=2):\n"
 ERROR_NEW = (
     "        if _embedding:\n"
-    "            val_error = 1.0 + min(log.history['val_loss'][check_logs_from_epoch:])\n"
-    "            return {'val_error': val_error, 'test_error': 1.0 + test_loss,\n"
+    "            import math as _m\n"
+    "            _vl = [v for v in log.history['val_loss'][check_logs_from_epoch:] if _m.isfinite(v)]\n"
+    "            val_error = 1.0 + min(_vl) if _vl else 1.0\n"
+    "            test_error = 1.0 + test_loss if _m.isfinite(test_loss) else 1.0\n"
+    "            return {'val_error': val_error, 'test_error': test_error,\n"
     "                    'pruned_weights': pruning_cb.weights if pruning_cb else None}\n"
     "        if(dataset.num_classes>=2):\n"
 )
@@ -53,7 +58,7 @@ def main(path):
     p = Path(path)
     s = p.read_text()
     if MARK in s:
-        print("already patched (v2)")
+        print("already patched (v3)")
         return
     if "# MIND embedding task" in s:
         raise SystemExit("an older MIND patch is present; copy the shared fork's model_trainer.py first")
@@ -61,7 +66,7 @@ def main(path):
         assert s.count(old) == 1, f"trainer layout changed near {old.strip()!r}; patch by hand"
     s = s.replace(COMPILE_OLD, COMPILE_NEW).replace(EVAL_OLD, EVAL_NEW).replace(ERROR_OLD, ERROR_NEW)
     p.write_text(s)
-    print("patched (v2)", p)
+    print("patched (v3)", p)
 
 
 if __name__ == "__main__":
