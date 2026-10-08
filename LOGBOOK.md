@@ -488,3 +488,61 @@ Critical path: 3, 4, 5, then 8. Step 6 can start now, since the integer encoder 
 | 10 | Paper B: app and on-device adaptation, pilot | 6, 7; days of real use | PhD Y2–Y3 | later |
 
 Critical path: 4, then 5, then 8. The matrix rerun of step 3 can run overnight beside daytime work on 4.
+
+## 2026-10-08 10:55 — Step 3 matrix rerun started; step 4 started (chosen µNAS encoders in the PyTorch pipeline)
+
+Matrix rerun (`scripts/run_matrix.py`, commit 4a4ed5e)
+- The nine cells of the June Table 1 (architectures 256-4-384, 64-5-384, 96-2-384 x FP32 / simulated INT8 /
+  simulated binary) under the October loop, seeds 42, 1, 2: random initialisation, English clicks, 8 epochs; INT8 and
+  binary = the trained FP32 model with simulated weight quantization of the inner layers plus 2 epochs of fine-tuning;
+  full dev set. The architectures are the June winners and are not searched again. Every cell is recorded when it ends
+  (`paper/results/matrix_runs.json`, `experiments.jsonl`), checkpoints are kept (`artifacts/runs/matrix`).
+- Smoke run (one arm, 2,000 impressions) 0.9 min: sizes and MACs equal the recomputed June costs (266.75 / 203.94 /
+  185.62 KB, 3.29 M MACs).
+- Started 10:36 (one process, below-normal priority). First cell, 64-5-384 FP32 seed 42: AUC 0.6203 in 16.1 min, the
+  same value as the P1 run `scratch_en/seed42` (same protocol and seed). GPU 95-97 %, 5.9 GB, 74-82 °C, 93-103 W.
+- A file `artifacts/runs/matrix/PAUSE` stops the run before its next cell; it was set at 10:50 so that step 4 could use
+  the GPU (one training process at a time). The run stopped at 10:52 and resumes after step 4 (`scripts/queue_step4.ps1`).
+- The GPU sampler of the new launcher (`scripts/launch_job.ps1`) first used `nvidia-smi -l -f`, which buffers its file on
+  Windows until it exits (empty CSV after 5 min); replaced by `scripts/gpu_sampler.ps1` (one appended line per 30 s
+  while the job's process lives).
+
+Step 4: chosen µNAS encoders rebuilt in PyTorch (commit 61723a1)
+- The search's networks are Keras models of the fork's space; click training, evaluation and integer export here are
+  PyTorch. `src/unas_encoder.py` rebuilds an architecture dictionary with the Keras semantics ("same" padding with the
+  odd pad on the right for strided layers, BatchNorm epsilon 1e-3, MaxPool1D(2) pre-pooling, GAP over all 128
+  positions, dropout before the output layer); the 257 x 64 byte table is a frozen parameter, as in the search.
+- Check (`unas/dump_keras.py` in WSL on the CPU, `scripts/check_unas_port.py`): Keras builds with seeded random weights
+  and non-trivial BatchNorm statistics, weights copied into the PyTorch builds, 64 validation rows. H7 candidate 144:
+  largest output difference 2.3e-5 (outputs up to 72.5), smallest cosine 0.9999998; F401 candidate 134: 8.6e-6,
+  0.9999999. Parameters: 53,404 and 42,664 trainable plus the 16,448-entry byte table. MACs counted here (convolution
+  and dense layers): 1,986,304 and 648,736; the fork's resource model gives 1,995,648 and 650,624 because it also
+  counts the pooling operations (9,344 and 1,888).
+- `scripts/run_unas_full.py`: the reference encoder's programme (scripts/run_p1.py): distillation 15 epochs on all
+  769k training rows in 15 languages (Matryoshka cosine loss), then click training from the distilled encoder,
+  8 epochs, English clicks (`distill_ft_en`) or clicks in a random language (`distill_ft_mixed`); seeds 42, 12, 1 as in
+  P1, so data order and negatives match the reference runs; full dev set, English by history bucket and 14 languages.
+  CPU smoke run: 2.2 min; the byte table is unchanged after both stages (largest difference 0).
+- 10:53 `distill_ft_en` started for both encoders and three seeds (estimate about 2.7 h); then the matrix resumes
+  (about 8.4 h), then `distill_ft_mixed` (about 2.5 h).
+
+Integer export with three seeds (`scripts/export_int8.py`, CPU)
+- Same export as `scripts/deploy_boards.py` (embedded sequence and mask in, QDQ int8, 512 calibration titles), for the
+  reference and the two µNAS encoders, three seeds each; accuracy of each file on the 73,152 dev impressions.
+- Reference 64-5-384, `distill_ft_en`, 2.5 min for three seeds:
+
+  | seed | PyTorch | ONNX FP32 | ONNX INT8 | FP32/INT8 cosine | INT8 file |
+  |---|--:|--:|--:|--:|--:|
+  | 42 | 0.6283 | 0.6283 | 0.6223 | 0.990 | 90,893 B |
+  | 12 | 0.6252 | 0.6252 | 0.6210 | 0.990 | 90,902 B |
+  | 1 | 0.6320 | 0.6320 | 0.6293 | 0.991 | 90,893 B |
+  | mean | 0.6285 | 0.6285 | 0.6242 (sd 0.0045) | | |
+
+  Seed 42 equals `paper/results/deploy_int8.json` to the last digit.
+- The ONNX export of the µNAS builds matches PyTorch to 1.2e-7. A first test showed a large difference; the cause was
+  the test itself: `torch.onnx.export` puts the wrapper module back into the mode it had, and a new wrapper is in
+  training mode, so the encoder was left with BatchNorm on batch statistics and dropout on when the PyTorch reference
+  was computed after the export. The export script sets the wrapper to evaluation mode before exporting; its earlier
+  results are not affected (the model is put in evaluation mode before it is evaluated).
+- 1-bit: not started. Route to a board as in `docs/binary_deployment.md` (Larq, LCE, TFLite Micro on the H7, as in
+  `NAS-BNN/publish/nasbnn-wakevision-stm32`, or CBin-NN).

@@ -1,0 +1,186 @@
+"""Integer files of the step-4 encoders and the ranking accuracy of each file, per seed.
+
+Encoders, all click-trained from the distilled start on English clicks (the deployment
+protocol) with seeds 42, 12 and 1:
+
+  unas_h7       µNAS choice for the STM32H7B3I-DK budget   artifacts/runs/unas_full/mind_h7_distill_ft_en_seed*.pt
+  unas_f401     µNAS choice for the NUCLEO-F401RE budget   artifacts/runs/unas_full/mind_f401_distill_ft_en_seed*.pt
+  ref_64-5-384  hand-designed reference                    artifacts/runs/p1/distill_ft_en_seed*.pt
+
+Export as in scripts/deploy_boards.py: the network after the byte-table lookup, inputs embedded
+sequence (1, 64, 128) and padding mask (1, 1, 128), FP32 ONNX (opset 18), then ONNX Runtime
+static quantisation to QDQ (per-channel symmetric int8 weights, int8 activations, Conv/Gemm/MatMul;
+the first 512 training titles for calibration). Accuracy of each file on the 73,152 dev
+impressions: news vectors from the file (ONNX Runtime, CPU), user encoder of the same checkpoint.
+Checkpoints that do not exist yet are skipped; finished entries are kept on a rerun.
+
+Writes artifacts/stedgeai/models/<name>_seed<seed>_body_{fp32,int8qdq}.onnx and
+paper/results/int8_export.json. Runs on the CPU (the GPU belongs to the training queue):
+    set CUDA_VISIBLE_DEVICES=-1 & python -m scripts.export_int8
+"""
+import json
+import statistics
+import time
+from pathlib import Path
+
+import numpy as np
+import onnx
+import onnxruntime as ort
+import torch
+from onnxruntime.quantization import CalibrationDataReader, QuantFormat, QuantType, quantize_static
+from onnxruntime.quantization.shape_inference import quant_pre_process
+
+from src import data_mind, recommender
+from src.config import load_config
+from src.student import ByteCNNEncoder, _byte_matrix
+from src.unas_encoder import UnasEncoder, chosen_arch
+
+cfg = load_config()
+L = cfg["data"]["max_title_bytes"]
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / "artifacts/stedgeai/models"
+OUT.mkdir(parents=True, exist_ok=True)
+RES = Path(cfg["paths"]["results_dir"]) / "int8_export.json"
+SEEDS = (42, 12, 1)
+MODELS = {
+    "unas_h7": ("mind_h7", ROOT / "artifacts/runs/unas_full/mind_h7_distill_ft_en_seed{seed}.pt"),
+    "unas_f401": ("mind_f401", ROOT / "artifacts/runs/unas_full/mind_f401_distill_ft_en_seed{seed}.pt"),
+    "ref_64-5-384": (None, ROOT / "artifacts/runs/p1/distill_ft_en_seed{seed}.pt"),
+}
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+
+class Body(torch.nn.Module):
+    """The encoder after the byte-table lookup: embedded sequence and mask in, news vector out."""
+
+    def __init__(self, enc):
+        super().__init__()
+        self.enc = enc
+
+    def forward(self, x, mask):                  # x (1, E, L) float32, mask (1, 1, L) float32
+        if isinstance(self.enc, UnasEncoder):
+            return self.enc.body(x, mask)
+        x = self.enc.proj_in(x)
+        for blk in self.enc.blocks:
+            x = blk(x)
+        x = (x * mask).sum(-1) / mask.sum(-1).clamp(min=1)
+        return self.enc.head(x)
+
+
+def embed_inputs(table, ids):
+    """numpy lookup: ids (N, L) int -> x (N, E, L) float32, mask (N, 1, L) float32."""
+    x = np.ascontiguousarray(table[ids].transpose(0, 2, 1)).astype(np.float32)
+    return x, (ids != 0).astype(np.float32)[:, None, :]
+
+
+def export(enc, path):
+    # The exporter puts the wrapper back into the mode it had; a new wrapper is in training mode,
+    # which would leave the encoder with BatchNorm on batch statistics and dropout active afterwards.
+    enc.eval()
+    torch.onnx.export(Body(enc).eval(), (torch.zeros(1, enc.embed.weight.shape[1], L), torch.ones(1, 1, L)), str(path),
+                      input_names=["embedded_bytes", "mask"], output_names=["news_embedding"], opset_version=18,
+                      dynamo=False)
+    onnx.checker.check_model(onnx.load(str(path)))
+
+
+class Calib(CalibrationDataReader):
+    def __init__(self, x, mask, names):
+        self.x, self.mask, self.names, self.i = x, mask, names, 0
+
+    def get_next(self):
+        if self.i >= len(self.x):
+            return None
+        d = {self.names[0]: self.x[self.i:self.i + 1], self.names[1]: self.mask[self.i:self.i + 1]}
+        self.i += 1
+        return d
+
+
+def quantise(fp32_path, int8_path, x, mask):
+    pre = fp32_path.with_name(fp32_path.stem + "_pre.onnx")
+    quant_pre_process(str(fp32_path), str(pre))
+    names = [i.name for i in ort.InferenceSession(str(pre), providers=["CPUExecutionProvider"]).get_inputs()]
+    quantize_static(str(pre), str(int8_path), Calib(x, mask, names), quant_format=QuantFormat.QDQ, per_channel=True,
+                    activation_type=QuantType.QInt8, weight_type=QuantType.QInt8,
+                    op_types_to_quantize=["Conv", "Gemm", "MatMul"])
+    pre.unlink()
+
+
+def ort_vectors(path, table, byte_matrix):
+    sess = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+    names = [i.name for i in sess.get_inputs()]
+    ids = byte_matrix.numpy().astype(np.int64)
+    out = np.zeros((len(ids), 384), dtype=np.float32)
+    for i in range(len(ids)):
+        if ids[i].any():
+            x, m = embed_inputs(table, ids[i:i + 1])
+            out[i] = sess.run(None, {names[0]: x, names[1]: m})[0][0]
+    return torch.tensor(np.nan_to_num(out))
+
+
+def build(search):
+    if search is None:
+        return ByteCNNEncoder(byte_embed_dim=64, channels=64, depth=5, out_dim=384)
+    return UnasEncoder(chosen_arch(search)[1])
+
+
+def metrics(res):
+    return {k: round(v, 4) for k, v in res.items() if k != "n_impressions"} | {"n_impressions": res["n_impressions"]}
+
+
+train_news = data_mind.read_news(cfg, "train")
+calib_ids = _byte_matrix([v["title"] for v in list(train_news.values())[:512]], L).astype(np.int64)
+vocab = recommender.eval_vocab(cfg, "dev")
+done = json.loads(RES.read_text(encoding="utf-8")) if RES.exists() else {"runs": {}}
+for name, (search, pattern) in MODELS.items():
+    for seed in SEEDS:
+        ckpt, key = Path(str(pattern).format(seed=seed)), f"{name}/seed{seed}"
+        if key in done["runs"] or not ckpt.exists():
+            continue
+        t0 = time.time()
+        sd = torch.load(ckpt, map_location="cpu")
+        enc = build(search)
+        enc.load_state_dict({k[len("news_encoder."):]: v for k, v in sd.items() if k.startswith("news_encoder.")})
+        table = enc.embed.weight.detach().numpy().astype(np.float32)
+        fp32, int8 = OUT / f"{name}_seed{seed}_body_fp32.onnx", OUT / f"{name}_seed{seed}_body_int8qdq.onnx"
+        export(enc, fp32)
+        quantise(fp32, int8, *embed_inputs(table, calib_ids))
+        rec = recommender.NewsRecommender(enc).to(device)
+        rec.load_state_dict(sd)
+        rec.eval()
+        user_only = recommender.NewsRecommender(recommender.FixedVectors(384)).to(device)
+        user_only.load_state_dict({k: v for k, v in sd.items() if not k.startswith("news_encoder.")}, strict=False)
+        r = {"checkpoint": str(ckpt.relative_to(ROOT)), "calibration_titles": int(len(calib_ids))}
+        with torch.no_grad():
+            r["torch_fp32"] = metrics(recommender.evaluate(cfg, rec, "dev"))
+        vec = {}
+        for kind, path in (("onnx_fp32", fp32), ("onnx_int8qdq", int8)):
+            vec[kind] = ort_vectors(path, table, vocab.byte_matrix)
+            with torch.no_grad():
+                r[kind] = metrics(recommender.evaluate(cfg, user_only, "dev", news_vectors=vec[kind]))
+            r[kind]["file_bytes"] = path.stat().st_size
+            r[kind]["file"] = str(path.relative_to(ROOT))
+        cos = torch.nn.functional.cosine_similarity(vec["onnx_fp32"][1:], vec["onnx_int8qdq"][1:], dim=-1)
+        r["cosine_fp32_vs_int8"] = {"mean": round(float(cos.mean()), 4), "min": round(float(cos.min()), 4),
+                                    "p05": round(float(cos.quantile(0.05)), 4)}
+        r["minutes"] = round((time.time() - t0) / 60, 2)
+        done["runs"][key] = r
+        RES.write_text(json.dumps(done, indent=1), encoding="utf-8")
+        print(f"{key}: AUC torch {r['torch_fp32']['auc']:.4f}, ONNX FP32 {r['onnx_fp32']['auc']:.4f}, "
+              f"INT8 {r['onnx_int8qdq']['auc']:.4f}; INT8 file {r['onnx_int8qdq']['file_bytes']} B; "
+              f"cos mean {r['cosine_fp32_vs_int8']['mean']}; {r['minutes']} min", flush=True)
+
+summary = {}
+for name in MODELS:
+    rows = [v for k, v in done["runs"].items() if k.startswith(name + "/")]
+    if rows:
+        summary[name] = {"n": len(rows)} | {
+            f"{kind}_auc": round(statistics.fmean(r[kind]["auc"] for r in rows), 4) for kind in
+            ("torch_fp32", "onnx_fp32", "onnx_int8qdq")} | {
+            "int8_minus_fp32_auc": round(statistics.fmean(r["onnx_int8qdq"]["auc"] - r["torch_fp32"]["auc"]
+                                                          for r in rows), 4)}
+        if len(rows) > 1:
+            summary[name]["onnx_int8qdq_auc_sd"] = round(statistics.stdev(r["onnx_int8qdq"]["auc"] for r in rows), 4)
+done["summary"] = summary
+done["versions"] = {"torch": torch.__version__, "onnxruntime": ort.__version__, "onnx": onnx.__version__}
+RES.write_text(json.dumps(done, indent=1), encoding="utf-8")
+print(json.dumps(summary, indent=1))

@@ -48,7 +48,19 @@ under the search recipe (`eval_reference.py`).
 | `patch_trainer.py` | patches `uNAS/model_trainer.py` | cosine loss and error for the embedding task |
 | `eval_reference.py` | run in the copy | June winners and the hand-designed family under the search recipe (`reference.json`, `grid.json`) |
 | `harvest_search.py` | run in the copy | history and Pareto front of a search (`paper/results/unas/`) |
+| `select_by_seeds.py` | run in the copy | final choice: eight best in-budget candidates re-trained with three seeds, validation only (`<name>_selection.json`) |
+| `dump_keras.py` | run in the copy, CPU | Keras build of each chosen architecture with seeded random weights, for the check of the PyTorch build |
 | `run_mind_search.sh` | WSL | `setup`, `reference`, `search <config>` (chunked, resumable, GPU sampler, logs in `logs/nas/`) |
+
+## After the search (step 4)
+
+The chosen architectures are rebuilt in PyTorch (`src/unas_encoder.py`, Keras semantics: "same"
+padding with the odd pad on the right, BatchNorm epsilon 1e-3, pre-pooling, GAP over all
+positions) so that they go through the same distillation, click training, evaluation and integer
+export as the hand-designed encoder. `scripts/check_unas_port.py` copies the weights of the
+`dump_keras.py` builds into the PyTorch ones and compares outputs on 64 validation rows
+(`paper/results/unas/port_check.json`). Training: `scripts/run_unas_full.py`; integer files and
+their accuracy: `scripts/export_int8.py`.
 
 ## Run
 
