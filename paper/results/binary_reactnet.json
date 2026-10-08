@@ -1,0 +1,150 @@
+{
+ "runs": {
+  "seed42": {
+   "seed": 42,
+   "minutes": 38.37,
+   "settings": {
+    "arch": {
+     "byte_embed_dim": 64,
+     "channels": 64,
+     "depth": 5,
+     "out_dim": 384
+    },
+    "blocks": "ReActNet RSign/RPReLU, Bi-Real shortcuts, binary weights and activations",
+    "init": "distilled",
+    "distill_epochs": 15,
+    "epochs": 8,
+    "train_langs": [
+     "en"
+    ],
+    "encoder_cost": {
+     "precision": "binary",
+     "params": 109248,
+     "macs": 8413184,
+     "macs_fp32": 548864,
+     "macs_quantized": 7864320,
+     "size_kb": 194.25,
+     "size_mb": 0.1897,
+     "energy_uj_per_inf": 3.0902
+    }
+   },
+   "results": {
+    "auc": 0.5732,
+    "mrr": 0.2952,
+    "ndcg@5": 0.2755,
+    "ndcg@10": 0.3397,
+    "n_impressions": 73152,
+    "teacher_cosine_dev": {
+     "64": 0.3323,
+     "128": 0.3415,
+     "256": 0.3461,
+     "384": 0.3505
+    }
+   }
+  },
+  "seed1": {
+   "seed": 1,
+   "minutes": 37.26,
+   "settings": {
+    "arch": {
+     "byte_embed_dim": 64,
+     "channels": 64,
+     "depth": 5,
+     "out_dim": 384
+    },
+    "blocks": "ReActNet RSign/RPReLU, Bi-Real shortcuts, binary weights and activations",
+    "init": "distilled",
+    "distill_epochs": 15,
+    "epochs": 8,
+    "train_langs": [
+     "en"
+    ],
+    "encoder_cost": {
+     "precision": "binary",
+     "params": 109248,
+     "macs": 8413184,
+     "macs_fp32": 548864,
+     "macs_quantized": 7864320,
+     "size_kb": 194.25,
+     "size_mb": 0.1897,
+     "energy_uj_per_inf": 3.0902
+    }
+   },
+   "results": {
+    "auc": 0.5848,
+    "mrr": 0.2978,
+    "ndcg@5": 0.2781,
+    "ndcg@10": 0.3438,
+    "n_impressions": 73152,
+    "teacher_cosine_dev": {
+     "64": 0.3222,
+     "128": 0.3323,
+     "256": 0.3371,
+     "384": 0.3423
+    }
+   }
+  },
+  "seed2": {
+   "seed": 2,
+   "minutes": 37.3,
+   "settings": {
+    "arch": {
+     "byte_embed_dim": 64,
+     "channels": 64,
+     "depth": 5,
+     "out_dim": 384
+    },
+    "blocks": "ReActNet RSign/RPReLU, Bi-Real shortcuts, binary weights and activations",
+    "init": "distilled",
+    "distill_epochs": 15,
+    "epochs": 8,
+    "train_langs": [
+     "en"
+    ],
+    "encoder_cost": {
+     "precision": "binary",
+     "params": 109248,
+     "macs": 8413184,
+     "macs_fp32": 548864,
+     "macs_quantized": 7864320,
+     "size_kb": 194.25,
+     "size_mb": 0.1897,
+     "energy_uj_per_inf": 3.0902
+    }
+   },
+   "results": {
+    "auc": 0.6014,
+    "mrr": 0.3069,
+    "ndcg@5": 0.289,
+    "ndcg@10": 0.3541,
+    "n_impressions": 73152,
+    "teacher_cosine_dev": {
+     "64": 0.3336,
+     "128": 0.3422,
+     "256": 0.3461,
+     "384": 0.3502
+    }
+   }
+  }
+ },
+ "summary": {
+  "n": 3,
+  "auc": 0.5865,
+  "auc_sd": 0.0116,
+  "seeds": [
+   1,
+   2,
+   42
+  ],
+  "cost": {
+   "precision": "binary",
+   "params": 109248,
+   "macs": 8413184,
+   "macs_fp32": 548864,
+   "macs_quantized": 7864320,
+   "size_kb": 194.25,
+   "size_mb": 0.1897,
+   "energy_uj_per_inf": 3.0902
+  }
+ }
+}

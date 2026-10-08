@@ -140,9 +140,17 @@ naive = cell[("micro_nas", "binary")]
 loss1 = cell[("micro_nas", "fp32")]["auc"] - naive["auc"]
 expect(f"costs the constrained model {f(loss1, 3)} AUC ({f(naive['auc'], 3)} over three seeds)", "naive binary")
 expect(f"cost the constrained model {f(loss1, 3)} AUC ({f(naive['auc'], 3)})", "abstract, naive binary")
-expect(f"gave {f(imp['result']['auc'], 3)} at an estimated {f(imp['cost']['size_kb'], 0)}\\,KB in a single June run",
-       "ReActNet single run")
-expect(f"reached {f(imp['result']['auc'], 3)} at {f(imp['cost']['size_kb'], 0)}\\,KB", "abstract, ReActNet single run")
+rn = load("binary_reactnet.json")["summary"]                      # three seeds, scripts/run_binary.py
+P1 = load("p1_summary.json")
+expect(f"gives ${f(rn['auc'], 3)}\\pm{f(rn['auc_sd'], 3)}$ over the same seeds ({f(imp['result']['auc'], 3)} in "
+       f"the single June run) at an estimated {f(rn['cost']['size_kb'], 0)}\\,KB: {f(rn['auc'] - naive['auc'], 3)} "
+       f"above naive binarisation, {f(P1['nrms/nrms_reduced']['en_auc']['mean'] - rn['auc'], 3)} below the reduced "
+       f"NRMS and {f(P1['student/distill_ft_en']['en_auc']['mean'] - rn['auc'], 3)} below the distilled encoder",
+       "ReActNet, three seeds")
+expect(f"reach {f(rn['auc'], 3)} at {f(rn['cost']['size_kb'], 0)}\\,KB", "abstract, ReActNet")
+expect(f"reaches {f(rn['auc'], 3)} at {f(rn['cost']['size_kb'], 0)}\\,KB", "conclusion, ReActNet")
+if sorted(rn["seeds"]) != sorted(r["seeds"] for r in cell.values())[0]:
+    missing.append("ReActNet seeds differ from the matrix seeds ('over the same seeds')")
 
 # ---- P1 aggregates (three seeds)
 P = load("p1_summary.json")
@@ -262,6 +270,17 @@ if (RES / "unas_summary.json").exists() and (RES / "int8_export.json").exists():
     expect(f"{m(f4, 'en_auc')} against {m(hf, 'en_auc')} within the", "F401 AUCs")
     expect(f"({m(h7, 'xlang_auc')} against {m(hh, 'xlang_auc')}, {m(f4, 'xlang_auc')} against "
            f"{m(hf, 'xlang_auc')})", "translation AUCs")
+    uf = load("unas_full.json")
+
+    def mixed(name, field):
+        runs = [v["results"] for k, v in uf.items() if k.startswith(f"{name}/distill_ft_mixed/")]
+        if len(runs) != 3:
+            missing.append(f"{name}: {len(runs)} mixed-language runs, the text assumes three")
+        vals = [r["en"]["all"]["auc"] if field == "en" else r["mean_xlang_auc"] for r in runs]
+        return f(sum(vals) / len(vals), 3)
+
+    expect(f"read the translations at {mixed('mind_h7', 'x')} and {mixed('mind_f401', 'x')} and English at "
+           f"{mixed('mind_h7', 'en')} and {mixed('mind_f401', 'en')}", "µNAS encoders, mixed-language clicks")
     p1s = load("p1_summary.json")
     expect(f"scores {m(h5, 'en_auc')} in this form and {f(p1s['student/distill_ft_en']['en_auc']['mean'], 3)} in its",
            "64-5-384 in both forms")
