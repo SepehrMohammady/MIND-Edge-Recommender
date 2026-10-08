@@ -636,10 +636,10 @@ First comparator signal: the hand-designed 64-5-384 in the fork's form (fixed by
 input handling costs about 0.01 of teacher cosine; the 0.07 gap of the H7 choice is its architecture (one kernel-3
 convolution and one pooling: a receptive field of 4 bytes, against 11 for 64-5-384).
 
-## 2026-10-08 13:00 — Step 4: hand-designed comparators, seed 42 (results and board runs)
+## 2026-10-08 12:54 — Step 4: hand-designed comparators, seed 42 (results and board runs)
 
 Same programme as the µNAS encoders (`run_unas_full.py --models hand_64-5-384 hand_64-2-384 hand_32-5-384`, started
-11:53 by the queue); integer files and boards as before (int8qdq, seed 42; ST Edge AI Cloud 12:28-12:58).
+11:53 by the queue); integer files and boards as before (int8qdq, seed 42; ST Edge AI Cloud runs ending 12:25-12:26 and 12:51-12:54).
 
 | encoder (budget) | MACs (search model) | teacher cos | EN AUC | 14 languages | INT8 AUC | H7 ms | F401 ms | flash B (H7) | RAM B (H7) |
 |---|--:|--:|--:|--:|--:|--:|--:|--:|--:|
