@@ -66,7 +66,7 @@ for a, (xcol, xlabel) in zip(ax, (("size_kb", "encoder size (KB)"),
     for side in ("top", "right"):
         a.spines[side].set_visible(False)
 ax[0].set_ylabel("AUC (MINDsmall dev)")
-ax[0].text(ax[0].get_xlim()[1], nrms + 0.002, f"NRMS, 27 MB ({nrms:.3f})", ha="right", va="bottom",
+ax[1].text(ax[1].get_xlim()[1], nrms + 0.002, f"NRMS, 27 MB ({nrms:.3f})", ha="right", va="bottom",
            color=MUTED, fontsize=7)
 handles = ([Line2D([], [], marker="o", ls="", color=c, markeredgecolor=SURFACE, markersize=6, label=n)
             for n, c in ARMS.values()]
