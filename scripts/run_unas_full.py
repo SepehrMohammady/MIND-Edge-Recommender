@@ -12,8 +12,12 @@ on 96,000 rows. Here the two chosen ones go through the programme of the referen
   distill_ft_mixed  the same, each click shown in a random one of the 15 languages
 
 Seeds 42, 12 and 1, as in the reference runs (data order and negatives then match run for
-run). Evaluation on the full dev set: English by history bucket and the 14 xMIND languages.
-The network is the PyTorch build of src/unas_encoder.py, checked against the fork's Keras build
+run). The hand-designed family is trained the same way in the fork's terms ("hand_<C>-<D>-384":
+fixed byte table, mask channel, global average pooling; src/unas_encoder.hand_designed), so that
+the searched encoders meet hand-designed ones of the same budget, and the reference 64-5-384, with
+the same input and pooling: hand_64-2-384 is the best of the step-3 grid within the H7 budget,
+hand_32-5-384 the best within the F401 budget. Evaluation on the full dev set: English by
+history bucket and the 14 xMIND languages. The network is the PyTorch build of src/unas_encoder.py, checked against the fork's Keras build
 (scripts/check_unas_port.py); the byte table stays fixed, as in the search.
 
 Results: paper/results/unas_full.json and paper/results/experiments.jsonl, one record per run;
@@ -34,14 +38,15 @@ import torch
 from src import data_xmind, footprint, recommender, runlog, student
 from src.config import load_config, use_run_dir
 from src.seed import seed_everything
-from src.unas_encoder import UnasEncoder, chosen_arch
+from src.unas_encoder import UnasEncoder, model_arch
 
 PROTOCOLS = {"distill_ft_en": ["en"], "distill_ft_mixed": None}      # None = all 15 languages
 EPOCHS, DISTILL_EPOCHS = 8, 15
 TRAIN_IMPRESSIONS = EVAL_IMPRESSIONS = DISTILL_TITLES = None          # None = everything
 
 parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-parser.add_argument("--models", nargs="+", default=["mind_h7", "mind_f401"])
+parser.add_argument("--models", nargs="+", default=["mind_h7", "mind_f401"],
+                    help="mind_h7, mind_f401 (the search's choices) or hand_<C>-<D>-384")
 parser.add_argument("--protocols", nargs="+", default=["distill_ft_en"], choices=list(PROTOCOLS))
 parser.add_argument("--seeds", nargs="+", type=int, default=[42, 12, 1])
 parser.add_argument("--smoke", action="store_true", help="tiny settings, two languages, results kept out of paper/results")
@@ -96,7 +101,7 @@ def language_results(model) -> dict:
     return out
 
 
-def distilled_encoder(name: str, index: int, arch: dict, seed: int, cost: dict) -> UnasEncoder:
+def distilled_encoder(name: str, label, arch: dict, seed: int, cost: dict) -> UnasEncoder:
     path = CKPT / f"{name}_distilled_seed{seed}.pt"
     seed_everything(seed)
     enc = UnasEncoder(arch)
@@ -108,7 +113,7 @@ def distilled_encoder(name: str, index: int, arch: dict, seed: int, cost: dict) 
     torch.save(enc.state_dict(), path)
     teacher_cos = student.teacher_similarity(cfg, copy.deepcopy(enc).to(recommender_device()))
     save_run(f"{name}/distill/seed{seed}",
-             {"candidate": index, "arch": arch, "distill_epochs": DISTILL_EPOCHS, "distill_titles": DISTILL_TITLES,
+             {"model": label, "arch": arch, "distill_epochs": DISTILL_EPOCHS, "distill_titles": DISTILL_TITLES,
               "loss": "Matryoshka cosine (64, 128, 256, 384)", "byte_table": "fixed", "encoder_cost": cost},
              {"teacher_cosine_dev": teacher_cos}, started)
     return enc
@@ -119,14 +124,14 @@ def recommender_device() -> str:
 
 
 def run_model(name: str, seed: int) -> None:
-    index, arch = chosen_arch(name)
+    label, arch = model_arch(name)
     todo = [p for p in args.protocols if f"{name}/{p}/seed{seed}" not in load_done()]
     if not todo and f"{name}/distill/seed{seed}" in load_done():
         return
     cfg["seed"] = seed
     ex = torch.zeros(1, cfg["data"]["max_title_bytes"], dtype=torch.long)
     cost = footprint.summarize(UnasEncoder(arch), ex, cfg, precision="fp32")
-    distilled = distilled_encoder(name, index, arch, seed, cost)
+    distilled = distilled_encoder(name, label, arch, seed, cost)
     for protocol in todo:
         started = time.time()
         seed_everything(seed)
@@ -134,7 +139,7 @@ def run_model(name: str, seed: int) -> None:
         model = recommender.train_recommender(cfg, news_encoder=copy.deepcopy(distilled), epochs=EPOCHS,
                                               max_train_impressions=TRAIN_IMPRESSIONS, langs=langs)
         torch.save(model.state_dict(), CKPT / f"{name}_{protocol}_seed{seed}.pt")
-        settings = {"candidate": index, "arch": arch, "init": "distilled", "train_langs": langs, "epochs": EPOCHS,
+        settings = {"model": label, "arch": arch, "init": "distilled", "train_langs": langs, "epochs": EPOCHS,
                     "distill_epochs": DISTILL_EPOCHS, "byte_table": "fixed", "encoder_cost": cost}
         save_run(f"{name}/{protocol}/seed{seed}", settings, language_results(model), started)
         del model

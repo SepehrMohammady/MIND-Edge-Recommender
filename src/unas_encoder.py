@@ -141,6 +141,29 @@ def load_keras_weights(model: UnasEncoder, npz) -> None:
             mod.bias.data.copy_(w["bias"])
 
 
+def hand_designed(C: int, D: int) -> dict:
+    """The hand-designed byte-CNN C-D-384 in the fork's terms, as in unas/eval_reference.py (grid of
+    step 3): 1x1 convolution to C channels, then D blocks of depthwise convolution (kernel 3) and 1x1
+    convolution with batch norm and ReLU, global average pooling, 384-unit output."""
+    def pw(bn):
+        return {"type": "1x1Conv1D", "filters": C, "has_bn": bn, "has_relu": bn, "has_prepool": False}
+    dw = {"type": "DWConv1D", "ker_size": 3, "1x_stride": False, "has_bn": False, "has_relu": False,
+          "has_prepool": False}
+    blocks = [{"is_branch": False, "layers": [pw(False)]}]
+    blocks += [{"is_branch": False, "layers": [dict(dw), pw(True)]} for _ in range(D)]
+    return {"conv_blocks": blocks, "pooling": {"type": "gap", "pool_size": 2}, "dense_blocks": [],
+            "head_dropout": 0.0}
+
+
+def model_arch(name: str) -> tuple:
+    """(label, architecture) of a step-4 model: "mind_h7" / "mind_f401" = the search's choice
+    (label = candidate index), "hand_<C>-<D>-384" = the hand-designed family in the fork's terms."""
+    if name.startswith("hand_"):
+        C, D, _ = (int(v) for v in name[len("hand_"):].split("-"))
+        return name[len("hand_"):], hand_designed(C, D)
+    return chosen_arch(name)
+
+
 def chosen_arch(name: str) -> tuple[int, dict]:
     """Index and architecture chosen by unas/select_by_seeds.py for search ``name``."""
     res = ROOT / "paper/results/unas"
