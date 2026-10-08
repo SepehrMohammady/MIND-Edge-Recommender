@@ -36,5 +36,81 @@
    "ram_kb": 64.0,
    "fp_param_fraction": 1.0
   }
+ },
+ "micro_nas/int8/seed42": {
+  "seed": 42,
+  "minutes": 7.26,
+  "settings": {
+   "arm": "micro_nas",
+   "precision": "int8",
+   "arch": {
+    "channels": 64,
+    "depth": 5,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 2,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.6219,
+   "mrr": 0.3395,
+   "ndcg@5": 0.3167,
+   "ndcg@10": 0.3777,
+   "n_impressions": 73152,
+   "params": 68288,
+   "macs": 3293184,
+   "macs_fp32": 548864,
+   "macs_quantized": 2744320,
+   "size_kb": 203.94,
+   "energy_uj": 3.156,
+   "ram_kb": 16.0,
+   "fp_param_fraction": 0.686
+  }
+ },
+ "micro_nas/binary/seed42": {
+  "seed": 42,
+  "minutes": 4.3,
+  "settings": {
+   "arm": "micro_nas",
+   "precision": "binary",
+   "arch": {
+    "channels": 64,
+    "depth": 5,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 2,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.5319,
+   "mrr": 0.266,
+   "ndcg@5": 0.2414,
+   "ndcg@10": 0.3074,
+   "n_impressions": 73152,
+   "params": 68288,
+   "macs": 3293184,
+   "macs_fp32": 548864,
+   "macs_quantized": 2744320,
+   "size_kb": 185.62,
+   "energy_uj": 2.7221,
+   "ram_kb": 16.0,
+   "fp_param_fraction": 0.686
+  }
  }
 }

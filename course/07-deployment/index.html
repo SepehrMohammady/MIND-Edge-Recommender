@@ -191,7 +191,7 @@ arch = {<span class="str">"channels"</span>: <span class="num">64</span>, <span 
 </div>
 
 <h3>روش ۴: اندازه‌گیری روی برد با ST Edge AI Developer Cloud</h3>
-<p>برای برد، مدل به‌صورت ONNX صادر می‌شود، اما بدون جدول embedding: کد فراخواننده ۱۲۸ سطر جدول ۲۵۷×۶۴ را برمی‌دارد و دنبالهٔ embed‌شده و ماسک padding را به شبکه می‌دهد. نسخهٔ 8-bit با کوانتیزاسیون ایستای ONNX Runtime ساخته می‌شود (وزن و activation هر دو 8-bit، فرمت QDQ). ST Edge AI Core فایل را به کد C تبدیل می‌کند و Developer Cloud آن را روی برد واقعی اجرا و زمان‌سنجی می‌کند.</p>
+<p>برای برد، مدل به‌صورت ONNX صادر می‌شود، اما بدون جدول embedding: کد فراخواننده ۱۲۸ سطر جدول ۲۵۷×۶۴ را برمی‌دارد و دنبالهٔ embed‌شده و ماسک padding را به شبکه می‌دهد. نسخهٔ 8-bit با کوانتیزاسیون ایستای ONNX Runtime ساخته می‌شود (فرمت QDQ: وزن‌ها و ورودی هر کانولوشن و لایهٔ خروجی 8-bit هستند؛ تابع‌های فعال‌سازی و میانگین‌گیری میان آن‌ها در ممیز شناور می‌مانند). ST Edge AI Core فایل را به کد C تبدیل می‌کند و Developer Cloud آن را روی برد واقعی اجرا و زمان‌سنجی می‌کند.</p>
 <div class="code-wrap">
   <div class="code-header"><span class="code-lang">Shell — scripts/deploy_boards.py و scripts/stedgeai_cloud.py</span><button class="copy-btn">کپی</button></div>
   <pre><span class="cmt"># ساختن فایل‌های FP32 و 8-bit و سنجش AUC آن‌ها روی dev</span>
@@ -212,6 +212,22 @@ python -m scripts.stedgeai_cloud benchmark artifacts/stedgeai/models/micro_nas_6
 </table>
 </div>
 <p>جدول بایت (64.3 KB) جداگانه در flash نگه داشته می‌شود. فایل 8-bit روی dev به AUC برابر 0.622 می‌رسد، در برابر 0.628 برای همان وزن‌ها با FP32. روی Cortex-M7 نسخهٔ 8-bit حدود 2.5 برابر سریع‌تر است؛ روی Cortex-M4 سریع‌تر نیست و سودش فقط در flash و RAM است. Developer Cloud زمان و حافظه را گزارش می‌دهد، نه انرژی؛ ستون انرژی همچنان تحلیلی است.</p>
+
+<h3>روش ۵: جست‌وجوی µNAS زیر بودجهٔ هر برد</h3>
+<p>با نسخهٔ یک‌بعدی آزمایشگاه از µNAS برای هر برد جداگانه جست‌وجو شد: برای STM32H7B3I-DK بودجهٔ 256 KiB وزن، 128 KiB activation و 2 میلیون MAC برای هر عنوان، و برای NUCLEO-F401RE بودجهٔ 128 KiB، 48 KiB و 1 میلیون MAC. شبکهٔ انتخاب‌شده و بهترین شکل دست‌سازِ همان بودجه با برنامهٔ کامل آموزش دیدند (تقطیر روی 769 هزار سطر، سپس کلیک‌های انگلیسی، سه seed) و فایل 8-bit هرکدام روی هر دو برد اجرا شد.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>شبکه</th><th>MAC</th><th>AUC (سه seed)</th><th>STM32H7B3I-DK</th><th>NUCLEO-F401RE</th></tr></thead>
+  <tbody>
+    <tr><td>µNAS، بودجهٔ H7</td><td>2.00 M</td><td>0.595</td><td>18.7 ms</td><td>252.3 ms</td></tr>
+    <tr><td>دست‌ساز 64-2-384، بودجهٔ H7</td><td>1.66 M</td><td>0.599</td><td>16.6 ms</td><td>191.7 ms</td></tr>
+    <tr><td>µNAS، بودجهٔ F401</td><td>0.65 M</td><td>0.591</td><td>15.1 ms</td><td>32.1 ms</td></tr>
+    <tr><td>دست‌ساز 32-5-384، بودجهٔ F401</td><td>1.00 M</td><td>0.589</td><td>21.2 ms</td><td>88.7 ms</td></tr>
+    <tr><td>دست‌ساز 64-5-384، بیرون از هر دو بودجه</td><td>3.31 M</td><td>0.618</td><td>31.5 ms</td><td>426.8 ms</td></tr>
+  </tbody>
+</table>
+</div>
+<p>در هر دو بودجه دقت رتبه‌بندیِ شبکهٔ جست‌وجوشده و بهترین شکل دست‌ساز در حد نوسان seedها یکی است. تفاوت روی برد دیده می‌شود: شبکهٔ بودجهٔ F401 روی NUCLEO-F401RE در 32.1 میلی‌ثانیه اجرا می‌شود، 2.8 برابر سریع‌تر از 32-5-384، چون در آن شکل دست‌ساز لایه‌های depthwise روی Cortex-M4 حدود 22 چرخه برای هر MAC می‌گیرند. یک درس روشی هم دارد: جست‌وجو هر نامزد را با تقطیری کوتاه (96 هزار سطر، حداکثر 15 دوره) می‌سنجد، و ترتیبی که این سنجش کوتاه می‌دهد پس از آموزش کامل پابرجا نماند.</p>
 
 <h2>۷.۶ مسیر استقرار</h2>
 <div class="steps">

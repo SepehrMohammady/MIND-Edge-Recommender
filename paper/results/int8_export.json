@@ -587,6 +587,300 @@
     "p05": 0.9721
    },
    "minutes": 1.01
+  },
+  "hand_64-5-384/seed12": {
+   "checkpoint": "artifacts\\runs\\unas_full\\hand_64-5-384_distill_ft_en_seed12.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.6093,
+    "mrr": 0.3206,
+    "ndcg@5": 0.2966,
+    "ndcg@10": 0.3645,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.6093,
+    "mrr": 0.3206,
+    "ndcg@5": 0.2966,
+    "ndcg@10": 0.3645,
+    "n_impressions": 73152,
+    "file_bytes": 209501,
+    "file": "artifacts\\stedgeai\\models\\hand_64-5-384_seed12_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.6004,
+    "mrr": 0.3141,
+    "ndcg@5": 0.2899,
+    "ndcg@10": 0.3586,
+    "n_impressions": 73152,
+    "file_bytes": 91542,
+    "file": "artifacts\\stedgeai\\models\\hand_64-5-384_seed12_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9894,
+    "min": 0.9427,
+    "p05": 0.979
+   },
+   "onnx_int8full": {
+    "auc": 0.6057,
+    "mrr": 0.3179,
+    "ndcg@5": 0.2943,
+    "ndcg@10": 0.362,
+    "n_impressions": 73152,
+    "file_bytes": 89427,
+    "file": "artifacts\\stedgeai\\models\\hand_64-5-384_seed12_body_int8full.onnx"
+   },
+   "cosine_fp32_vs_int8full": {
+    "mean": 0.9916,
+    "min": 0.9467,
+    "p05": 0.9834
+   },
+   "minutes": 1.12
+  },
+  "hand_64-5-384/seed1": {
+   "checkpoint": "artifacts\\runs\\unas_full\\hand_64-5-384_distill_ft_en_seed1.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.623,
+    "mrr": 0.3232,
+    "ndcg@5": 0.3091,
+    "ndcg@10": 0.3725,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.623,
+    "mrr": 0.3232,
+    "ndcg@5": 0.3091,
+    "ndcg@10": 0.3725,
+    "n_impressions": 73152,
+    "file_bytes": 209501,
+    "file": "artifacts\\stedgeai\\models\\hand_64-5-384_seed1_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.621,
+    "mrr": 0.3203,
+    "ndcg@5": 0.3073,
+    "ndcg@10": 0.3699,
+    "n_impressions": 73152,
+    "file_bytes": 91551,
+    "file": "artifacts\\stedgeai\\models\\hand_64-5-384_seed1_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9884,
+    "min": 0.9172,
+    "p05": 0.9748
+   },
+   "onnx_int8full": {
+    "auc": 0.6195,
+    "mrr": 0.3187,
+    "ndcg@5": 0.3055,
+    "ndcg@10": 0.3682,
+    "n_impressions": 73152,
+    "file_bytes": 89427,
+    "file": "artifacts\\stedgeai\\models\\hand_64-5-384_seed1_body_int8full.onnx"
+   },
+   "cosine_fp32_vs_int8full": {
+    "mean": 0.9898,
+    "min": 0.9171,
+    "p05": 0.9779
+   },
+   "minutes": 1.08
+  },
+  "hand_64-2-384/seed12": {
+   "checkpoint": "artifacts\\runs\\unas_full\\hand_64-2-384_distill_ft_en_seed12.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.5921,
+    "mrr": 0.3016,
+    "ndcg@5": 0.2798,
+    "ndcg@10": 0.3474,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.5921,
+    "mrr": 0.3016,
+    "ndcg@5": 0.2798,
+    "ndcg@10": 0.3474,
+    "n_impressions": 73152,
+    "file_bytes": 154594,
+    "file": "artifacts\\stedgeai\\models\\hand_64-2-384_seed12_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.5926,
+    "mrr": 0.2991,
+    "ndcg@5": 0.2789,
+    "ndcg@10": 0.3463,
+    "n_impressions": 73152,
+    "file_bytes": 60826,
+    "file": "artifacts\\stedgeai\\models\\hand_64-2-384_seed12_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9993,
+    "min": 0.8821,
+    "p05": 0.9986
+   },
+   "onnx_int8full": {
+    "auc": 0.5919,
+    "mrr": 0.3,
+    "ndcg@5": 0.2792,
+    "ndcg@10": 0.3461,
+    "n_impressions": 73152,
+    "file_bytes": 60742,
+    "file": "artifacts\\stedgeai\\models\\hand_64-2-384_seed12_body_int8full.onnx"
+   },
+   "cosine_fp32_vs_int8full": {
+    "mean": 0.9994,
+    "min": 0.8828,
+    "p05": 0.9988
+   },
+   "minutes": 0.95
+  },
+  "hand_64-2-384/seed1": {
+   "checkpoint": "artifacts\\runs\\unas_full\\hand_64-2-384_distill_ft_en_seed1.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.6015,
+    "mrr": 0.3114,
+    "ndcg@5": 0.2895,
+    "ndcg@10": 0.3556,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.6015,
+    "mrr": 0.3114,
+    "ndcg@5": 0.2895,
+    "ndcg@10": 0.3556,
+    "n_impressions": 73152,
+    "file_bytes": 154594,
+    "file": "artifacts\\stedgeai\\models\\hand_64-2-384_seed1_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.5951,
+    "mrr": 0.3066,
+    "ndcg@5": 0.2829,
+    "ndcg@10": 0.3504,
+    "n_impressions": 73152,
+    "file_bytes": 60835,
+    "file": "artifacts\\stedgeai\\models\\hand_64-2-384_seed1_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9989,
+    "min": 0.6067,
+    "p05": 0.9976
+   },
+   "onnx_int8full": {
+    "auc": 0.5919,
+    "mrr": 0.3046,
+    "ndcg@5": 0.281,
+    "ndcg@10": 0.3486,
+    "n_impressions": 73152,
+    "file_bytes": 60751,
+    "file": "artifacts\\stedgeai\\models\\hand_64-2-384_seed1_body_int8full.onnx"
+   },
+   "cosine_fp32_vs_int8full": {
+    "mean": 0.999,
+    "min": 0.6095,
+    "p05": 0.9977
+   },
+   "minutes": 1.03
+  },
+  "hand_32-5-384/seed12": {
+   "checkpoint": "artifacts\\runs\\unas_full\\hand_32-5-384_distill_ft_en_seed12.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.5881,
+    "mrr": 0.2995,
+    "ndcg@5": 0.2786,
+    "ndcg@10": 0.3464,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.5881,
+    "mrr": 0.2995,
+    "ndcg@5": 0.2786,
+    "ndcg@10": 0.3464,
+    "n_impressions": 73152,
+    "file_bytes": 87249,
+    "file": "artifacts\\stedgeai\\models\\hand_32-5-384_seed12_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.5886,
+    "mrr": 0.3028,
+    "ndcg@5": 0.2814,
+    "ndcg@10": 0.3484,
+    "n_impressions": 73152,
+    "file_bytes": 55334,
+    "file": "artifacts\\stedgeai\\models\\hand_32-5-384_seed12_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9916,
+    "min": 0.9034,
+    "p05": 0.9801
+   },
+   "onnx_int8full": {
+    "auc": 0.5864,
+    "mrr": 0.3014,
+    "ndcg@5": 0.2795,
+    "ndcg@10": 0.3474,
+    "n_impressions": 73152,
+    "file_bytes": 53219,
+    "file": "artifacts\\stedgeai\\models\\hand_32-5-384_seed12_body_int8full.onnx"
+   },
+   "cosine_fp32_vs_int8full": {
+    "mean": 0.9931,
+    "min": 0.9266,
+    "p05": 0.9837
+   },
+   "minutes": 1.17
+  },
+  "hand_32-5-384/seed1": {
+   "checkpoint": "artifacts\\runs\\unas_full\\hand_32-5-384_distill_ft_en_seed1.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.5987,
+    "mrr": 0.3028,
+    "ndcg@5": 0.2853,
+    "ndcg@10": 0.3524,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.5987,
+    "mrr": 0.3028,
+    "ndcg@5": 0.2853,
+    "ndcg@10": 0.3524,
+    "n_impressions": 73152,
+    "file_bytes": 87249,
+    "file": "artifacts\\stedgeai\\models\\hand_32-5-384_seed1_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.592,
+    "mrr": 0.3,
+    "ndcg@5": 0.2824,
+    "ndcg@10": 0.3494,
+    "n_impressions": 73152,
+    "file_bytes": 55343,
+    "file": "artifacts\\stedgeai\\models\\hand_32-5-384_seed1_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9844,
+    "min": 0.9227,
+    "p05": 0.9706
+   },
+   "onnx_int8full": {
+    "auc": 0.5868,
+    "mrr": 0.2989,
+    "ndcg@5": 0.2802,
+    "ndcg@10": 0.3472,
+    "n_impressions": 73152,
+    "file_bytes": 53219,
+    "file": "artifacts\\stedgeai\\models\\hand_32-5-384_seed1_body_int8full.onnx"
+   },
+   "cosine_fp32_vs_int8full": {
+    "mean": 0.9853,
+    "min": 0.9257,
+    "p05": 0.9722
+   },
+   "minutes": 1.24
   }
  },
  "summary": {
@@ -630,31 +924,43 @@
    "int8full_minus_fp32_auc": -0.0028
   },
   "hand_64-5-384": {
-   "n": 1,
-   "torch_fp32_auc": 0.6224,
-   "onnx_fp32_auc": 0.6224,
-   "onnx_int8qdq_auc": 0.6199,
-   "int8qdq_minus_fp32_auc": -0.0025,
-   "onnx_int8full_auc": 0.6213,
-   "int8full_minus_fp32_auc": -0.0011
+   "n": 3,
+   "torch_fp32_auc": 0.6182,
+   "torch_fp32_auc_sd": 0.0063,
+   "onnx_fp32_auc": 0.6182,
+   "onnx_fp32_auc_sd": 0.0063,
+   "onnx_int8qdq_auc": 0.6138,
+   "onnx_int8qdq_auc_sd": 0.0095,
+   "int8qdq_minus_fp32_auc": -0.0045,
+   "onnx_int8full_auc": 0.6155,
+   "onnx_int8full_auc_sd": 0.007,
+   "int8full_minus_fp32_auc": -0.0027
   },
   "hand_64-2-384": {
-   "n": 1,
-   "torch_fp32_auc": 0.6021,
-   "onnx_fp32_auc": 0.6021,
-   "onnx_int8qdq_auc": 0.6054,
-   "int8qdq_minus_fp32_auc": 0.0033,
-   "onnx_int8full_auc": 0.6038,
-   "int8full_minus_fp32_auc": 0.0017
+   "n": 3,
+   "torch_fp32_auc": 0.5986,
+   "torch_fp32_auc_sd": 0.0046,
+   "onnx_fp32_auc": 0.5986,
+   "onnx_fp32_auc_sd": 0.0046,
+   "onnx_int8qdq_auc": 0.5977,
+   "onnx_int8qdq_auc_sd": 0.0055,
+   "int8qdq_minus_fp32_auc": -0.0009,
+   "onnx_int8full_auc": 0.5959,
+   "onnx_int8full_auc_sd": 0.0056,
+   "int8full_minus_fp32_auc": -0.0027
   },
   "hand_32-5-384": {
-   "n": 1,
-   "torch_fp32_auc": 0.5799,
-   "onnx_fp32_auc": 0.5799,
-   "onnx_int8qdq_auc": 0.5852,
-   "int8qdq_minus_fp32_auc": 0.0053,
-   "onnx_int8full_auc": 0.5829,
-   "int8full_minus_fp32_auc": 0.003
+   "n": 3,
+   "torch_fp32_auc": 0.5889,
+   "torch_fp32_auc_sd": 0.0077,
+   "onnx_fp32_auc": 0.5889,
+   "onnx_fp32_auc_sd": 0.0077,
+   "onnx_int8qdq_auc": 0.5886,
+   "onnx_int8qdq_auc_sd": 0.0028,
+   "int8qdq_minus_fp32_auc": -0.0003,
+   "onnx_int8full_auc": 0.5854,
+   "onnx_int8full_auc_sd": 0.0018,
+   "int8full_minus_fp32_auc": -0.0035
   }
  },
  "versions": {
