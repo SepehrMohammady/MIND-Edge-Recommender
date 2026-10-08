@@ -595,3 +595,43 @@ Pad export fix
 - In these QDQ files only Conv and Gemm run in 8 bits; ReLU, max-pooling and the average run in float between them
   (`--op_types_to_quantize Conv Gemm MatMul`, as for the reference, so that the files compare). Quantising those
   operators too would cut RAM and time further; not done yet.
+
+## 2026-10-08 12:25 — Step 4: µNAS encoders over three seeds; full-integer files; first comparator signal
+
+µNAS encoders, English clicks, seeds 42, 12, 1 (10:53-11:53, one process; distillation 1.2-3.2 min, clicks 5.6-11.0 min):
+
+| encoder | teacher cosine, EN dev | EN AUC | mean of 14 languages |
+|---|--:|--:|--:|
+| µNAS H7 (cand. 144) | 0.392 ± 0.001 | 0.595 ± 0.003 (0.598 / 0.596 / 0.590) | 0.543 ± 0.005 |
+| µNAS F401 (cand. 134) | 0.349 ± 0.002 | 0.591 ± 0.003 (0.595 / 0.587 / 0.590) | 0.537 ± 0.004 |
+| reference 64-5-384 (P1) | 0.472 | 0.629 ± 0.003 | 0.557 ± 0.002 |
+
+Integer files, three seeds each (`scripts/export_int8.py`, now with two variants: `int8qdq` = Conv/Gemm/MatMul only, the
+files measured so far; `int8full` = every operator ONNX Runtime quantises, ReLU folded into the convolution's range):
+
+| encoder | PyTorch | int8qdq | int8full |
+|---|--:|--:|--:|
+| µNAS H7 | 0.5949 | 0.5959 ± 0.0027 | 0.5952 ± 0.0023 |
+| µNAS F401 | 0.5905 | 0.5896 ± 0.0025 | 0.5899 ± 0.0028 |
+| reference 64-5-384 | 0.6285 | 0.6242 ± 0.0036 | 0.6257 ± 0.0025 |
+
+Board runs of the full-integer files (seed 42), 12:10-12:22:
+
+| file | board | int8qdq ms | int8full ms | int8qdq RAM B | int8full RAM B |
+|---|---|--:|--:|--:|--:|
+| µNAS H7 | STM32H7B3I-DK | 18.68 | 31.58 | 32,772 | 33,200 |
+| µNAS H7 | NUCLEO-F401RE | 252.26 | 264.32 | 26,020 | 26,448 |
+| µNAS F401 | STM32H7B3I-DK | 15.08 | 15.12 | 19,192 | 19,192 |
+| µNAS F401 | NUCLEO-F401RE | 32.15 | 31.91 | 17,956 | 17,956 |
+| reference 64-5-384 | STM32H7B3I-DK | 31.19 | 39.55 | 49.4 KB | 41,212 |
+| reference 64-5-384 | NUCLEO-F401RE | 449.64 | 449.48 | 44.5 KB | 35,072 |
+
+- Quantising the remaining operators does not speed anything up. In the µNAS H7 file ST Edge AI then fuses the kernel-3
+  convolution, its ReLU and the max-pooling into one integer "convolution with pooling" kernel, which takes 20.2 ms
+  (5.8 cycles per MACC) on the Cortex-M7; the same convolution in the int8qdq file is part of an 18.7 ms total. RAM
+  falls only for the reference (its masked average runs in 8 bits). The int8qdq files stay the deployment files.
+
+First comparator signal: the hand-designed 64-5-384 in the fork's form (fixed byte table, mask channel, average over all
+128 positions) reaches teacher cosine 0.460 after full distillation (seed 42), against 0.468 for the reference form. The
+input handling costs about 0.01 of teacher cosine; the 0.07 gap of the H7 choice is its architecture (one kernel-3
+convolution and one pooling: a receptive field of 4 bytes, against 11 for 64-5-384).
