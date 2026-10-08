@@ -1,0 +1,40 @@
+{
+ "micro_nas/fp32/seed42": {
+  "seed": 42,
+  "minutes": 16.1,
+  "settings": {
+   "arm": "micro_nas",
+   "precision": "fp32",
+   "arch": {
+    "channels": 64,
+    "depth": 5,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 0,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.6203,
+   "mrr": 0.3362,
+   "ndcg@5": 0.3137,
+   "ndcg@10": 0.3756,
+   "n_impressions": 73152,
+   "params": 68288,
+   "macs": 3293184,
+   "macs_fp32": 3293184,
+   "macs_quantized": 0,
+   "size_kb": 266.75,
+   "energy_uj": 15.1486,
+   "ram_kb": 64.0,
+   "fp_param_fraction": 1.0
+  }
+ }
+}
