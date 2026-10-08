@@ -28,6 +28,7 @@ from pathlib import Path
 
 import numpy as np
 import onnx
+from onnx import numpy_helper
 import onnxruntime as ort
 import torch
 from onnxruntime.quantization import CalibrationDataReader, QuantFormat, QuantType, quantize_static
@@ -78,6 +79,46 @@ def embed_inputs(table, ids):
     return x, (ids != 0).astype(np.float32)[:, None, :]
 
 
+def fold_pads(path):
+    """Move every zero-valued constant Pad into the Conv that reads it (Conv "pads" attribute).
+
+    The same function, without a Pad node: ST Edge AI Core 4.0.1 writes C code that does not
+    compile for the Pad node of a PyTorch export (its constant value is left empty; network.c
+    "expected expression before ']'", benchmark of 2026-10-08). The pads are computed by a small
+    subgraph in the export, so the graph is first constant-folded with ONNX Runtime (basic level)."""
+    folded = path.with_name(path.stem + "_folded.onnx")
+    so = ort.SessionOptions()
+    so.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
+    so.optimized_model_filepath = str(folded)
+    ort.InferenceSession(str(path), so, providers=["CPUExecutionProvider"])
+    m = onnx.load(str(folded))
+    folded.unlink()
+    g = m.graph
+    inits = {i.name: numpy_helper.to_array(i) for i in g.initializer}
+    users = {}
+    for n in g.node:
+        for i in n.input:
+            users.setdefault(i, []).append(n)
+    for pad in [n for n in g.node if n.op_type == "Pad"]:
+        mode = next((a.s for a in pad.attribute if a.name == "mode"), b"constant")
+        value = inits.get(pad.input[2]) if len(pad.input) > 2 and pad.input[2] else np.zeros(1)
+        conv = users.get(pad.output[0], [])
+        assert mode == b"constant" and pad.input[1] in inits and value is not None and not np.any(value), pad
+        assert len(conv) == 1 and conv[0].op_type == "Conv", f"Pad {pad.name} does not feed one Conv"
+        conv, p = conv[0], inits[pad.input[1]].tolist()
+        r = len(p) // 2
+        assert not any(p[:2]) and not any(p[r:r + 2]), "padding on batch or channel axis"
+        old = next((list(a.ints) for a in conv.attribute if a.name == "pads"), [0] * (2 * (r - 2)))
+        new = [old[i] + p[2 + i] for i in range(r - 2)] + [old[r - 2 + i] + p[r + 2 + i] for i in range(r - 2)]
+        for a in [a for a in conv.attribute if a.name in ("pads", "auto_pad")]:
+            conv.attribute.remove(a)
+        conv.attribute.append(onnx.helper.make_attribute("pads", new))
+        conv.input[0] = pad.input[0]
+        g.node.remove(pad)
+    onnx.checker.check_model(m)
+    onnx.save(m, str(path))
+
+
 def export(enc, path):
     # The exporter puts the wrapper back into the mode it had; a new wrapper is in training mode,
     # which would leave the encoder with BatchNorm on batch statistics and dropout active afterwards.
@@ -85,6 +126,8 @@ def export(enc, path):
     torch.onnx.export(Body(enc).eval(), (torch.zeros(1, enc.embed.weight.shape[1], L), torch.ones(1, 1, L)), str(path),
                       input_names=["embedded_bytes", "mask"], output_names=["news_embedding"], opset_version=18,
                       dynamo=False)
+    if any(n.op_type == "Pad" for n in onnx.load(str(path)).graph.node):
+        fold_pads(path)
     onnx.checker.check_model(onnx.load(str(path)))
 
 

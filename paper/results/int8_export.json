@@ -104,16 +104,100 @@
     "p05": 0.9825
    },
    "minutes": 0.78
+  },
+  "unas_h7/seed42": {
+   "checkpoint": "artifacts\\runs\\unas_full\\mind_h7_distill_ft_en_seed42.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.5984,
+    "mrr": 0.2957,
+    "ndcg@5": 0.2775,
+    "ndcg@10": 0.3451,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.5984,
+    "mrr": 0.2957,
+    "ndcg@5": 0.2775,
+    "ndcg@10": 0.3451,
+    "n_impressions": 73152,
+    "file_bytes": 214848,
+    "file": "artifacts\\stedgeai\\models\\unas_h7_seed42_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.5986,
+    "mrr": 0.2949,
+    "ndcg@5": 0.2768,
+    "ndcg@10": 0.3442,
+    "n_impressions": 73152,
+    "file_bytes": 72032,
+    "file": "artifacts\\stedgeai\\models\\unas_h7_seed42_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9988,
+    "min": 0.9805,
+    "p05": 0.9979
+   },
+   "minutes": 0.71
+  },
+  "unas_f401/seed42": {
+   "checkpoint": "artifacts\\runs\\unas_full\\mind_f401_distill_ft_en_seed42.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.5949,
+    "mrr": 0.301,
+    "ndcg@5": 0.283,
+    "ndcg@10": 0.3486,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.5949,
+    "mrr": 0.301,
+    "ndcg@5": 0.283,
+    "ndcg@10": 0.3486,
+    "n_impressions": 73152,
+    "file_bytes": 171726,
+    "file": "artifacts\\stedgeai\\models\\unas_f401_seed42_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.5931,
+    "mrr": 0.3003,
+    "ndcg@5": 0.282,
+    "ndcg@10": 0.3475,
+    "n_impressions": 73152,
+    "file_bytes": 56783,
+    "file": "artifacts\\stedgeai\\models\\unas_f401_seed42_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9992,
+    "min": 0.7393,
+    "p05": 0.9983
+   },
+   "minutes": 0.6
   }
  },
  "summary": {
+  "unas_h7": {
+   "n": 1,
+   "torch_fp32_auc": 0.5984,
+   "onnx_fp32_auc": 0.5984,
+   "onnx_int8qdq_auc": 0.5986,
+   "int8_minus_fp32_auc": 0.0002
+  },
+  "unas_f401": {
+   "n": 1,
+   "torch_fp32_auc": 0.5949,
+   "onnx_fp32_auc": 0.5949,
+   "onnx_int8qdq_auc": 0.5931,
+   "int8_minus_fp32_auc": -0.0018
+  },
   "ref_64-5-384": {
    "n": 3,
    "torch_fp32_auc": 0.6285,
    "onnx_fp32_auc": 0.6285,
    "onnx_int8qdq_auc": 0.6242,
    "int8_minus_fp32_auc": -0.0043,
-   "onnx_int8qdq_auc_sd": 0.0045
+   "onnx_int8qdq_auc_sd": 0.0036
   }
  },
  "versions": {

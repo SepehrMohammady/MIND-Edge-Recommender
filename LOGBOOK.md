@@ -546,3 +546,52 @@ Integer export with three seeds (`scripts/export_int8.py`, CPU)
   results are not affected (the model is put in evaluation mode before it is evaluated).
 - 1-bit: not started. Route to a board as in `docs/binary_deployment.md` (Larq, LCE, TFLite Micro on the H7, as in
   `NAS-BNN/publish/nasbnn-wakevision-stm32`, or CBin-NN).
+
+## 2026-10-08 11:35 — Step 4 first results (seed 42); board files of the µNAS encoders; Pad export fix
+
+Full programme, seed 42 (`scripts/run_unas_full.py`; reference 64-5-384 from P1 for comparison):
+
+| encoder | distillation | teacher cosine, EN dev | click training | EN AUC | mean of 14 languages |
+|---|--:|--:|--:|--:|--:|
+| µNAS H7, candidate 144 | 3.2 min | 0.390 | 11.0 min | 0.5984 | 0.5500 |
+| µNAS F401, candidate 134 | 1.7 min | – | 5.8 min | 0.5949 | 0.5354 |
+| reference 64-5-384 (P1, seed 42) | – | 0.468 | – | 0.6284 | 0.5565 |
+
+- The search recipe put the H7 choice 0.012 below 64-5-384 in teacher cosine (0.331 against 0.343, 96k rows,
+  15 epochs at most); after distillation on all 769k rows the gap is 0.078 (0.390 against 0.468) and the click-trained
+  encoder is 0.030 AUC below the reference. The two differ in more than the architecture: the searched encoders read
+  the byte table fixed (the reference trains its own) and average over all 128 positions, padding included (the
+  reference averages over the title's bytes only). The hand-designed encoders in the same form (64-5-384, and the
+  grid's best within each budget, 64-2-384 and 32-5-384) were added to the queue after the µNAS runs to separate the
+  two effects.
+- GPU during click training of the H7 encoder: 90-94 %, 2.8 GB, 70-73 °C, 93-95 W; distillation 75-77 %, 1.2 GB.
+
+Integer files (`scripts/export_int8.py`), seed 42: µNAS H7 0.5984 (PyTorch) = 0.5984 (ONNX FP32), 0.5986 (ONNX INT8),
+72,032 B; µNAS F401 0.5949 = 0.5949, 0.5931, 56,783 B.
+
+Board runs, ST Edge AI Developer Cloud (Core 4.0.1), INT8 files of seed 42, 11:20-11:33:
+
+| file | board | ms | MACC | weights B | flash B | RAM B | cycles/MACC |
+|---|---|--:|--:|--:|--:|--:|--:|
+| µNAS H7 | STM32H7B3I-DK | 18.68 | 2,047,954 | 55,716 | 74,059 | 32,772 | 2.55 |
+| µNAS H7 | NUCLEO-F401RE | 252.26 | 2,047,954 | 55,716 | 74,935 | 26,020 | 10.35 |
+| µNAS F401 | STM32H7B3I-DK | 15.08 | 661,128 | 44,532 | 63,393 | 19,192 | 6.39 |
+| µNAS F401 | NUCLEO-F401RE | 32.15 | 661,128 | 44,532 | 64,297 | 17,956 | 4.08 |
+
+On-target validation error 0 for all four. For comparison, 64-5-384 INT8 (10-07): 31.19 ms on the H7, 449.64 ms on
+the F401.
+
+Pad export fix
+- The first board run of the H7 file (11:09-11:13) failed on both boards: the C code that ST Edge AI generates for the
+  ONNX Pad node of the PyTorch export does not compile (the node's constant value is empty: `network.c: expected
+  expression before ']'`, `_layers_1_Pad_output_0_value undeclared`). The board then ran the firmware of the previous
+  job, so the validation and timing in the server's log belonged to another model (the 256-4-384 and 96-2-384 FP32
+  tables of 10-07: 837.37 and 397.22 ms) and the check reported a cosine of -0.04. The two records are kept
+  (`*__failed.json`, with a note; account id removed).
+- `fold_pads` in `scripts/export_int8.py`: constant-fold the exported graph with ONNX Runtime (basic level) and move each
+  zero Pad into the Conv that reads it (Conv `pads`: [1, 1] for the H7 encoder's kernel-3 layer, [0, 1] and [1, 2] for
+  the F401 encoder's strided layers). Same function: largest difference to PyTorch 1.5e-7 on 200 titles. The H7 file was
+  exported again; its AUC did not change. The reference files have no Pad node and are not affected.
+- In these QDQ files only Conv and Gemm run in 8 bits; ReLU, max-pooling and the average run in float between them
+  (`--op_types_to_quantize Conv Gemm MatMul`, as for the reference, so that the files compare). Quantising those
+  operators too would cut RAM and time further; not done yet.
