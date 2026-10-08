@@ -12,12 +12,13 @@ protocol) with seeds 42, 12 and 1:
 
 Export as in scripts/deploy_boards.py: the network after the byte-table lookup, inputs embedded
 sequence (1, 64, 128) and padding mask (1, 1, 128), FP32 ONNX (opset 18), then ONNX Runtime
-static quantisation to QDQ (per-channel symmetric int8 weights, int8 activations, Conv/Gemm/MatMul;
-the first 512 training titles for calibration). Accuracy of each file on the 73,152 dev
+static quantisation to QDQ (per-channel symmetric int8 weights, int8 activations; the first 512
+training titles for calibration), in two variants: "int8qdq" quantises Conv, Gemm and MatMul only
+(the files measured on the boards on 2026-10-07), "int8full" every operator ONNX Runtime supports. Accuracy of each file on the 73,152 dev
 impressions: news vectors from the file (ONNX Runtime, CPU), user encoder of the same checkpoint.
 Checkpoints that do not exist yet are skipped; finished entries are kept on a rerun.
 
-Writes artifacts/stedgeai/models/<name>_seed<seed>_body_{fp32,int8qdq}.onnx and
+Writes artifacts/stedgeai/models/<name>_seed<seed>_body_{fp32,int8qdq,int8full}.onnx and
 paper/results/int8_export.json. Runs on the CPU (the GPU belongs to the training queue):
     set CUDA_VISIBLE_DEVICES=-1 & python -m scripts.export_int8
 """
@@ -143,13 +144,20 @@ class Calib(CalibrationDataReader):
         return d
 
 
-def quantise(fp32_path, int8_path, x, mask):
+# Two integer files per encoder. "int8qdq": only Conv, Gemm and MatMul get quantize/dequantize pairs, so
+# ReLU, pooling and the averages run in float between them (the files of 2026-10-07 and of the reference's
+# board runs). "int8full": every operator ONNX Runtime can quantise (activations stay 8-bit through Concat,
+# MaxPool, ReduceMean, Mul/Div; ReLU folds into the convolution's output range).
+VARIANTS = {"onnx_int8qdq": ("int8qdq", ["Conv", "Gemm", "MatMul"]), "onnx_int8full": ("int8full", None)}
+
+
+def quantise(fp32_path, int8_path, x, mask, ops=("Conv", "Gemm", "MatMul")):
     pre = fp32_path.with_name(fp32_path.stem + "_pre.onnx")
     quant_pre_process(str(fp32_path), str(pre))
     names = [i.name for i in ort.InferenceSession(str(pre), providers=["CPUExecutionProvider"]).get_inputs()]
     quantize_static(str(pre), str(int8_path), Calib(x, mask, names), quant_format=QuantFormat.QDQ, per_channel=True,
                     activation_type=QuantType.QInt8, weight_type=QuantType.QInt8,
-                    op_types_to_quantize=["Conv", "Gemm", "MatMul"])
+                    op_types_to_quantize=list(ops) if ops else None)
     pre.unlink()
 
 
@@ -182,52 +190,64 @@ done = json.loads(RES.read_text(encoding="utf-8")) if RES.exists() else {"runs":
 for name, (search, pattern) in MODELS.items():
     for seed in SEEDS:
         ckpt, key = Path(str(pattern).format(seed=seed)), f"{name}/seed{seed}"
-        if key in done["runs"] or not ckpt.exists():
+        r = done["runs"].get(key)
+        missing = [v for v in VARIANTS if r is None or v not in r]
+        if not missing or not ckpt.exists():
             continue
         t0 = time.time()
         sd = torch.load(ckpt, map_location="cpu")
         enc = build(search)
         enc.load_state_dict({k[len("news_encoder."):]: v for k, v in sd.items() if k.startswith("news_encoder.")})
         table = enc.embed.weight.detach().numpy().astype(np.float32)
-        fp32, int8 = OUT / f"{name}_seed{seed}_body_fp32.onnx", OUT / f"{name}_seed{seed}_body_int8qdq.onnx"
-        export(enc, fp32)
-        quantise(fp32, int8, *embed_inputs(table, calib_ids))
-        rec = recommender.NewsRecommender(enc).to(device)
-        rec.load_state_dict(sd)
-        rec.eval()
+        fp32 = OUT / f"{name}_seed{seed}_body_fp32.onnx"
         user_only = recommender.NewsRecommender(recommender.FixedVectors(384)).to(device)
         user_only.load_state_dict({k: v for k, v in sd.items() if not k.startswith("news_encoder.")}, strict=False)
-        r = {"checkpoint": str(ckpt.relative_to(ROOT)), "calibration_titles": int(len(calib_ids))}
-        with torch.no_grad():
-            r["torch_fp32"] = metrics(recommender.evaluate(cfg, rec, "dev"))
-        vec = {}
-        for kind, path in (("onnx_fp32", fp32), ("onnx_int8qdq", int8)):
+        if r is None:
+            export(enc, fp32)
+            rec = recommender.NewsRecommender(enc).to(device)
+            rec.load_state_dict(sd)
+            rec.eval()
+            r = {"checkpoint": str(ckpt.relative_to(ROOT)), "calibration_titles": int(len(calib_ids))}
+            with torch.no_grad():
+                r["torch_fp32"] = metrics(recommender.evaluate(cfg, rec, "dev"))
+        vec = {"onnx_fp32": ort_vectors(fp32, table, vocab.byte_matrix)}
+        if "onnx_fp32" not in r:
+            with torch.no_grad():
+                r["onnx_fp32"] = metrics(recommender.evaluate(cfg, user_only, "dev", news_vectors=vec["onnx_fp32"]))
+            r["onnx_fp32"] |= {"file_bytes": fp32.stat().st_size, "file": str(fp32.relative_to(ROOT))}
+        for kind in missing:
+            suffix, ops = VARIANTS[kind]
+            path = OUT / f"{name}_seed{seed}_body_{suffix}.onnx"
+            quantise(fp32, path, *embed_inputs(table, calib_ids), ops=ops)
             vec[kind] = ort_vectors(path, table, vocab.byte_matrix)
             with torch.no_grad():
                 r[kind] = metrics(recommender.evaluate(cfg, user_only, "dev", news_vectors=vec[kind]))
-            r[kind]["file_bytes"] = path.stat().st_size
-            r[kind]["file"] = str(path.relative_to(ROOT))
-        cos = torch.nn.functional.cosine_similarity(vec["onnx_fp32"][1:], vec["onnx_int8qdq"][1:], dim=-1)
-        r["cosine_fp32_vs_int8"] = {"mean": round(float(cos.mean()), 4), "min": round(float(cos.min()), 4),
-                                    "p05": round(float(cos.quantile(0.05)), 4)}
-        r["minutes"] = round((time.time() - t0) / 60, 2)
+            r[kind] |= {"file_bytes": path.stat().st_size, "file": str(path.relative_to(ROOT))}
+            cos = torch.nn.functional.cosine_similarity(vec["onnx_fp32"][1:], vec[kind][1:], dim=-1)
+            r["cosine_fp32_vs_int8" if kind == "onnx_int8qdq" else f"cosine_fp32_vs_{suffix}"] = {
+                "mean": round(float(cos.mean()), 4), "min": round(float(cos.min()), 4),
+                "p05": round(float(cos.quantile(0.05)), 4)}
+        r["minutes"] = round(r.get("minutes", 0) + (time.time() - t0) / 60, 2)
         done["runs"][key] = r
         RES.write_text(json.dumps(done, indent=1), encoding="utf-8")
         print(f"{key}: AUC torch {r['torch_fp32']['auc']:.4f}, ONNX FP32 {r['onnx_fp32']['auc']:.4f}, "
-              f"INT8 {r['onnx_int8qdq']['auc']:.4f}; INT8 file {r['onnx_int8qdq']['file_bytes']} B; "
-              f"cos mean {r['cosine_fp32_vs_int8']['mean']}; {r['minutes']} min", flush=True)
+              + ", ".join(f"{VARIANTS[k][0]} {r[k]['auc']:.4f} ({r[k]['file_bytes']} B)" for k in VARIANTS)
+              + f"; {r['minutes']} min", flush=True)
 
 summary = {}
 for name in MODELS:
     rows = [v for k, v in done["runs"].items() if k.startswith(name + "/")]
     if rows:
-        summary[name] = {"n": len(rows)} | {
-            f"{kind}_auc": round(statistics.fmean(r[kind]["auc"] for r in rows), 4) for kind in
-            ("torch_fp32", "onnx_fp32", "onnx_int8qdq")} | {
-            "int8_minus_fp32_auc": round(statistics.fmean(r["onnx_int8qdq"]["auc"] - r["torch_fp32"]["auc"]
-                                                          for r in rows), 4)}
-        if len(rows) > 1:
-            summary[name]["onnx_int8qdq_auc_sd"] = round(statistics.pstdev(r["onnx_int8qdq"]["auc"] for r in rows), 4)
+        summary[name] = {"n": len(rows)}
+        for kind in ("torch_fp32", "onnx_fp32", *VARIANTS):
+            vals = [r[kind]["auc"] for r in rows if kind in r]
+            if vals:
+                summary[name][f"{kind}_auc"] = round(statistics.fmean(vals), 4)
+                if len(vals) > 1:
+                    summary[name][f"{kind}_auc_sd"] = round(statistics.pstdev(vals), 4)
+                if kind in VARIANTS:
+                    summary[name][f"{VARIANTS[kind][0]}_minus_fp32_auc"] = round(statistics.fmean(
+                        r[kind]["auc"] - r["torch_fp32"]["auc"] for r in rows if kind in r), 4)
 done["summary"] = summary
 done["versions"] = {"torch": torch.__version__, "onnxruntime": ort.__version__, "onnx": onnx.__version__}
 RES.write_text(json.dumps(done, indent=1), encoding="utf-8")

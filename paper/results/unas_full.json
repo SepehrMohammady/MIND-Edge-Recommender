@@ -1642,5 +1642,156 @@
    },
    "mean_xlang_auc": 0.5423
   }
+ },
+ "hand_64-5-384/distill/seed42": {
+  "seed": 42,
+  "minutes": 4.81,
+  "settings": {
+   "model": "64-5-384",
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 64,
+        "has_bn": false,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": false,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 64,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": false,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 64,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": false,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 64,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": false,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 64,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": false,
+        "has_prepool": false
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 64,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.0
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 68352,
+    "macs": 3301376,
+    "macs_fp32": 3301376,
+    "macs_quantized": 0,
+    "size_kb": 267.0,
+    "size_mb": 0.2607,
+    "energy_uj_per_inf": 15.1863
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.464,
+    "128": 0.4641,
+    "256": 0.4621,
+    "384": 0.4599
+   }
+  }
  }
 }
