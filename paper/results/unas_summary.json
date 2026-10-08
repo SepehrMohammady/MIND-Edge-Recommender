@@ -1,0 +1,145 @@
+[
+ {
+  "group": "h7",
+  "label": "$\\mu$NAS, candidate 144",
+  "name": "mind_h7",
+  "macs": 1995648,
+  "weights_bytes": 53156,
+  "activation_bytes": 15872,
+  "search_cos": {
+   "mean": 0.3309,
+   "n": 3
+  },
+  "teacher_cos_dev": {
+   "mean": 0.3924,
+   "std": 0.0014,
+   "n": 3
+  },
+  "en_auc": {
+   "mean": 0.5949,
+   "std": 0.0033,
+   "n": 3
+  },
+  "xlang_auc": {
+   "mean": 0.5432,
+   "std": 0.0048,
+   "n": 3
+  },
+  "torch_auc_export": {
+   "mean": 0.5949,
+   "std": 0.0033,
+   "n": 3
+  },
+  "int8_auc": {
+   "mean": 0.5959,
+   "std": 0.0027,
+   "n": 3
+  },
+  "int8_file_bytes": 72050,
+  "seeds_full": [
+   1,
+   12,
+   42
+  ]
+ },
+ {
+  "group": "h7",
+  "label": "Hand-designed 64-2-384",
+  "name": "hand_64-2-384",
+  "macs": 1662976,
+  "weights_bytes": 38016,
+  "activation_bytes": 16384,
+  "search_cos": {
+   "mean": 0.3032,
+   "n": 1
+  },
+  "teacher_cos_dev": null,
+  "en_auc": null,
+  "xlang_auc": null,
+  "torch_auc_export": null,
+  "int8_auc": null,
+  "int8_file_bytes": null,
+  "seeds_full": []
+ },
+ {
+  "group": "f401",
+  "label": "$\\mu$NAS, candidate 134",
+  "name": "mind_f401",
+  "macs": 650624,
+  "weights_bytes": 42534,
+  "activation_bytes": 6048,
+  "search_cos": {
+   "mean": 0.2977,
+   "n": 3
+  },
+  "teacher_cos_dev": {
+   "mean": 0.349,
+   "std": 0.0015,
+   "n": 3
+  },
+  "en_auc": {
+   "mean": 0.5905,
+   "std": 0.0033,
+   "n": 3
+  },
+  "xlang_auc": {
+   "mean": 0.537,
+   "std": 0.0039,
+   "n": 3
+  },
+  "torch_auc_export": {
+   "mean": 0.5905,
+   "std": 0.0033,
+   "n": 3
+  },
+  "int8_auc": {
+   "mean": 0.5896,
+   "std": 0.0025,
+   "n": 3
+  },
+  "int8_file_bytes": 56792,
+  "seeds_full": [
+   1,
+   12,
+   42
+  ]
+ },
+ {
+  "group": "f401",
+  "label": "Hand-designed 32-5-384",
+  "name": "hand_32-5-384",
+  "macs": 999424,
+  "weights_bytes": 20704,
+  "activation_bytes": 8192,
+  "search_cos": {
+   "mean": 0.2963,
+   "n": 1
+  },
+  "teacher_cos_dev": null,
+  "en_auc": null,
+  "xlang_auc": null,
+  "torch_auc_export": null,
+  "int8_auc": null,
+  "int8_file_bytes": null,
+  "seeds_full": []
+ },
+ {
+  "group": "none",
+  "label": "Hand-designed 64-5-384",
+  "name": "hand_64-5-384",
+  "macs": 3309568,
+  "weights_bytes": 51264,
+  "activation_bytes": 16384,
+  "search_cos": {
+   "mean": 0.3431,
+   "n": 3
+  },
+  "teacher_cos_dev": null,
+  "en_auc": null,
+  "xlang_auc": null,
+  "torch_auc_export": null,
+  "int8_auc": null,
+  "int8_file_bytes": null,
+  "seeds_full": []
+ }
+]
