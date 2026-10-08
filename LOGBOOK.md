@@ -763,3 +763,39 @@ single run in brackets:
   and the 14-language chart replaced by the distilled + mixed-click encoder of Table 2 (the old chart was the June FP32
   scratch model labelled INT8, with a reading the P1 results contradict).
 - Schedule step 3 is complete. µNAS mixed-language runs started 20:12; ReActNet rerun queued after them.
+
+## 2026-10-08 23:04 — Queue finished: µNAS encoders with mixed-language clicks; ReActNet one-bit over three seeds; paper and course
+
+µNAS encoders, clicks shown in a random one of 15 languages (`distill_ft_mixed`), seeds 42 / 12 / 1, 20:12-21:08
+(55.9 min, distilled checkpoints reused):
+
+| encoder | EN AUC | mean of 14 languages | with English clicks (EN / 14 languages) |
+|---|--:|--:|--:|
+| µNAS H7 | 0.571 ± 0.007 (0.561 / 0.578 / 0.574) | 0.562 ± 0.001 | 0.595 / 0.543 |
+| µNAS F401 | 0.549 ± 0.012 (0.534 / 0.564 / 0.549) | 0.556 ± 0.004 | 0.591 / 0.537 |
+| reference 64-5-384 (P1) | 0.609 ± 0.008 | 0.589 ± 0.005 | 0.629 / 0.557 |
+
+ReActNet / Bi-Real one-bit 64-5-384, distilled start, English clicks (`scripts/run_binary.py`, seeds 42 / 1 / 2,
+21:08-23:01, about 37 min per seed): AUC 0.5732 / 0.5848 / 0.6014, mean 0.587 ± 0.012 (June single run 0.572); teacher
+cosine after distillation 0.351 / 0.342 / 0.350. Against the naive binary cell of the matrix (0.554 ± 0.017): +0.032;
+0.018 below the reduced NRMS; 0.042 below the distilled full-precision encoder (0.629).
+
+- Paper: abstract, binary paragraph, Fig. 2 (ReActNet star with its seed SD) and conclusion use the three-seed value;
+  the TODO for the rerun is gone; one sentence on the µNAS encoders with mixed-language clicks. `check_numbers.py`
+  extended (ReActNet sentence, same seeds as the matrix, mixed-language sentence) and passes; PDF 11 pages.
+- Course lesson 5: the binary callout generated from the result files (`scripts/sync_course.py`).
+- GPU during the ReActNet runs: `logs/binary_reactnet_10082108_gpu.csv`. The laptop is idle now.
+
+Schedule, updated
+
+| # | Step | Status |
+|---|---|---|
+| 0-2 | Audit, P1, paper and course sync | done |
+| 3 | µNAS searches, grid, seed-based choice; matrix rerun over 3 seeds | done 10-08 |
+| 4 | Full training of the chosen encoders and comparators; 8-bit files with AUC from the file; full-integer variant; ReActNet one-bit over 3 seeds | done 10-08, except a one-bit file for a board |
+| 5 | Boards: latency, flash, RAM of all step-4 files done 10-08 (ST cloud); energy with the lab probe; one-bit on the physical H7 (LCE + TFLite Micro or CBin-NN) | open: needs the lab board and probe |
+| 6 | FeedWell-Edge: encoder in the app; phone latency and battery | open |
+| 7 | Offline replay through the app learner | not started; optional for paper A |
+| 8 | Paper A final | draft current (11 pp); needs venue, authors, energy, phone |
+| 9 | Houriyeh's thesis | delivered 10-07 |
+| 10 | Paper B | later |

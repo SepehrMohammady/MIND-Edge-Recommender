@@ -138,4 +138,21 @@ s = s.replace(x_old.group(0), f"out_dim=384 یافت که AUC {f(mi8['auc'])} د
                               f"{f(cell[('micro_nas', 'fp32')]['macs'] / 1e6, 2)} میلیون MAC دارد؛ "
                               "جست‌وجوی µNAS درس ۷ مرز را رعایت می‌کند.")
 p4.write_text(s, encoding="utf-8")
+
+# lesson 5: the binary callout, from the matrix rerun and the three-seed ReActNet runs (scripts/run_binary.py)
+rn = json.loads((RES / "binary_reactnet.json").read_text(encoding="utf-8"))["summary"]
+nb = cell[("micro_nas", "binary")]
+text = (f"Binaryِ ساده هزینه دارد: Micro-NAS/Binary به <strong>{f(nb['auc'])} ± {f(nb['auc_sd'])}</strong> می‌رسد "
+        f"(میانگین سه seed؛ اجرای تکیِ ژوئن 0.521 بود و «نزدیک به تصادف» به نظر می‌رسید). با تکنیک‌های "
+        f"<strong>ReActNet</strong> (RSign/RPReLU) + میان‌بر <strong>Bi-Real</strong> و مقداردهیِ اولیه با distillation، "
+        f"دقتِ binary به <strong>{f(rn['auc'])} ± {f(rn['auc_sd'])}</strong> در {f(rn['cost']['size_kb'], 0)}KB می‌رسد: "
+        f"{f(rn['auc'] - nb['auc'])} بالاتر از binaryِ ساده و {f(nrms['en_auc']['mean'] - rn['auc'])} پایین‌تر از NRMSِ "
+        "کاهش‌یافته (27 MB). Binary گزینهٔ کم‌ترین‌فوت‌پرینت است؛ INT8 هنوز در دقت جلوتر.")
+p5 = ROOT / "course/05-quantization/index.html"
+s = p5.read_text(encoding="utf-8")
+i = s.index('<div class="callout-title">✅ بازیابی دقت Binary (هدف اصلی ما)</div>')
+a = s.index("</div>", i) + len("</div>")
+b = s.index("</div>", a)
+s = s[:a] + "\n  " + text + "\n" + s[b:]
+p5.write_text(s, encoding="utf-8")
 print("lesson 5 rows:", len(rows5), "lesson 6 rows:", len(rows6), "lesson 4 rows:", len(rows4))

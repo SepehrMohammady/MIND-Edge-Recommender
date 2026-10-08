@@ -46,8 +46,8 @@ network 0.598. At the constrained architecture, starting from weights distilled
 from a frozen multilingual sentence-transformer adds 0.011 AUC (0.629 against
 0.618), and training on clicks shown in a random xMIND language raises the mean
 over fourteen translations from 0.557 to 0.589 at a cost of 0.020 in English.
-Naive one-bit weights cost the constrained model 0.065 AUC (0.554); a single run
-with ReActNet blocks started from distilled weights reached 0.572 at 194\,KB.
+Naive one-bit weights cost the constrained model 0.065 AUC (0.554); ReActNet
+blocks started from distilled weights reach 0.587 at 194\,KB.
 Standard deviations over seeds reach 0.017, so smaller gaps are not resolved. Exported as an
 8-bit file, the distilled constrained encoder scores 0.622 (0.628 at full
 precision) and runs in 31.2\,ms per title on an STM32H7B3I-DK and 450\,ms on a
@@ -246,7 +246,8 @@ released.\footnote{\url{https://github.com/SepehrMohammady/MIND-Edge-Recommender
 \includegraphics[width=0.98\linewidth]{figures/pareto.png}
 \caption{Accuracy against estimated encoder size (left) and against the energy
 estimate (right), per arm and weight precision, mean and standard deviation over
-three seeds; star: one-bit model with ReActNet blocks (single June run); dashed
+three seeds; star: one-bit model with ReActNet blocks started from distilled
+weights (three seeds); dashed
 line: reduced NRMS with a 27\,MB word table (three seeds).}
 \label{fig:pareto}
 \end{figure}
@@ -306,8 +307,10 @@ readers with one to five clicks, 0.633 for six to twenty and 0.638 beyond, again
 Binarising the inner weights the naive way costs the constrained model 0.065
 AUC (0.554 over three seeds). Replacing its blocks with full binary
 convolutions, ReActNet activations and Bi-Real shortcuts, and starting from
-distilled weights, gave 0.572 at an estimated 194\,KB in a single June run
-\TODO{three-seed rerun under the loop of Sect.~3}. On the accuracy-versus-footprint
+distilled weights, gives $0.587\pm0.012$ over the same seeds (0.572 in the single
+June run) at an estimated 194\,KB: 0.032 above naive binarisation, 0.018 below the
+reduced NRMS and 0.042 below the distilled encoder at full precision
+(Table~\ref{tab:p1}). On the accuracy-versus-footprint
 view (Fig.~\ref{fig:pareto}) eight-bit Micro-NAS (0.614, 204\,KB, 3.2\uJ) has
 the lowest cost at the accuracy of the reduced NRMS, while unconstrained
 eight-bit leads on accuracy (0.639, 790\,KB).
@@ -335,8 +338,10 @@ recipe (0.331 against 0.303 and 0.298 against 0.296) and after full distillation
 (0.392 against 0.371 and 0.349 against 0.333). In ranking the lead disappears:
 0.595 against 0.599 AUC within the H7 budget and 0.591 against 0.589 within the
 F401 budget, differences smaller than the spread over seeds, and the same holds
-across the fourteen translations (0.543 against 0.547, 0.537 against 0.538). All
-of them stay below 64-5-384, which fits neither operation budget and scores 0.618
+across the fourteen translations (0.543 against 0.547, 0.537 against 0.538).
+Trained on clicks shown in a random language, as in Table~\ref{tab:p1}, the two
+searched encoders read the translations at 0.562 and 0.556 and English at 0.571
+and 0.549. All of them stay below 64-5-384, which fits neither operation budget and scores 0.618
 in this form and 0.629 in its original one. The full programme also widened the
 gaps in teacher cosine: under the search recipe the H7 choice was 0.012 below
 64-5-384, after full distillation 0.067, so a short distillation is a weak
@@ -388,8 +393,8 @@ the same 256-row vocabulary. With eight-bit weights the constrained encoder
 reaches 0.614 AUC at an estimated 204\,KB, and as an 8-bit file it runs in
 31.2\,ms per title on an STM32H7B3I-DK; searched under the budget of a
 NUCLEO-F401RE, an encoder of 0.65\,M multiply-accumulates reaches 0.591 at
-32.1\,ms per title on that board; a single run of the one-bit model, started
-from distilled weights, reached 0.572 at 194\,KB; trained on clicks shown in a random
+32.1\,ms per title on that board; the one-bit model with ReActNet blocks,
+started from distilled weights, reaches 0.587 at 194\,KB; trained on clicks shown in a random
 language, the distilled byte-CNN reads fourteen languages at 0.589 AUC on average.
 What is still missing: \TODO{board energy, phone timing and a one-bit runtime}
 --- that is where we take it next.

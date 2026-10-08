@@ -38,7 +38,13 @@ if summary_file.exists():
 else:
     m = pd.read_csv(res / "results_matrix.csv")
     nrms = json.loads((res / "results_summary.json").read_text(encoding="utf-8"))["baseline"]["auc"]
-improved = json.loads((res / "binary_improved.json").read_text(encoding="utf-8"))
+# ReActNet one-bit encoder: three-seed rerun (scripts/run_binary.py) when present, else the June single run
+reactnet = res / "binary_reactnet.json"
+if reactnet.exists():
+    _r = json.loads(reactnet.read_text(encoding="utf-8"))["summary"]
+    improved = {"cost": _r["cost"], "result": {"auc": _r["auc"], "auc_sd": _r["auc_sd"]}}
+else:
+    improved = json.loads((res / "binary_improved.json").read_text(encoding="utf-8"))
 
 # Fig. 2: AUC against encoder size and against the energy proxy, per arm and precision.
 fig, ax = plt.subplots(1, 2, figsize=(6.6, 2.75), sharey=True)
@@ -53,6 +59,9 @@ for a, (xcol, xlabel) in zip(ax, (("size_kb", "encoder size (KB)"),
             a.scatter(r[xcol], r["auc"], s=46, marker=marker, color=color,
                       edgecolor=SURFACE, linewidth=0.9, zorder=3)
     x_imp = improved["cost"]["size_kb"] if xcol == "size_kb" else improved["cost"]["energy_uj_per_inf"]
+    if improved["result"].get("auc_sd"):
+        a.errorbar(x_imp, improved["result"]["auc"], yerr=improved["result"]["auc_sd"], fmt="none",
+                   ecolor=ARMS["micro_nas"][1], elinewidth=0.8, capsize=1.5, zorder=2)
     a.scatter(x_imp, improved["result"]["auc"], s=62, marker="*", color=ARMS["micro_nas"][1],
               edgecolor=SURFACE, linewidth=0.7, zorder=3)
     a.axhline(nrms, ls="--", color=MUTED, lw=0.8, zorder=1)
