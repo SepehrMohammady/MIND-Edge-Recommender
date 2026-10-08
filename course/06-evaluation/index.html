@@ -79,44 +79,44 @@ nDCG@5 = DCG@5 / IDCG@5 (مقدار بهینه)</div>
 <table>
   <thead><tr><th>بازو</th><th>Prec.</th><th>AUC</th><th>MRR</th><th>nDCG@10</th><th>Size (KB)</th><th>Energy (µJ)</th></tr></thead>
   <tbody>
-    <tr><td>NAS</td><td>FP32</td><td>0.633</td><td>0.326</td><td>0.375</td><td>1566</td><td>168.7</td></tr>
-    <tr><td>NAS</td><td>INT8</td><td><strong>0.647</strong></td><td><strong>0.338</strong></td><td><strong>0.387</strong></td><td>790</td><td>4.65</td></tr>
-    <tr><td>NAS</td><td>Binary</td><td>0.588</td><td>0.297</td><td>0.342</td><td>563</td><td>4.25</td></tr>
-    <tr><td>Micro-NAS</td><td>FP32</td><td>0.605</td><td>0.307</td><td>0.352</td><td>267</td><td>15.9</td></tr>
-    <tr class="row-hl"><td>Micro-NAS</td><td>INT8</td><td><strong>0.610</strong></td><td><strong>0.314</strong></td><td><strong>0.360</strong></td><td><strong>204</strong></td><td><strong>2.30</strong></td></tr>
-    <tr><td>Micro-NAS</td><td>Binary</td><td>0.521</td><td>0.251</td><td>0.294</td><td>186</td><td>2.25</td></tr>
-    <tr><td>Bin.µNAS</td><td>FP32</td><td>0.593</td><td>0.290</td><td>0.336</td><td>311</td><td>15.4</td></tr>
-    <tr><td>Bin.µNAS</td><td>INT8</td><td>0.601</td><td>0.295</td><td>0.344</td><td>256</td><td>3.28</td></tr>
-    <tr><td>Bin.µNAS</td><td>Binary</td><td>0.546</td><td>0.273</td><td>0.317</td><td>240</td><td>3.23</td></tr>
-    <tr style="border-top:2px solid #ccc"><td colspan="2"><em>NRMS baseline (FP32)</em></td><td>0.607</td><td>0.322</td><td>0.364</td><td>~27,000 (INT8: 6,800)</td><td>زیاد</td></tr>
+    <tr><td>NAS</td><td>FP32</td><td>0.628 ± 0.015</td><td>0.326</td><td>0.373</td><td>1567</td><td>166.3</td></tr>
+    <tr><td>NAS</td><td>INT8</td><td><strong>0.639 ± 0.005</strong></td><td>0.333</td><td>0.381</td><td>790</td><td>17.91</td></tr>
+    <tr><td>NAS</td><td>Binary</td><td>0.598 ± 0.014</td><td>0.302</td><td>0.350</td><td>563</td><td>12.54</td></tr>
+    <tr><td>Micro-NAS</td><td>FP32</td><td><strong>0.619 ± 0.001</strong></td><td>0.327</td><td>0.371</td><td>267</td><td>15.15</td></tr>
+    <tr class="row-hl"><td>Micro-NAS</td><td>INT8</td><td><strong>0.614 ± 0.006</strong></td><td><strong>0.323</strong></td><td><strong>0.365</strong></td><td><strong>204</strong></td><td><strong>3.16</strong></td></tr>
+    <tr><td>Micro-NAS</td><td>Binary</td><td>0.554 ± 0.017</td><td>0.277</td><td>0.320</td><td>186</td><td>2.72</td></tr>
+    <tr><td>Bin.µNAS</td><td>FP32</td><td><strong>0.602 ± 0.003</strong></td><td>0.301</td><td>0.350</td><td>311</td><td>14.98</td></tr>
+    <tr><td>Bin.µNAS</td><td>INT8</td><td>0.601 ± 0.009</td><td>0.302</td><td>0.351</td><td>256</td><td>4.35</td></tr>
+    <tr><td>Bin.µNAS</td><td>Binary</td><td>0.558 ± 0.007</td><td>0.271</td><td>0.317</td><td>239</td><td>3.96</td></tr>
+    <tr style="border-top:2px solid #ccc"><td colspan="2"><em>NRMS، نسخهٔ کاهش‌یافته (FP32، سه seed)</em></td><td>0.604 ± 0.010</td><td>0.322</td><td>0.364</td><td>~27,000 (INT8: 6,800)</td><td>زیاد</td></tr>
   </tbody>
 </table>
 </div>
 
 <h2>۶.۴ ارزیابی ۱۴ زبانه</h2>
-<p>مدل Micro-NAS/INT8 (انگلیسی آموزش دیده) روی همه ۱۴ زبان xMIND تست شد:</p>
+<p>انکودر بایتی با شروع از وزن‌های تقطیرشده، آموزش‌دیده روی کلیک‌هایی که هرکدام به یک زبان تصادفی نشان داده می‌شوند (جدول ۲ مقاله، میانگین سه seed): انگلیسی 0.609 و میانگین ۱۴ ترجمه 0.589:</p>
 
 <div class="bar-chart">
-  <div class="bar-row"><div class="bar-label">en (انگلیسی)</div><div class="bar-track"><div class="bar-fill blue" data-width="100%">0.604</div></div></div>
-  <div class="bar-row"><div class="bar-label">hat (هائیتی کریول)</div><div class="bar-track"><div class="bar-fill blue" data-width="92%">0.556</div></div></div>
-  <div class="bar-row"><div class="bar-label">jpn (ژاپنی)</div><div class="bar-track"><div class="bar-fill blue" data-width="91%">0.551</div></div></div>
-  <div class="bar-row"><div class="bar-label">ind (اندونزیایی)</div><div class="bar-track"><div class="bar-fill blue" data-width="89%">0.537</div></div></div>
-  <div class="bar-row"><div class="bar-label">grn (گوارانی)</div><div class="bar-track"><div class="bar-fill blue" data-width="88%">0.533</div></div></div>
-  <div class="bar-row"><div class="bar-label">ron (رومانیایی)</div><div class="bar-track"><div class="bar-fill blue" data-width="88%">0.532</div></div></div>
-  <div class="bar-row"><div class="bar-label">tur (ترکی)</div><div class="bar-track"><div class="bar-fill blue" data-width="88%">0.530</div></div></div>
-  <div class="bar-row"><div class="bar-label">vie (ویتنامی)</div><div class="bar-track"><div class="bar-fill blue" data-width="87%">0.523</div></div></div>
-  <div class="bar-row"><div class="bar-label">swh (سواحیلی)</div><div class="bar-track"><div class="bar-fill blue" data-width="86%">0.521</div></div></div>
-  <div class="bar-row"><div class="bar-label">zho (چینی)</div><div class="bar-track"><div class="bar-fill blue" data-width="86%">0.521</div></div></div>
-  <div class="bar-row"><div class="bar-label">som (سومالیایی)</div><div class="bar-track"><div class="bar-fill orange" data-width="85%">0.514</div></div></div>
-  <div class="bar-row"><div class="bar-label">tha (تایلندی)</div><div class="bar-track"><div class="bar-fill orange" data-width="83%">0.504</div></div></div>
-  <div class="bar-row"><div class="bar-label">tam (تامیلی)</div><div class="bar-track"><div class="bar-fill orange" data-width="83%">0.504</div></div></div>
-  <div class="bar-row"><div class="bar-label">fin (فنلاندی)</div><div class="bar-track"><div class="bar-fill red" data-width="82%">0.495</div></div></div>
-  <div class="bar-row"><div class="bar-label">kat (گرجی)</div><div class="bar-track"><div class="bar-fill red" data-width="81%">0.491</div></div></div>
+  <div class="bar-row"><div class="bar-label">en (انگلیسی)</div><div class="bar-track"><div class="bar-fill blue" data-width="100%">0.609</div></div></div>
+  <div class="bar-row"><div class="bar-label">fin (فنلاندی)</div><div class="bar-track"><div class="bar-fill blue" data-width="100%">0.609</div></div></div>
+  <div class="bar-row"><div class="bar-label">tur (ترکی)</div><div class="bar-track"><div class="bar-fill blue" data-width="100%">0.608</div></div></div>
+  <div class="bar-row"><div class="bar-label">hat (هائیتی کریول)</div><div class="bar-track"><div class="bar-fill blue" data-width="100%">0.606</div></div></div>
+  <div class="bar-row"><div class="bar-label">som (سومالیایی)</div><div class="bar-track"><div class="bar-fill blue" data-width="100%">0.606</div></div></div>
+  <div class="bar-row"><div class="bar-label">swh (سواحیلی)</div><div class="bar-track"><div class="bar-fill blue" data-width="99%">0.606</div></div></div>
+  <div class="bar-row"><div class="bar-label">ind (اندونزیایی)</div><div class="bar-track"><div class="bar-fill blue" data-width="99%">0.605</div></div></div>
+  <div class="bar-row"><div class="bar-label">ron (رومانیایی)</div><div class="bar-track"><div class="bar-fill blue" data-width="98%">0.599</div></div></div>
+  <div class="bar-row"><div class="bar-label">grn (گوارانی)</div><div class="bar-track"><div class="bar-fill blue" data-width="98%">0.597</div></div></div>
+  <div class="bar-row"><div class="bar-label">vie (ویتنامی)</div><div class="bar-track"><div class="bar-fill blue" data-width="98%">0.596</div></div></div>
+  <div class="bar-row"><div class="bar-label">zho (چینی)</div><div class="bar-track"><div class="bar-fill blue" data-width="97%">0.592</div></div></div>
+  <div class="bar-row"><div class="bar-label">jpn (ژاپنی)</div><div class="bar-track"><div class="bar-fill blue" data-width="96%">0.586</div></div></div>
+  <div class="bar-row"><div class="bar-label">tha (تایلندی)</div><div class="bar-track"><div class="bar-fill orange" data-width="91%">0.554</div></div></div>
+  <div class="bar-row"><div class="bar-label">tam (تامیلی)</div><div class="bar-track"><div class="bar-fill red" data-width="89%">0.544</div></div></div>
+  <div class="bar-row"><div class="bar-label">kat (گرجی)</div><div class="bar-track"><div class="bar-fill red" data-width="88%">0.538</div></div></div>
 </div>
 
 <div class="callout callout-info">
   <div class="callout-title">💡 تفسیر</div>
-  زبان‌های کم‌منبع (kat، fin، tam) کمترین AUC را دارند — کیفیت ترجمه NLLB برای آن‌ها پایین‌تر است. برای ضعیف‌ترین زبان (kat: 0.491) مدل عملاً <strong>در سطح تصادفی</strong> است (۰٫۴۹۱ کمی <em>زیر</em> ۰٫۵، نه بالاتر) — یعنی انتقال بین‌زبانی برای گرجی تقریباً شکست می‌خورد: خط نوشتاری متفاوت (Mkhedruli)، زبانِ کم‌منبع، و student فقط روی متنِ انگلیسی برای رتبه‌بندی آموزش دیده. سیگنالِ باقی‌مانده (اعداد، اسامی خاص، کاراکترهای مشترک) آن را دقیقاً روی ۰٫۵ نگه نمی‌دارد.
+  همین انکودر اگر از صفر و فقط با کلیک‌های انگلیسی آموزش ببیند ترجمه‌ها را به‌طور میانگین با AUC 0.528 می‌خواند، نزدیک به تصادف؛ هم‌ترازی زبان‌ها از تقطیر می‌آید. ضعیف‌ترین زبان‌ها خط غیرلاتین دارند: گرجی 0.538، تامیلی 0.544 و تایلندی 0.554؛ چینی و ژاپنی با وجود خط غیرلاتین به 0.592 و 0.586 می‌رسند.
 </div>
 
 <h2>۶.۵ کد ارزیابی</h2>
@@ -149,14 +149,14 @@ m = metrics.<span class="fn">evaluate</span>([imp])     <span class="cmt"># می
   <div class="quiz-score">امتیاز شما: <span class="score-num">0</span> از 4</div>
 
   <div class="question-block" data-correct="2">
-    <p class="question-text"><span class="q-num">۱</span> AUC=0.610 برای Micro-NAS/INT8 در مقایسه با NRMS baseline (0.607) چه معنایی دارد؟</p>
+    <p class="question-text"><span class="q-num">۱</span> AUC=0.614 برای Micro-NAS/INT8 در مقایسه با NRMS کاهش‌یافته (0.604) چه معنایی دارد؟</p>
     <div class="options">
       <div class="option"><div class="opt-letter">الف</div> مدل ما ضعیف‌تر است</div>
       <div class="option"><div class="opt-letter">ب</div> مدل ما خیلی بهتر است</div>
       <div class="option"><div class="opt-letter">ج</div> مدل ما با 204 KB همان دقت ~27 MB NRMS را دارد — رقابتی!</div>
       <div class="option"><div class="opt-letter">د</div> مدل ما از NAS بهتر است</div>
     </div>
-    <div class="explanation">0.610 نسبت به 0.607 کمی بهتر است، اما مهم‌تر این است که این دقت با فقط 204 KB (در مقابل ~27 MB FP32 یا 6.8 MB INT8 برای NRMS) و پشتیبانی 14 زبان حاصل شده.</div>
+    <div class="explanation">0.614 در برابر 0.604: تفاوتی در حد نوسان seedها (انحراف معیار 0.006 و 0.010)؛ مهم این است که این دقت با فقط 204 KB به دست می‌آید، در برابر ~27 MB (FP32) یا 6.8 MB (INT8) برای NRMS. این مدل از صفر و فقط با کلیک‌های انگلیسی آموزش دیده و ترجمه‌ها را نزدیک به تصادف می‌خواند (بخش ۶.۴).</div>
   </div>
 
   <div class="question-block" data-correct="0">

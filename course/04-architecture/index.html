@@ -96,9 +96,9 @@
 <table>
   <thead><tr><th>بازو</th><th>Channels</th><th>Depth</th><th>Out_dim</th><th>AUC (INT8)</th><th>Size</th></tr></thead>
   <tbody>
-    <tr><td>NAS</td><td>256</td><td>4</td><td>384</td><td><span class="badge-good">0.647</span></td><td>790 KB</td></tr>
-    <tr><td>Micro-NAS ⭐</td><td>64</td><td>5</td><td>384</td><td><span class="badge-good">0.610</span></td><td>204 KB</td></tr>
-    <tr><td>Bin. µNAS</td><td>96</td><td>2</td><td>384</td><td>0.546 (Binary)</td><td>240 KB</td></tr>
+    <tr><td>NAS</td><td>256</td><td>4</td><td>384</td><td><span class="badge-good">0.639 ± 0.005</span></td><td>790 KB</td></tr>
+    <tr><td>Micro-NAS ⭐</td><td>64</td><td>5</td><td>384</td><td><span class="badge-good">0.614 ± 0.006</span></td><td>204 KB</td></tr>
+    <tr><td>Bin. µNAS</td><td>96</td><td>2</td><td>384</td><td>0.558 ± 0.007 (Binary)</td><td>239 KB</td></tr>
   </tbody>
 </table>
 </div>
@@ -161,7 +161,7 @@ best = results[<span class="num">0</span>]
       <div class="option"><div class="opt-letter">ج</div> channels=96, depth=2, out_dim=384</div>
       <div class="option"><div class="opt-letter">د</div> channels=128, depth=3, out_dim=256</div>
     </div>
-    <div class="explanation">Micro-NAS بهترین معماری زیر محدودیت MCU را با channels=64، depth=5، out_dim=384 یافت که AUC 0.610 در 204 KB می‌دهد.</div>
+    <div class="explanation">Micro-NAS بهترین معماری زیر محدودیت MCU را با channels=64، depth=5، out_dim=384 یافت که AUC 0.614 در 204 KB می‌دهد (میانگین سه seed). مرز ۲ میلیون MAC در آن جست‌وجو درست شمرده نشد و این معماری 3.29 میلیون MAC دارد؛ جست‌وجوی µNAS درس ۷ مرز را رعایت می‌کند.</div>
   </div>
 
   <div class="question-block" data-correct="-1">

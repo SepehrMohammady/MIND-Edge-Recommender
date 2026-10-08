@@ -737,3 +737,29 @@ titles per step), so the cache grows without bound. With the allocator capped at
 - `scripts/make_tab_matrix.py` writes Table 1 (`paper/tab_matrix.tex`) from `matrix_summary.json`;
   `scripts/make_figures.py` draws Fig. 2 from the rerun (mean and SD over seeds) and the three-seed reduced NRMS when
   the summary exists. Paper, checker and course follow when the matrix is complete.
+
+## 2026-10-08 20:21 — Step 3 done: matrix rerun complete; Table 1, Fig. 2, text, checker and course from the rerun
+
+Matrix rerun finished 20:12 (`matrix_summary.json`, 27 cells, 337.5 min of training; the 256-4-384 cells after the
+allocator cap: FP32 47 min, INT8 and binary QAT 12 min each per seed). Mean ± population SD over seeds 42, 1, 2, June
+single run in brackets:
+
+| arm | FP32 | INT8 (simulated) | binary (simulated) |
+|---|---|---|---|
+| NAS 256-4-384 | 0.628 ± 0.015 (0.633) | 0.639 ± 0.005 (0.647) | 0.598 ± 0.014 (0.588) |
+| Micro-NAS 64-5-384 | 0.619 ± 0.001 (0.605) | 0.614 ± 0.006 (0.610) | 0.554 ± 0.017 (0.521) |
+| Bin. µNAS 96-2-384 | 0.602 ± 0.003 (0.593) | 0.601 ± 0.009 (0.601) | 0.558 ± 0.007 (0.546) |
+
+- FP32 to INT8 changes AUC by -0.005 to +0.011, inside the seed spread; one bit costs 0.029 (256-4-384) to 0.065
+  (64-5-384). The largest June-to-rerun difference is the naive binary 64-5-384 (0.521 against 0.554): it is not "near
+  chance". Costs (size, MACs, energy proxy, RAM estimate) are those of the June models after the 10-05 recomputation.
+- Paper: Table 1 is now generated (`paper/tab_matrix.tex`, `scripts/make_tab_matrix.py`); Fig. 2 from the rerun with
+  seed SD bars and the three-seed reduced NRMS (label moved off an error bar); abstract, contributions, setup (seeding,
+  training time), results (precision effects, seed spread, binary paragraph), limitations and conclusion rewritten. The
+  ReActNet result is now quoted as a single June run with a TODO for the three-seed rerun (queued, running after the
+  mixed-language runs). PDF 11 pages; `check_numbers.py` rewritten for Table 1 from `matrix_summary.json` and passes.
+- Course (`scripts/sync_course.py`, generated from the result files): lesson 4 architecture table and quiz, lesson 5
+  table (it still had the pre-10-05 energy and RAM values), lesson 6 full matrix with the three-seed reduced NRMS, quiz 1,
+  and the 14-language chart replaced by the distilled + mixed-click encoder of Table 2 (the old chart was the June FP32
+  scratch model labelled INT8, with a reading the P1 results contradict).
+- Schedule step 3 is complete. µNAS mixed-language runs started 20:12; ReActNet rerun queued after them.

@@ -37,17 +37,18 @@ vocabulary is shared by every language. Around this encoder we search three
 families of architecture (unconstrained, budget-constrained and binary-aware) and
 evaluate each at full precision and with inner-layer weights at eight bits and at
 one bit, measuring ranking quality on MIND against estimated flash, RAM and
-energy. With eight-bit weights the constrained model scores 0.610 AUC at an
-estimated 204\,KB and the unconstrained one 0.647 at 790\,KB. For reference,
+energy. With eight-bit weights the constrained model scores 0.614 AUC at an
+estimated 204\,KB and the unconstrained one 0.639 at 790\,KB (means over three
+seeds). For reference,
 NRMS with GloVe vectors scores 0.664 over three seeds, a reduced NRMS with a
 random 256-dimensional table 0.604, and a per-user category histogram with no
 network 0.598. At the constrained architecture, starting from weights distilled
 from a frozen multilingual sentence-transformer adds 0.011 AUC (0.629 against
 0.618), and training on clicks shown in a random xMIND language raises the mean
-over fourteen translations from 0.557 to 0.589 at a cost of 0.020 in English. A
-naive one-bit model stays near chance (0.521); ReActNet blocks started from the
-distilled weights bring it to 0.572 at 194\,KB. Seeded reruns differ from the
-matrix run by up to 0.02 AUC, so smaller gaps are not resolved. Exported as an
+over fourteen translations from 0.557 to 0.589 at a cost of 0.020 in English.
+Naive one-bit weights cost the constrained model 0.065 AUC (0.554); a single run
+with ReActNet blocks started from distilled weights reached 0.572 at 194\,KB.
+Standard deviations over seeds reach 0.017, so smaller gaps are not resolved. Exported as an
 8-bit file, the distilled constrained encoder scores 0.622 (0.628 at full
 precision) and runs in 31.2\,ms per title on an STM32H7B3I-DK and 450\,ms on a
 NUCLEO-F401RE. A $\mu$NAS search under the budgets of the two boards finds
@@ -84,9 +85,11 @@ We contribute three things. A byte-level content encoder removes the
 embedding-table memory wall: its vocabulary is one 256-row table for every
 language. Around it we benchmark three architecture searches (unconstrained,
 budget-constrained and binary-aware) at three weight precisions, reporting
-accuracy alongside estimated flash, RAM and energy. Finally we bring the one-bit
-case from near chance to 0.572 AUC with ReActNet activations and Bi-Real
-shortcuts started from distilled weights. Character-level inputs have been used
+accuracy alongside estimated flash, RAM and energy, and search again with
+$\mu$NAS under the budgets of two STM32 boards, measuring the results on the
+boards. Finally we measure what one-bit weights cost at this scale and how much
+of it ReActNet activations and Bi-Real shortcuts, started from distilled
+weights, recover. Character-level inputs have been used
 for click prediction~\cite{edizel2017char}, and vocabulary-free projections give
 text classifiers of about 200\,KB~\cite{kaliamoorthi2019prado}. A search of arXiv
 and IEEE Xplore (October 2026) returned no news recommender that reads raw bytes
@@ -210,9 +213,9 @@ swap the text. Every recommender we train, and the
 NRMS baseline, sees only English clicks, and the other languages appear only at
 evaluation. The multilingual numbers are therefore a test of cross-lingual
 transfer in the content encoder, not of native-language personalisation. We stay on
-the small split rather than the million-user MINDlarge because the full study ---
-three arms, three precisions, the search and the fifteen-language evaluation ---
-already takes 8.2 hours on one laptop; the small split has no public test set, so
+the small split rather than the million-user MINDlarge because the nine cells of
+Table~\ref{tab:matrix} alone take 5.6 hours of training for three seeds on one
+laptop; the small split has no public test set, so
 we evaluate on dev with the number of epochs fixed in advance. The search runs a
 population of thirty over fifteen generations, scoring each candidate by a
 two-epoch distillation on twenty thousand titles. The budgets of the constrained
@@ -226,57 +229,35 @@ RTX~5070 Laptop GPU and 32\,GB of memory, PyTorch~2.12 on CUDA~13. The targets
 are STM32 microcontrollers and an Android phone. Board latency, flash and RAM
 come from the ST Edge AI Developer Cloud (ST Edge AI Core 4.0.1) on an
 STM32H7B3I-DK (Cortex-M7, 280\,MHz) and a NUCLEO-F401RE (Cortex-M4, 84\,MHz);
-\TODO{phone timing and board energy}. Negative sampling and the search are seeded; network
-initialisation in the matrix run was not, which the seeded reruns of
-Sect.~\ref{sec:results} quantify. The downloaded data is pinned by checksum, and
+\TODO{phone timing and board energy}. Every run is seeded (seeds 42, 1 and 2 for
+Table~\ref{tab:matrix}; 42, 12 and 1 for Tables~\ref{tab:p1} and~\ref{tab:unas}),
+uses the loop of Sect.~3, which redraws the negatives at every step, and is
+reported as the mean and standard deviation over its three seeds. The June
+architectures are kept; the June run that found them drew its negatives once and
+did not seed the network initialisation. The downloaded data is pinned by checksum, and
 the code, notebook, result files and a dependency lock are
 released.\footnote{\url{https://github.com/SepehrMohammady/MIND-Edge-Recommender}}
-Table~\ref{tab:matrix} comes from the June run, which drew the negatives once; the
-experiments of Table~\ref{tab:p1} use the loop of Sect.~3, which redraws them at
-every step, and report the mean and standard deviation over three seeds.
 
 \section{Results}\label{sec:results}
-\begin{table}[t]
-\caption{Architecture $\times$ weight precision on MINDsmall dev, single runs.
-\textbf{Bold}: best per group; $\dagger$: precision the arm was searched at.
-Arm\,=\,the search, precision\,=\,simulated weight quantisation, so off-diagonal
-cells are ablations. Size and energy are estimates (Sect.~3).}
-\label{tab:matrix}\centering\scriptsize\setlength{\tabcolsep}{4pt}
-\begin{tabular}{llccccr}
-\toprule
-Arm & Prec. & AUC & MRR & nDCG@10 & Size\,(KB) & Energy\,($\mu$J)\\
-\midrule
-NAS & FP32$^\dagger$ & 0.633 & 0.326 & 0.375 & 1566.8 & 166.3\\
-NAS & INT8 & \textbf{0.647} & \textbf{0.338} & \textbf{0.387} & 789.8 & 17.91\\
-NAS & Binary & 0.588 & 0.297 & 0.342 & 563.1 & 12.54\\
-\midrule
-Micro-NAS & FP32 & 0.605 & 0.307 & 0.352 & 266.8 & 15.15\\
-Micro-NAS & INT8$^\dagger$ & \textbf{0.610} & \textbf{0.314} & \textbf{0.360} & 203.9 & 3.16\\
-Micro-NAS & Binary & 0.521 & 0.251 & 0.294 & 185.6 & 2.72\\
-\midrule
-Bin.\,$\mu$NAS & FP32 & 0.593 & 0.290 & 0.336 & 311.4 & 14.98\\
-Bin.\,$\mu$NAS & INT8 & 0.601 & 0.295 & 0.344 & 255.7 & 4.35\\
-Bin.\,$\mu$NAS & Binary$^\dagger$ & \textbf{0.546} & \textbf{0.273} & \textbf{0.317} & 239.5 & 3.96\\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tab_matrix}
 
 \begin{figure}[tb]
 \centering
 \includegraphics[width=0.98\linewidth]{figures/pareto.png}
 \caption{Accuracy against estimated encoder size (left) and against the energy
-estimate (right), per arm and weight precision; dashed line: reduced NRMS with a
-27\,MB word table.}
+estimate (right), per arm and weight precision, mean and standard deviation over
+three seeds; star: one-bit model with ReActNet blocks (single June run); dashed
+line: reduced NRMS with a 27\,MB word table (three seeds).}
 \label{fig:pareto}
 \end{figure}
 Table~\ref{tab:matrix} collects the nine combinations (the three arms found the
 architectures 256-4-384, 64-5-384 and 96-2-384, with 36.1, 3.29 and 3.26 million
 multiply-accumulates per title). Two patterns emerge. Moving the inner weights
-from full to eight-bit precision changes AUC by at most 0.014, inside the
-run-to-run variation reported below, while the energy estimate falls 3.4 to 9.3
-times and the size 1.2 to 2 times. One bit is different: it loses five to nine
-AUC points, and because the embedding and outer layers stay in full precision its
-size advantage over eight bits is small at this scale. The RAM estimate, the input
+from full to eight-bit precision changes AUC by at most 0.011, inside the spread
+over seeds, while the energy estimate falls 3.4 to 9.3 times and the size 1.2 to
+2 times. One bit is different: it loses 0.029 to 0.065 AUC, and because the
+embedding and outer layers stay in full precision its size advantage over eight
+bits is small at this scale. The RAM estimate, the input
 and output buffer of the widest layer at one byte per activation, is 16\,KB for
 the constrained model and 64\,KB for the unconstrained one. On the laptop a title
 takes 0.10--0.34\,ms on CPU (onnxruntime) and under 0.7\,ms on GPU for the three
@@ -286,7 +267,7 @@ full-precision architectures.
 Table~\ref{tab:p1} places these numbers. Our NRMS reproduction in the reduced
 configuration of the June run (a randomly initialised 256-dimensional word table;
 92\% of its 7.08 million parameters are the table, 27\,MB) averages 0.604 over
-three seeds with a spread of 0.010, which covers the 0.607 of the matrix run. In
+three seeds with a spread of 0.010, which covers the 0.607 of the June run. In
 the reference configuration shipped with MIND (GloVe-initialised 300-dimensional
 table, twenty heads) NRMS reaches 0.664, in line with the 0.656 reported for this
 split~\cite{mao2022digat}. Two scorers with no network set a floor: popularity
@@ -301,8 +282,8 @@ carry no such editorial labels, which is the case a content encoder is for.
 
 Cross-lingual transfer depends on how the encoder is trained (last column of
 Table~\ref{tab:p1}). Trained from a random start on English clicks it reads the
-fourteen translated dev sets at 0.528 on average, close to chance; the June matrix
-models are of this kind. The distilled student alone, frozen under a trained user
+fourteen translated dev sets at 0.528 on average, close to chance; the models of
+Table~\ref{tab:matrix} are of this kind. The distilled student alone, frozen under a trained user
 encoder, scores 0.572 across languages against 0.573 in English, so the
 distillation does carry the teacher's language alignment (the teacher itself:
 0.575 against 0.589). Fine-tuning the distilled encoder on English clicks raises
@@ -312,25 +293,24 @@ a random xMIND language instead keeps 0.589 across languages, from 0.538
 the frozen teacher reaches 0.590 across languages with the whole teacher behind
 it; the 68k-parameter byte-CNN comes within 0.001 of that figure.
 
-Two further points qualify the tables. Three seeded reruns of the eight-bit
-constrained model score 0.630, 0.622 and 0.621; the matrix run, whose
-initialisation was not seeded, scored 0.610, so we read gaps below about 0.02 in
-Table~\ref{tab:matrix} as unresolved. For the 3\% of impressions whose reader has
+Two further points qualify the tables. The standard deviation over seeds reaches
+0.017 in Table~\ref{tab:matrix}, so we read gaps below about 0.02 as unresolved;
+the June single run of each cell lies within 0.033 of the new mean, the largest
+difference being the one-bit constrained model (0.521 in June). For the 3\% of impressions whose reader has
 no history, a history-based score ties every candidate (0.500 by construction);
 popularity gives 0.529 there and the population's category distribution 0.533. By
 history length, the distilled encoder trained on English clicks scores 0.615 for
 readers with one to five clicks, 0.633 for six to twenty and 0.638 beyond, against
 0.622, 0.664 and 0.688 for GloVe NRMS: the gap widens with history.
 
-Binarising the inner weights the naive way
-leaves the constrained model near chance (0.521). Replacing its blocks with full
-binary convolutions, ReActNet activations and Bi-Real shortcuts, and starting from
-distilled weights, gives 0.572 at an estimated 194\,KB, 0.035 below the reduced
-NRMS. The 0.05 gain exceeds the run-to-run variation; three seeded runs of this
-model on a reduced training budget have a standard deviation of 0.012. On the
-accuracy-versus-footprint view (Fig.~\ref{fig:pareto}) eight-bit Micro-NAS (0.610,
-204\,KB, 3.2\uJ) has the lowest cost at the accuracy of the reduced NRMS, while
-unconstrained eight-bit leads on accuracy (0.647, 790\,KB).
+Binarising the inner weights the naive way costs the constrained model 0.065
+AUC (0.554 over three seeds). Replacing its blocks with full binary
+convolutions, ReActNet activations and Bi-Real shortcuts, and starting from
+distilled weights, gave 0.572 at an estimated 194\,KB in a single June run
+\TODO{three-seed rerun under the loop of Sect.~3}. On the accuracy-versus-footprint
+view (Fig.~\ref{fig:pareto}) eight-bit Micro-NAS (0.614, 204\,KB, 3.2\uJ) has
+the lowest cost at the accuracy of the reduced NRMS, while unconstrained
+eight-bit leads on accuracy (0.639, 790\,KB).
 
 For the boards, the trained constrained encoder (distilled start, English clicks)
 was exported to ONNX without its byte-table lookup, which the caller performs, and
@@ -390,8 +370,7 @@ Engine~\cite{bannink2021lce}, and the Cortex-M7 has no popcount instruction, so 
 make no speed claim for binary and treat it only as a way to save space. The
 energy figure ignores SRAM and memory traffic, which can dominate on a Cortex-M.
 The June constrained search enforced its flash and RAM budgets but not the
-operation budget, and the precision matrix predates the training loop of
-Table~\ref{tab:p1}, so it will be rerun with it. The $\mu$NAS searches score a
+operation budget. The $\mu$NAS searches score a
 candidate by a short distillation, whose ranking did not survive full training
 (Sect.~\ref{sec:results}); a longer fitness, or a final choice among the best
 candidates after full training, would cost more search time. Even after mixed-language
@@ -406,11 +385,11 @@ touches no personal data beyond the public logs, and the translations are
 machine-generated. Replacing the word-embedding table with a byte-level encoder
 removes the largest item of a news recommender's storage and gives every language
 the same 256-row vocabulary. With eight-bit weights the constrained encoder
-reaches 0.610 AUC at an estimated 204\,KB, and as an 8-bit file it runs in
+reaches 0.614 AUC at an estimated 204\,KB, and as an 8-bit file it runs in
 31.2\,ms per title on an STM32H7B3I-DK; searched under the budget of a
 NUCLEO-F401RE, an encoder of 0.65\,M multiply-accumulates reaches 0.591 at
-32.1\,ms per title on that board; the one-bit model, started from
-distilled weights, reaches 0.572 at 194\,KB; trained on clicks shown in a random
+32.1\,ms per title on that board; a single run of the one-bit model, started
+from distilled weights, reached 0.572 at 194\,KB; trained on clicks shown in a random
 language, the distilled byte-CNN reads fourteen languages at 0.589 AUC on average.
 What is still missing: \TODO{board energy, phone timing and a one-bit runtime}
 --- that is where we take it next.
