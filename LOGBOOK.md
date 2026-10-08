@@ -457,3 +457,16 @@ Critical path: 3, 4, 5, then 8. Step 6 can start now, since the integer encoder 
   5.9 KiB activations: one block of two strided layers (up to 59 filters) and the GAP head.
 - PyTorch loads again in the MIND venv this morning (2.12.1+cu130).
 - 09:42 H7 selection relaunched on the corrected shortlist (24 runs).
+
+## 2026-10-08 09:54 — Step 3 search phase done: corrected H7 selection
+
+- H7 selection on the corrected shortlist, 09:41-09:53 (24 runs, 12 min): candidate 144 is both the best and
+  the smallest within one standard error: mean val cos 0.3309 (SE 0.0007, seeds 42/1/2), test 0.331,
+  2.00 M MACs, 51.9 KiB INT8 weights, 15.5 KiB activations; two convolution blocks, three layers, one
+  pre-pooling, up to 98 filters, GAP head, no hidden dense layer. Next three: 0.322, 0.321, 0.321.
+  F401 selection unchanged on rerun: candidate 134, 0.2977 (SE 0.0006), 0.65 M MACs.
+- Against the hand-designed family under the same recipe and cost model (`grid.json`, one seed):
+  H7 budget 64-2-384 0.303 at 1.66 M MACs, so the searched model is 0.028 higher at 2.00 M; F401 budget
+  32-5-384 0.296 at 1.00 M, so the searched model is level at 0.65 M MACs.
+- Neither choice reaches the hand-designed 64-5-384 (0.343 at 3.31 M MACs): within these budgets the encoder
+  gives up 0.012 (H7) and 0.045 (F401) of teacher cosine. Ranking AUC of the chosen models follows in step 4.
