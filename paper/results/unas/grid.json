@@ -1,0 +1,512 @@
+[
+ {
+  "arch": "32-1-384",
+  "seed": 42,
+  "val_error": 0.7351139485836029,
+  "test_error": 0.7337227463722229,
+  "val_cos": 0.2648860514163971,
+  "params": 16096,
+  "peak_mem_bytes": 8192,
+  "model_size_bytes": 15968,
+  "macs": 425984,
+  "epochs_max": 15,
+  "minutes": 0.77,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "32-2-384",
+  "seed": 42,
+  "val_error": 0.7226642072200775,
+  "test_error": 0.7193217873573303,
+  "val_cos": 0.2773357927799225,
+  "params": 17408,
+  "peak_mem_bytes": 8192,
+  "model_size_bytes": 17152,
+  "macs": 569344,
+  "epochs_max": 15,
+  "minutes": 0.83,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "32-3-384",
+  "seed": 42,
+  "val_error": 0.7143661975860596,
+  "test_error": 0.7122278213500977,
+  "val_cos": 0.28563380241394043,
+  "params": 18720,
+  "peak_mem_bytes": 8192,
+  "model_size_bytes": 18336,
+  "macs": 712704,
+  "epochs_max": 15,
+  "minutes": 1.07,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "32-4-384",
+  "seed": 42,
+  "val_error": 0.7071579992771149,
+  "test_error": 0.7046931087970734,
+  "val_cos": 0.29284200072288513,
+  "params": 20032,
+  "peak_mem_bytes": 8192,
+  "model_size_bytes": 19520,
+  "macs": 856064,
+  "epochs_max": 15,
+  "minutes": 1.25,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "32-5-384",
+  "seed": 42,
+  "val_error": 0.7037402093410492,
+  "test_error": 0.7008192837238312,
+  "val_cos": 0.2962597906589508,
+  "params": 21344,
+  "peak_mem_bytes": 8192,
+  "model_size_bytes": 20704,
+  "macs": 999424,
+  "epochs_max": 15,
+  "minutes": 1.58,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "64-1-384",
+  "seed": 42,
+  "val_error": 0.715808779001236,
+  "test_error": 0.7135066092014313,
+  "val_cos": 0.28419122099876404,
+  "params": 33856,
+  "peak_mem_bytes": 16384,
+  "model_size_bytes": 33600,
+  "macs": 1114112,
+  "epochs_max": 15,
+  "minutes": 0.78,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "64-2-384",
+  "seed": 42,
+  "val_error": 0.6968052685260773,
+  "test_error": 0.6924919188022614,
+  "val_cos": 0.30319473147392273,
+  "params": 38528,
+  "peak_mem_bytes": 16384,
+  "model_size_bytes": 38016,
+  "macs": 1662976,
+  "epochs_max": 15,
+  "minutes": 1.1,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "64-3-384",
+  "seed": 42,
+  "val_error": 0.6805135905742645,
+  "test_error": 0.6782452464103699,
+  "val_cos": 0.3194864094257355,
+  "params": 43200,
+  "peak_mem_bytes": 16384,
+  "model_size_bytes": 42432,
+  "macs": 2211840,
+  "epochs_max": 15,
+  "minutes": 1.45,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "64-4-384",
+  "seed": 42,
+  "val_error": 0.6665697693824768,
+  "test_error": 0.6649172306060791,
+  "val_cos": 0.3334302306175232,
+  "params": 47872,
+  "peak_mem_bytes": 16384,
+  "model_size_bytes": 46848,
+  "macs": 2760704,
+  "epochs_max": 15,
+  "minutes": 1.85,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "64-5-384",
+  "seed": 42,
+  "val_error": 0.6569846570491791,
+  "test_error": 0.6553365588188171,
+  "val_cos": 0.3430153429508209,
+  "params": 52544,
+  "peak_mem_bytes": 16384,
+  "model_size_bytes": 51264,
+  "macs": 3309568,
+  "epochs_max": 15,
+  "minutes": 2.17,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "96-1-384",
+  "seed": 42,
+  "val_error": 0.6996614336967468,
+  "test_error": 0.7002487480640411,
+  "val_cos": 0.3003385663032532,
+  "params": 53664,
+  "peak_mem_bytes": 24576,
+  "model_size_bytes": 53280,
+  "macs": 2064384,
+  "epochs_max": 15,
+  "minutes": 1.0,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "96-2-384",
+  "seed": 42,
+  "val_error": 0.6698342263698578,
+  "test_error": 0.6672889590263367,
+  "val_cos": 0.3301657736301422,
+  "params": 63744,
+  "peak_mem_bytes": 24576,
+  "model_size_bytes": 62976,
+  "macs": 3280896,
+  "epochs_max": 15,
+  "minutes": 1.45,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "96-3-384",
+  "seed": 42,
+  "val_error": 0.6477928161621094,
+  "test_error": 0.6469830274581909,
+  "val_cos": 0.3522071838378906,
+  "params": 73824,
+  "peak_mem_bytes": 24576,
+  "model_size_bytes": 72672,
+  "macs": 4497408,
+  "epochs_max": 15,
+  "minutes": 1.95,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "96-4-384",
+  "seed": 42,
+  "val_error": 0.6330135762691498,
+  "test_error": 0.630146712064743,
+  "val_cos": 0.3669864237308502,
+  "params": 83904,
+  "peak_mem_bytes": 24576,
+  "model_size_bytes": 82368,
+  "macs": 5713920,
+  "epochs_max": 15,
+  "minutes": 2.46,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "96-5-384",
+  "seed": 42,
+  "val_error": 0.6160656213760376,
+  "test_error": 0.6177798211574554,
+  "val_cos": 0.3839343786239624,
+  "params": 93984,
+  "peak_mem_bytes": 24576,
+  "model_size_bytes": 92064,
+  "macs": 6930432,
+  "epochs_max": 15,
+  "minutes": 2.97,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "128-1-384",
+  "seed": 42,
+  "val_error": 0.6866760849952698,
+  "test_error": 0.6854758262634277,
+  "val_cos": 0.3133239150047302,
+  "params": 75520,
+  "peak_mem_bytes": 32768,
+  "model_size_bytes": 75008,
+  "macs": 3276800,
+  "epochs_max": 15,
+  "minutes": 1.18,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "128-2-384",
+  "seed": 42,
+  "val_error": 0.6506012976169586,
+  "test_error": 0.6508535444736481,
+  "val_cos": 0.3493987023830414,
+  "params": 93056,
+  "peak_mem_bytes": 32768,
+  "model_size_bytes": 92032,
+  "macs": 5423104,
+  "epochs_max": 15,
+  "minutes": 1.78,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "128-3-384",
+  "seed": 42,
+  "val_error": 0.6250969171524048,
+  "test_error": 0.6255159378051758,
+  "val_cos": 0.3749030828475952,
+  "params": 110592,
+  "peak_mem_bytes": 32768,
+  "model_size_bytes": 109056,
+  "macs": 7569408,
+  "epochs_max": 15,
+  "minutes": 2.48,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "128-4-384",
+  "seed": 42,
+  "val_error": 0.6013848781585693,
+  "test_error": 0.6006999313831329,
+  "val_cos": 0.39861512184143066,
+  "params": 128128,
+  "peak_mem_bytes": 32768,
+  "model_size_bytes": 126080,
+  "macs": 9715712,
+  "epochs_max": 15,
+  "minutes": 3.18,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "128-5-384",
+  "seed": 42,
+  "val_error": 0.5812781453132629,
+  "test_error": 0.5806802809238434,
+  "val_cos": 0.41872185468673706,
+  "params": 145664,
+  "peak_mem_bytes": 32768,
+  "model_size_bytes": 143104,
+  "macs": 11862016,
+  "epochs_max": 15,
+  "minutes": 3.87,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "192-1-384",
+  "seed": 42,
+  "val_error": 0.6706804931163788,
+  "test_error": 0.6691638827323914,
+  "val_cos": 0.3293195068836212,
+  "params": 125376,
+  "peak_mem_bytes": 49152,
+  "model_size_bytes": 124608,
+  "macs": 6488064,
+  "epochs_max": 15,
+  "minutes": 1.57,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "192-2-384",
+  "seed": 42,
+  "val_error": 0.6252383887767792,
+  "test_error": 0.6231032609939575,
+  "val_cos": 0.3747616112232208,
+  "params": 163968,
+  "peak_mem_bytes": 49152,
+  "model_size_bytes": 162432,
+  "macs": 11280384,
+  "epochs_max": 15,
+  "minutes": 2.59,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "192-3-384",
+  "seed": 42,
+  "val_error": 0.5866078436374664,
+  "test_error": 0.5875320434570312,
+  "val_cos": 0.41339215636253357,
+  "params": 202560,
+  "peak_mem_bytes": 49152,
+  "model_size_bytes": 200256,
+  "macs": 16072704,
+  "epochs_max": 15,
+  "minutes": 3.62,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "192-4-384",
+  "seed": 42,
+  "val_error": 0.5541632175445557,
+  "test_error": 0.5519400835037231,
+  "val_cos": 0.44583678245544434,
+  "params": 241152,
+  "peak_mem_bytes": 49152,
+  "model_size_bytes": 238080,
+  "macs": 20865024,
+  "epochs_max": 15,
+  "minutes": 4.67,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "192-5-384",
+  "seed": 42,
+  "val_error": 0.5316036939620972,
+  "test_error": 0.5319632589817047,
+  "val_cos": 0.46839630603790283,
+  "params": 279744,
+  "peak_mem_bytes": 49152,
+  "model_size_bytes": 275904,
+  "macs": 25657344,
+  "epochs_max": 15,
+  "minutes": 5.73,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "256-1-384",
+  "seed": 42,
+  "val_error": 0.6571526229381561,
+  "test_error": 0.6553541421890259,
+  "val_cos": 0.34284737706184387,
+  "params": 183424,
+  "peak_mem_bytes": 65536,
+  "model_size_bytes": 182400,
+  "macs": 10747904,
+  "epochs_max": 15,
+  "minutes": 1.96,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "256-2-384",
+  "seed": 42,
+  "val_error": 0.6033298671245575,
+  "test_error": 0.6027770042419434,
+  "val_cos": 0.3966701328754425,
+  "params": 251264,
+  "peak_mem_bytes": 65536,
+  "model_size_bytes": 249216,
+  "macs": 19234816,
+  "epochs_max": 15,
+  "minutes": 3.3,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "256-3-384",
+  "seed": 42,
+  "val_error": 0.5582107901573181,
+  "test_error": 0.557055652141571,
+  "val_cos": 0.4417892098426819,
+  "params": 319104,
+  "peak_mem_bytes": 65536,
+  "model_size_bytes": 316032,
+  "macs": 27721728,
+  "epochs_max": 15,
+  "minutes": 4.73,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "256-4-384",
+  "seed": 42,
+  "val_error": 0.521973043680191,
+  "test_error": 0.5206402540206909,
+  "val_cos": 0.47802695631980896,
+  "params": 386944,
+  "peak_mem_bytes": 65536,
+  "model_size_bytes": 382848,
+  "macs": 36208640,
+  "epochs_max": 15,
+  "minutes": 6.16,
+  "input_shape": [
+   128,
+   65
+  ]
+ },
+ {
+  "arch": "256-5-384",
+  "seed": 42,
+  "val_error": 0.4968934655189514,
+  "test_error": 0.4952095150947571,
+  "val_cos": 0.5031065344810486,
+  "params": 454784,
+  "peak_mem_bytes": 65536,
+  "model_size_bytes": 449664,
+  "macs": 44695552,
+  "epochs_max": 15,
+  "minutes": 7.57,
+  "input_shape": [
+   128,
+   65
+  ]
+ }
+]

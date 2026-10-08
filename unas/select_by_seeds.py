@@ -36,7 +36,7 @@ SEEDS = (42, 1, 2)
 name = sys.argv[1]
 K = int(sys.argv[2]) if len(sys.argv) > 2 else 8
 hist = json.loads((RES / f"{name}_history.json").read_text())
-ok = [c for c in hist["candidates"] if c["in_budget"] and not c["failed"]]
+ok = [c for c in hist["candidates"] if c["in_budget"] and not c["failed"] and np.isfinite(c["val_error"])]
 short = sorted(ok, key=lambda c: c["val_error"])[:K]
 out = RES / f"{name}_selection.json"
 done = json.loads(out.read_text()) if out.exists() else {"runs": []}
@@ -60,7 +60,7 @@ for c in short:
 
 rows = []
 for c in short:
-    v = [r["val_cos"] for r in done["runs"] if r["index"] == c["index"]]
+    v = [r["val_cos"] for r in done["runs"] if r["index"] == c["index"] and np.isfinite(r["val_cos"])]
     rows.append({"index": c["index"], "search_val_cos": c["val_cos"], "mean_val_cos": float(np.mean(v)),
                  "se": float(np.std(v, ddof=1) / np.sqrt(len(v))) if len(v) > 1 else None, "n": len(v),
                  "macs": c["macs"], "model_size_bytes": c["model_size_bytes"], "peak_mem_bytes": c["peak_mem_bytes"],
