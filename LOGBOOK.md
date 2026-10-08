@@ -635,3 +635,28 @@ First comparator signal: the hand-designed 64-5-384 in the fork's form (fixed by
 128 positions) reaches teacher cosine 0.460 after full distillation (seed 42), against 0.468 for the reference form. The
 input handling costs about 0.01 of teacher cosine; the 0.07 gap of the H7 choice is its architecture (one kernel-3
 convolution and one pooling: a receptive field of 4 bytes, against 11 for 64-5-384).
+
+## 2026-10-08 13:00 — Step 4: hand-designed comparators, seed 42 (results and board runs)
+
+Same programme as the µNAS encoders (`run_unas_full.py --models hand_64-5-384 hand_64-2-384 hand_32-5-384`, started
+11:53 by the queue); integer files and boards as before (int8qdq, seed 42; ST Edge AI Cloud 12:28-12:58).
+
+| encoder (budget) | MACs (search model) | teacher cos | EN AUC | 14 languages | INT8 AUC | H7 ms | F401 ms | flash B (H7) | RAM B (H7) |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| µNAS cand. 144 (H7) | 2.00 M | 0.390 | 0.5984 | 0.5500 | 0.5986 | 18.68 | 252.26 | 74,059 | 32,772 |
+| hand 64-2-384 (H7) | 1.66 M | 0.372 | 0.6021 | 0.5424 | 0.6054 | 16.57 | 191.68 | 61,198 | 40,880 |
+| µNAS cand. 134 (F401) | 0.65 M | 0.347 | 0.5949 | 0.5354 | 0.5931 | 15.08 | 32.15 | 63,393 | 19,192 |
+| hand 32-5-384 (F401) | 1.00 M | 0.333 | 0.5799 | 0.5419 | 0.5852 | 21.22 | 88.68 | 46,838 | 20,136 |
+| hand 64-5-384 (none) | 3.31 M | 0.460 | 0.6223 | 0.5527 | 0.6199 | 31.47 | 426.85 | 80,182 | 41,672 |
+
+- F401 budget: the searched encoder beats the best hand-designed shape on English AUC (+0.015) and teacher cosine
+  (+0.014) with 35 % fewer MACs, and runs 2.8 times faster on the NUCLEO-F401RE (32.2 against 88.7 ms); the
+  translations go the other way (-0.007).
+- H7 budget: the hand-designed 64-2-384 is level or slightly ahead on English AUC (+0.004) with fewer MACs and runs
+  faster on the H7 (16.6 against 18.7 ms); the searched encoder is ahead on teacher cosine (+0.018) and on the
+  translations (+0.008). One seed; seeds 12 and 1 follow.
+- The hand-designed 64-5-384 in the search's form loses 0.006 AUC to its original form (0.6223 against 0.6284,
+  seed 42): the fixed byte table and the average over padded positions cost little.
+- The on-target check of the 32-5-384 file reports a validation error of 0.008 (all other files 0).
+- GPU: the 64-5-384 click training held 7.7-7.8 GB of the 8 GB (96-98 % utilisation, no slowdown seen); the smaller
+  encoders 1.1-2.9 GB.
