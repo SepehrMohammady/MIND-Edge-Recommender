@@ -229,9 +229,76 @@ if dep_file.exists() and runs_file.exists():
     expect(f"with {f(h8['weights_bytes'] / 1024, 1)}\\,KB of weights, {f(h8['rom_bytes'] / 1024, 1)}\\,KB of flash", "H7 flash")
     expect(f"and {f(h8['ram_bytes'] / 1024, 1)}\\,KB of RAM, plus the {f(dep['byte_table_bytes'] / 1024, 1)}\\,KB byte table", "H7 RAM, table")
     expect(f"takes {f(f8['duration_ms'], 0)}\\,ms, no faster than full precision there ({f(f32['duration_ms'], 0)}\\,ms)", "F401 comparison")
-    expect(f"costs {Decimal(f(dep['onnx_fp32']['auc'], 3)) - Decimal(f(dep['onnx_int8qdq']['auc'], 3))} AUC", "integer-only loss")
 else:
     notes.append("board results not present; deploy and board sentences unchecked")
+
+# µNAS encoders under the board budgets (unas/, scripts/run_unas_full.py, scripts/export_int8.py, Table 3)
+if (RES / "unas_summary.json").exists() and (RES / "int8_export.json").exists():
+    U = {r["name"]: r for r in load("unas_summary.json")}
+    q = load("int8_export.json")
+    qs = q["summary"]
+    h7, hh, f4, hf, h5 = (U[n] for n in ("mind_h7", "hand_64-2-384", "mind_f401", "hand_32-5-384", "hand_64-5-384"))
+    m = lambda r, k: f(r[k]["mean"], 3)                                          # noqa: E731
+    ref = qs["ref_64-5-384"]
+    expect(f"(0.624 against 0.629 over three seeds)".replace("0.624", f(ref["onnx_int8qdq_auc"], 3))
+           .replace("0.629", f(ref["torch_fp32_auc"], 3)), "reference 8-bit file, three seeds")
+    expect(f"8-bit file costs {f(-ref['int8qdq_minus_fp32_auc'], 3)} AUC on average over three seeds",
+           "reference 8-bit loss (mean of the per-seed differences)")
+    worst = max(abs(qs[k]["onnx_int8qdq_auc"] - qs[k]["torch_fp32_auc"])
+                for k in ("unas_h7", "unas_f401", "hand_64-2-384", "hand_32-5-384"))
+    expect(f"at most {f(worst, 3)}", "in-budget 8-bit loss")
+    expect(f"(0.595 and 0.591 AUC)".replace("0.595", m(h7, "en_auc")).replace("0.591", m(f4, "en_auc")), "abstract µNAS AUC")
+    expect(f"at {f(h7['macs'] / 1e6, 2)}\\,M multiply-accumulates, and within the F401 budget", "H7 MACs")
+    expect(f"convolution at {f(f4['macs'] / 1e6, 2)}\\,M", "F401 MACs")
+    expect(f"({f(h7['search_cos']['mean'], 3)} against {f(hh['search_cos']['mean'], 3)} and "
+           f"{f(f4['search_cos']['mean'], 3)} against {f(hf['search_cos']['mean'], 3)})", "search cosines")
+    expect(f"({m(h7, 'teacher_cos_dev')} against {m(hh, 'teacher_cos_dev')} and "
+           f"{m(f4, 'teacher_cos_dev')} against {m(hf, 'teacher_cos_dev')})", "full-distillation cosines")
+    expect(f"{m(h7, 'en_auc')} against {m(hh, 'en_auc')} AUC within the H7", "H7 AUCs")
+    expect(f"{m(f4, 'en_auc')} against {m(hf, 'en_auc')} within the", "F401 AUCs")
+    expect(f"({m(h7, 'xlang_auc')} against {m(hh, 'xlang_auc')}, {m(f4, 'xlang_auc')} against "
+           f"{m(hf, 'xlang_auc')})", "translation AUCs")
+    p1s = load("p1_summary.json")
+    expect(f"scores {m(h5, 'en_auc')} in this form and {f(p1s['student/distill_ft_en']['en_auc']['mean'], 3)} in its",
+           "64-5-384 in both forms")
+    expect(f"the H7 choice was {f(h5['search_cos']['mean'] - h7['search_cos']['mean'], 3)} below",
+           "search-recipe gap")
+    expect(f"after full distillation {f(h5['teacher_cos_dev']['mean'] - h7['teacher_cos_dev']['mean'], 3)}",
+           "full-distillation gap")
+    ms = lambda r, b: r["boards"][b]["duration_ms"]                              # noqa: E731
+    H7, F4 = "STM32H7B3I-DK", "NUCLEO-F401RE"
+    expect(f"({f(ms(f4, H7), 1)}\\,ms per title on the STM32H7B3I-DK)", "F401 encoder on the H7")
+    expect(f"it takes\n{f(ms(f4, F4), 1)}\\,ms".replace("\n", " "), "F401 encoder on the F401")
+    expect(f"against {f(ms(hf, F4), 1)}\\,ms for 32-5-384 and {f(ms(h5, F4), 0)}\\,ms for 64-5-384", "F401 board, hand")
+    expect(f"{f(ms(hf, F4) / ms(f4, F4), 1)}\ntimes faster".replace("\n", " "), "F401 speed-up")
+    expect(f"title, {f(ms(hf, F4) / ms(f4, F4), 1)} times less than that shape", "abstract speed-up")
+    expect(f"an encoder of {f(f4['macs'] / 1e6, 2)}\\,M multiply-accumulates reaches {m(f4, 'en_auc')} at "
+           f"{f(ms(f4, F4), 1)}\\,ms per title on that board", "conclusion F401")
+    expect(f"({f(ms(hh, H7), 1)} against {f(ms(h7, H7), 1)}\\,ms)", "H7 board, µNAS and 64-2-384")
+    expect(f"{f(f4['boards'][F4]['duration_ms'], 1)}\\,ms per\ntitle".replace("\n", " "), "abstract F401 latency")
+    cyc = {}
+    for line in (RES / "stedgeai_cloud" / "runs.jsonl").read_text(encoding="utf-8").splitlines():
+        r = json.loads(line)
+        if r.get("cmd") == "benchmark" and (r.get("duration_ms") or -1) > 0:
+            cyc[(r["model"], r["board"])] = r
+    c_f4 = cyc[("unas_f401_seed42_body_int8qdq.onnx", F4)]["cycles_by_macc"]
+    c_hf = cyc[("hand_32-5-384_seed42_body_int8qdq.onnx", F4)]["cycles_by_macc"]
+    expect(f"at {f(c_f4, 1)} cycles\nper multiply-accumulate against {f(c_hf, 1)}".replace("\n", " "), "cycles per MAC")
+    rep = json.loads((RES / "stedgeai_cloud" / "hand_32-5-384_seed42_body_int8qdq__NUCLEO-F401RE.json")
+                     .read_text(encoding="utf-8"))["info"]["graphs"][0]["nodes"]
+    dw = {round(n["exec_time"]["cycles_by_macc"]) for n in rep
+          if n.get("attributes", {}).get("is_depthwise") == "True" and n.get("exec_time")}
+    first = next(n for n in rep if n["name"] == "_layers_0_conv_Conv_output_0")["exec_time"]["cycles_by_macc"]
+    expect(f"depthwise layers take {dw.pop() if len(dw) == 1 else dw}", "depthwise cycles per MAC")
+    expect(f"65 input\nchannels, {f(first, 1)}".replace("\n", " "), "first pointwise cycles per MAC")
+    full = json.loads((RES / "stedgeai_cloud" / "unas_h7_seed42_body_int8full__STM32H7B3I-DK.json")
+                      .read_text(encoding="utf-8"))["info"]["graphs"][0]["nodes"]
+    fused = max(n["exec_time"]["duration_ms"] for n in full if n.get("exec_time"))
+    expect(f"took {f(fused, 1)}\\,ms alone", "fused conv+pool kernel")
+    port = load("unas/port_check.json")
+    expect(f"{max(r['output_max_abs_diff'] for r in port.values()):.1e}".replace("e-05", r"\times10^{-5}"), "port check")
+else:
+    notes.append("µNAS results not present; Table 3 sentences unchecked")
 
 for line in notes:
     print("note:", line)

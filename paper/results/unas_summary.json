@@ -36,6 +36,20 @@
    "n": 3
   },
   "int8_file_bytes": 72050,
+  "boards": {
+   "STM32H7B3I-DK": {
+    "duration_ms": 18.677528944332153,
+    "rom_bytes": 74059,
+    "ram_bytes": 32772,
+    "macc": 2047954
+   },
+   "NUCLEO-F401RE": {
+    "duration_ms": 252.2633320670575,
+    "rom_bytes": 74935,
+    "ram_bytes": 26020,
+    "macc": 2047954
+   }
+  },
   "seeds_full": [
    1,
    12,
@@ -53,13 +67,51 @@
    "mean": 0.3032,
    "n": 1
   },
-  "teacher_cos_dev": null,
-  "en_auc": null,
-  "xlang_auc": null,
-  "torch_auc_export": null,
-  "int8_auc": null,
-  "int8_file_bytes": null,
-  "seeds_full": []
+  "teacher_cos_dev": {
+   "mean": 0.3708,
+   "std": 0.0008,
+   "n": 3
+  },
+  "en_auc": {
+   "mean": 0.5986,
+   "std": 0.0045,
+   "n": 3
+  },
+  "xlang_auc": {
+   "mean": 0.547,
+   "std": 0.0033,
+   "n": 3
+  },
+  "torch_auc_export": {
+   "mean": 0.5986,
+   "std": 0.0046,
+   "n": 3
+  },
+  "int8_auc": {
+   "mean": 0.5977,
+   "std": 0.0055,
+   "n": 3
+  },
+  "int8_file_bytes": 60835,
+  "boards": {
+   "STM32H7B3I-DK": {
+    "duration_ms": 16.56529628811404,
+    "rom_bytes": 61198,
+    "ram_bytes": 40880,
+    "macc": 1700800
+   },
+   "NUCLEO-F401RE": {
+    "duration_ms": 191.68090695235878,
+    "rom_bytes": 62098,
+    "ram_bytes": 34604,
+    "macc": 1700800
+   }
+  },
+  "seeds_full": [
+   1,
+   12,
+   42
+  ]
  },
  {
   "group": "f401",
@@ -98,6 +150,20 @@
    "n": 3
   },
   "int8_file_bytes": 56792,
+  "boards": {
+   "STM32H7B3I-DK": {
+    "duration_ms": 15.081500440603122,
+    "rom_bytes": 63393,
+    "ram_bytes": 19192,
+    "macc": 661128
+   },
+   "NUCLEO-F401RE": {
+    "duration_ms": 32.149226404726505,
+    "rom_bytes": 64297,
+    "ram_bytes": 17956,
+    "macc": 661128
+   }
+  },
   "seeds_full": [
    1,
    12,
@@ -115,13 +181,51 @@
    "mean": 0.2963,
    "n": 1
   },
-  "teacher_cos_dev": null,
-  "en_auc": null,
-  "xlang_auc": null,
-  "torch_auc_export": null,
-  "int8_auc": null,
-  "int8_file_bytes": null,
-  "seeds_full": []
+  "teacher_cos_dev": {
+   "mean": 0.333,
+   "std": 0.019,
+   "n": 3
+  },
+  "en_auc": {
+   "mean": 0.5889,
+   "std": 0.0077,
+   "n": 3
+  },
+  "xlang_auc": {
+   "mean": 0.538,
+   "std": 0.0047,
+   "n": 3
+  },
+  "torch_auc_export": {
+   "mean": 0.5889,
+   "std": 0.0077,
+   "n": 3
+  },
+  "int8_auc": {
+   "mean": 0.5886,
+   "std": 0.0028,
+   "n": 3
+  },
+  "int8_file_bytes": 55343,
+  "boards": {
+   "STM32H7B3I-DK": {
+    "duration_ms": 21.215357060544193,
+    "rom_bytes": 46838,
+    "ram_bytes": 20136,
+    "macc": 1033056
+   },
+   "NUCLEO-F401RE": {
+    "duration_ms": 88.67613001167774,
+    "rom_bytes": 47754,
+    "ram_bytes": 19012,
+    "macc": 1033056
+   }
+  },
+  "seeds_full": [
+   1,
+   12,
+   42
+  ]
  },
  {
   "group": "none",
@@ -134,12 +238,50 @@
    "mean": 0.3431,
    "n": 3
   },
-  "teacher_cos_dev": null,
-  "en_auc": null,
-  "xlang_auc": null,
-  "torch_auc_export": null,
-  "int8_auc": null,
-  "int8_file_bytes": null,
-  "seeds_full": []
+  "teacher_cos_dev": {
+   "mean": 0.4594,
+   "std": 0.0004,
+   "n": 3
+  },
+  "en_auc": {
+   "mean": 0.6182,
+   "std": 0.0063,
+   "n": 3
+  },
+  "xlang_auc": {
+   "mean": 0.5514,
+   "std": 0.0043,
+   "n": 3
+  },
+  "torch_auc_export": {
+   "mean": 0.6182,
+   "std": 0.0063,
+   "n": 3
+  },
+  "int8_auc": {
+   "mean": 0.6138,
+   "std": 0.0095,
+   "n": 3
+  },
+  "int8_file_bytes": 91551,
+  "boards": {
+   "STM32H7B3I-DK": {
+    "duration_ms": 31.46722515625879,
+    "rom_bytes": 80182,
+    "ram_bytes": 41672,
+    "macc": 3372352
+   },
+   "NUCLEO-F401RE": {
+    "duration_ms": 426.84667453262955,
+    "rom_bytes": 81074,
+    "ram_bytes": 35396,
+    "macc": 3372352
+   }
+  },
+  "seeds_full": [
+   1,
+   12,
+   42
+  ]
  }
 ]
