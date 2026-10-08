@@ -723,3 +723,17 @@ titles per step), so the cache grows without bound. With the allocator capped at
   the fork-form 64-5-384 runs today, possibly the 240-min P1 run of 10-06).
 - Queue relaunched (`scripts/queue_step4.ps1`; finished jobs skip): matrix from the 256-4-384 arm, then the µNAS
   encoders with mixed-language clicks.
+
+## 2026-10-08 16:47 — Matrix relaunched with the allocator cap; ReActNet rerun queued; Table 1 and Fig. 2 generators
+
+- Matrix relaunched 16:37. 256-4-384, first epoch in about 4.5 min (17 min before the cap; P0 had estimated 9.2 min):
+  GPU 98-99 %, 95 W, 5.6 GB dedicated, no shared memory, 12 GB of RAM free; epoch-1 loss 1.4529, the same as in the
+  stopped run. Expected end about 19:40, then the µNAS mixed-language runs (about 1 h).
+- The matrix rerun changes a claim of the paper: the naive binary 64-5-384 scores 0.532 / 0.557 / 0.573 (mean 0.554)
+  over three seeds, not "near chance" (June single run 0.521). The ReActNet encoder has only the June single run
+  (0.572). `scripts/run_binary.py` now runs it with seeds 42, 1, 2 under the October loop (same programme: distillation
+  15 epochs, English clicks 8 epochs; `paper/results/binary_reactnet.json`; CPU smoke run 2.1 min). Queued after the
+  current queue.
+- `scripts/make_tab_matrix.py` writes Table 1 (`paper/tab_matrix.tex`) from `matrix_summary.json`;
+  `scripts/make_figures.py` draws Fig. 2 from the rerun (mean and SD over seeds) and the three-seed reduced NRMS when
+  the summary exists. Paper, checker and course follow when the matrix is complete.
