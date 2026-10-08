@@ -112,5 +112,575 @@
    "ram_kb": 16.0,
    "fp_param_fraction": 0.686
   }
+ },
+ "micro_nas/fp32/seed1": {
+  "seed": 1,
+  "minutes": 14.57,
+  "settings": {
+   "arm": "micro_nas",
+   "precision": "fp32",
+   "arch": {
+    "channels": 64,
+    "depth": 5,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 0,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.6181,
+   "mrr": 0.3197,
+   "ndcg@5": 0.3028,
+   "ndcg@10": 0.3656,
+   "n_impressions": 73152,
+   "params": 68288,
+   "macs": 3293184,
+   "macs_fp32": 3293184,
+   "macs_quantized": 0,
+   "size_kb": 266.75,
+   "energy_uj": 15.1486,
+   "ram_kb": 64.0,
+   "fp_param_fraction": 1.0
+  }
+ },
+ "micro_nas/int8/seed1": {
+  "seed": 1,
+  "minutes": 4.26,
+  "settings": {
+   "arm": "micro_nas",
+   "precision": "int8",
+   "arch": {
+    "channels": 64,
+    "depth": 5,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 2,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.6073,
+   "mrr": 0.308,
+   "ndcg@5": 0.2895,
+   "ndcg@10": 0.3545,
+   "n_impressions": 73152,
+   "params": 68288,
+   "macs": 3293184,
+   "macs_fp32": 548864,
+   "macs_quantized": 2744320,
+   "size_kb": 203.94,
+   "energy_uj": 3.156,
+   "ram_kb": 16.0,
+   "fp_param_fraction": 0.686
+  }
+ },
+ "micro_nas/binary/seed1": {
+  "seed": 1,
+  "minutes": 4.1,
+  "settings": {
+   "arm": "micro_nas",
+   "precision": "binary",
+   "arch": {
+    "channels": 64,
+    "depth": 5,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 2,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.5573,
+   "mrr": 0.2653,
+   "ndcg@5": 0.245,
+   "ndcg@10": 0.3126,
+   "n_impressions": 73152,
+   "params": 68288,
+   "macs": 3293184,
+   "macs_fp32": 548864,
+   "macs_quantized": 2744320,
+   "size_kb": 185.62,
+   "energy_uj": 2.7221,
+   "ram_kb": 16.0,
+   "fp_param_fraction": 0.686
+  }
+ },
+ "micro_nas/fp32/seed2": {
+  "seed": 2,
+  "minutes": 14.45,
+  "settings": {
+   "arm": "micro_nas",
+   "precision": "fp32",
+   "arch": {
+    "channels": 64,
+    "depth": 5,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 0,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.6187,
+   "mrr": 0.3251,
+   "ndcg@5": 0.3075,
+   "ndcg@10": 0.3706,
+   "n_impressions": 73152,
+   "params": 68288,
+   "macs": 3293184,
+   "macs_fp32": 3293184,
+   "macs_quantized": 0,
+   "size_kb": 266.75,
+   "energy_uj": 15.1486,
+   "ram_kb": 64.0,
+   "fp_param_fraction": 1.0
+  }
+ },
+ "micro_nas/int8/seed2": {
+  "seed": 2,
+  "minutes": 4.28,
+  "settings": {
+   "arm": "micro_nas",
+   "precision": "int8",
+   "arch": {
+    "channels": 64,
+    "depth": 5,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 2,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.6136,
+   "mrr": 0.3209,
+   "ndcg@5": 0.3011,
+   "ndcg@10": 0.3639,
+   "n_impressions": 73152,
+   "params": 68288,
+   "macs": 3293184,
+   "macs_fp32": 548864,
+   "macs_quantized": 2744320,
+   "size_kb": 203.94,
+   "energy_uj": 3.156,
+   "ram_kb": 16.0,
+   "fp_param_fraction": 0.686
+  }
+ },
+ "micro_nas/binary/seed2": {
+  "seed": 2,
+  "minutes": 4.04,
+  "settings": {
+   "arm": "micro_nas",
+   "precision": "binary",
+   "arch": {
+    "channels": 64,
+    "depth": 5,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 2,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.5734,
+   "mrr": 0.2989,
+   "ndcg@5": 0.2803,
+   "ndcg@10": 0.341,
+   "n_impressions": 73152,
+   "params": 68288,
+   "macs": 3293184,
+   "macs_fp32": 548864,
+   "macs_quantized": 2744320,
+   "size_kb": 185.62,
+   "energy_uj": 2.7221,
+   "ram_kb": 16.0,
+   "fp_param_fraction": 0.686
+  }
+ },
+ "binarized_micro_nas/fp32/seed42": {
+  "seed": 42,
+  "minutes": 10.43,
+  "settings": {
+   "arm": "binarized_micro_nas",
+   "precision": "fp32",
+   "arch": {
+    "channels": 96,
+    "depth": 2,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 0,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.6046,
+   "mrr": 0.3071,
+   "ndcg@5": 0.2911,
+   "ndcg@10": 0.3552,
+   "n_impressions": 73152,
+   "params": 79712,
+   "macs": 3256320,
+   "macs_fp32": 3256320,
+   "macs_quantized": 0,
+   "size_kb": 311.38,
+   "energy_uj": 14.9791,
+   "ram_kb": 96.0,
+   "fp_param_fraction": 1.0
+  }
+ },
+ "binarized_micro_nas/int8/seed42": {
+  "seed": 42,
+  "minutes": 3.04,
+  "settings": {
+   "arm": "binarized_micro_nas",
+   "precision": "int8",
+   "arch": {
+    "channels": 96,
+    "depth": 2,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 2,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.6085,
+   "mrr": 0.3095,
+   "ndcg@5": 0.294,
+   "ndcg@10": 0.3575,
+   "n_impressions": 73152,
+   "params": 79712,
+   "macs": 3256320,
+   "macs_fp32": 823296,
+   "macs_quantized": 2433024,
+   "size_kb": 255.69,
+   "energy_uj": 4.3468,
+   "ram_kb": 24.0,
+   "fp_param_fraction": 0.7615
+  }
+ },
+ "binarized_micro_nas/binary/seed42": {
+  "seed": 42,
+  "minutes": 2.94,
+  "settings": {
+   "arm": "binarized_micro_nas",
+   "precision": "binary",
+   "arch": {
+    "channels": 96,
+    "depth": 2,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 2,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.5666,
+   "mrr": 0.273,
+   "ndcg@5": 0.2519,
+   "ndcg@10": 0.3195,
+   "n_impressions": 73152,
+   "params": 79712,
+   "macs": 3256320,
+   "macs_fp32": 823296,
+   "macs_quantized": 2433024,
+   "size_kb": 239.45,
+   "energy_uj": 3.9621,
+   "ram_kb": 24.0,
+   "fp_param_fraction": 0.7615
+  }
+ },
+ "binarized_micro_nas/fp32/seed1": {
+  "seed": 1,
+  "minutes": 10.45,
+  "settings": {
+   "arm": "binarized_micro_nas",
+   "precision": "fp32",
+   "arch": {
+    "channels": 96,
+    "depth": 2,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 0,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.5977,
+   "mrr": 0.2902,
+   "ndcg@5": 0.2703,
+   "ndcg@10": 0.3404,
+   "n_impressions": 73152,
+   "params": 79712,
+   "macs": 3256320,
+   "macs_fp32": 3256320,
+   "macs_quantized": 0,
+   "size_kb": 311.38,
+   "energy_uj": 14.9791,
+   "ram_kb": 96.0,
+   "fp_param_fraction": 1.0
+  }
+ },
+ "binarized_micro_nas/int8/seed1": {
+  "seed": 1,
+  "minutes": 3.0,
+  "settings": {
+   "arm": "binarized_micro_nas",
+   "precision": "int8",
+   "arch": {
+    "channels": 96,
+    "depth": 2,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 2,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.5875,
+   "mrr": 0.2952,
+   "ndcg@5": 0.2774,
+   "ndcg@10": 0.3427,
+   "n_impressions": 73152,
+   "params": 79712,
+   "macs": 3256320,
+   "macs_fp32": 823296,
+   "macs_quantized": 2433024,
+   "size_kb": 255.69,
+   "energy_uj": 4.3468,
+   "ram_kb": 24.0,
+   "fp_param_fraction": 0.7615
+  }
+ },
+ "binarized_micro_nas/binary/seed1": {
+  "seed": 1,
+  "minutes": 2.95,
+  "settings": {
+   "arm": "binarized_micro_nas",
+   "precision": "binary",
+   "arch": {
+    "channels": 96,
+    "depth": 2,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 2,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.5564,
+   "mrr": 0.2669,
+   "ndcg@5": 0.2455,
+   "ndcg@10": 0.3147,
+   "n_impressions": 73152,
+   "params": 79712,
+   "macs": 3256320,
+   "macs_fp32": 823296,
+   "macs_quantized": 2433024,
+   "size_kb": 239.45,
+   "energy_uj": 3.9621,
+   "ram_kb": 24.0,
+   "fp_param_fraction": 0.7615
+  }
+ },
+ "binarized_micro_nas/fp32/seed2": {
+  "seed": 2,
+  "minutes": 10.48,
+  "settings": {
+   "arm": "binarized_micro_nas",
+   "precision": "fp32",
+   "arch": {
+    "channels": 96,
+    "depth": 2,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 0,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.6028,
+   "mrr": 0.3043,
+   "ndcg@5": 0.2878,
+   "ndcg@10": 0.353,
+   "n_impressions": 73152,
+   "params": 79712,
+   "macs": 3256320,
+   "macs_fp32": 3256320,
+   "macs_quantized": 0,
+   "size_kb": 311.38,
+   "energy_uj": 14.9791,
+   "ram_kb": 96.0,
+   "fp_param_fraction": 1.0
+  }
+ },
+ "binarized_micro_nas/int8/seed2": {
+  "seed": 2,
+  "minutes": 3.02,
+  "settings": {
+   "arm": "binarized_micro_nas",
+   "precision": "int8",
+   "arch": {
+    "channels": 96,
+    "depth": 2,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 2,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.6061,
+   "mrr": 0.3023,
+   "ndcg@5": 0.2833,
+   "ndcg@10": 0.3513,
+   "n_impressions": 73152,
+   "params": 79712,
+   "macs": 3256320,
+   "macs_fp32": 823296,
+   "macs_quantized": 2433024,
+   "size_kb": 255.69,
+   "energy_uj": 4.3468,
+   "ram_kb": 24.0,
+   "fp_param_fraction": 0.7615
+  }
+ },
+ "binarized_micro_nas/binary/seed2": {
+  "seed": 2,
+  "minutes": 2.96,
+  "settings": {
+   "arm": "binarized_micro_nas",
+   "precision": "binary",
+   "arch": {
+    "channels": 96,
+    "depth": 2,
+    "out_dim": 384
+   },
+   "init": "random",
+   "train_langs": [
+    "en"
+   ],
+   "epochs": 8,
+   "qat_epochs": 2,
+   "lr": 0.0001,
+   "batch_size": 64,
+   "train_impressions": null,
+   "eval_impressions": null
+  },
+  "results": {
+   "auc": 0.5497,
+   "mrr": 0.2725,
+   "ndcg@5": 0.2474,
+   "ndcg@10": 0.3169,
+   "n_impressions": 73152,
+   "params": 79712,
+   "macs": 3256320,
+   "macs_fp32": 823296,
+   "macs_quantized": 2433024,
+   "size_kb": 239.45,
+   "energy_uj": 3.9621,
+   "ram_kb": 24.0,
+   "fp_param_fraction": 0.7615
+  }
  }
 }

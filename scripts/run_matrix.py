@@ -40,6 +40,7 @@ import torch
 
 from src import footprint, quantize, recommender, runlog
 from src.config import load_config, use_run_dir
+from src.gpu import cap_gpu_memory
 from src.nas.search import build_encoder, estimate_ram_kb
 from src.seed import seed_everything
 
@@ -62,6 +63,7 @@ args = parser.parse_args()
 
 cfg = load_config()
 use_run_dir(cfg, "matrix_smoke" if args.smoke else "matrix")
+cap_gpu_memory()                    # src/gpu.py: keeps the allocator's cache inside the card
 CKPT = Path(cfg["paths"]["artifacts_dir"])
 if args.smoke:
     EPOCHS, QAT_EPOCHS = 1, 1

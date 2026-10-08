@@ -29,6 +29,7 @@ import torch
 from src import (baseline_nrms, data_xmind, footprint, heuristics, recommender, runlog,
                  student, teacher)
 from src.config import load_config, use_run_dir
+from src.gpu import cap_gpu_memory
 from src.nas.search import build_encoder
 from src.recommender import FixedVectors, NewsRecommender
 from src.seed import seed_everything
@@ -48,6 +49,7 @@ assert all(s in STAGES for s in args.stages), f"stages must be among {STAGES}"
 
 cfg = load_config()
 use_run_dir(cfg, "p1_smoke" if args.smoke else "p1")
+cap_gpu_memory()                    # src/gpu.py: keeps the allocator's cache inside the card
 CKPT = Path(cfg["paths"]["artifacts_dir"])
 XLANGS = data_xmind.available_langs(cfg)
 if args.smoke:

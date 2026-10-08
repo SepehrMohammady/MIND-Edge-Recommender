@@ -37,6 +37,7 @@ import torch
 
 from src import data_xmind, footprint, recommender, runlog, student
 from src.config import load_config, use_run_dir
+from src.gpu import cap_gpu_memory
 from src.seed import seed_everything
 from src.unas_encoder import UnasEncoder, model_arch
 
@@ -54,6 +55,7 @@ args = parser.parse_args()
 
 cfg = load_config()
 use_run_dir(cfg, "unas_full_smoke" if args.smoke else "unas_full")
+cap_gpu_memory()                    # src/gpu.py: keeps the allocator's cache inside the card
 CKPT = Path(cfg["paths"]["artifacts_dir"])
 XLANGS = data_xmind.available_langs(cfg)
 if args.smoke:
