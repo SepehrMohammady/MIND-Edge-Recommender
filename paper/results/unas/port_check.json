@@ -1,0 +1,30 @@
+{
+ "mind_h7": {
+  "candidate": 144,
+  "rows": 64,
+  "input_max_abs_diff": 0.0,
+  "output_max_abs_diff": 2.288818359375e-05,
+  "output_max_abs_keras": 72.50992584228516,
+  "cosine_min": 0.9999998211860657,
+  "trainable_params": 53404,
+  "byte_table_params": 16448,
+  "macs_conv_dense": 1986304,
+  "macs_fork": 1995648,
+  "fork_minus_ours": 9344,
+  "pass": true
+ },
+ "mind_f401": {
+  "candidate": 134,
+  "rows": 64,
+  "input_max_abs_diff": 0.0,
+  "output_max_abs_diff": 8.58306884765625e-06,
+  "output_max_abs_keras": 18.532413482666016,
+  "cosine_min": 0.9999998807907104,
+  "trainable_params": 42664,
+  "byte_table_params": 16448,
+  "macs_conv_dense": 648736,
+  "macs_fork": 650624,
+  "fork_minus_ours": 1888,
+  "pass": true
+ }
+}
