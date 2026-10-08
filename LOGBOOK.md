@@ -489,7 +489,7 @@ Critical path: 3, 4, 5, then 8. Step 6 can start now, since the integer encoder 
 
 Critical path: 4, then 5, then 8. The matrix rerun of step 3 can run overnight beside daytime work on 4.
 
-## 2026-10-08 10:55 — Step 3 matrix rerun started; step 4 started (chosen µNAS encoders in the PyTorch pipeline)
+## 2026-10-08 10:53 — Step 3 matrix rerun started; step 4 started (chosen µNAS encoders in the PyTorch pipeline)
 
 Matrix rerun (`scripts/run_matrix.py`, commit 4a4ed5e)
 - The nine cells of the June Table 1 (architectures 256-4-384, 64-5-384, 96-2-384 x FP32 / simulated INT8 /
@@ -547,7 +547,7 @@ Integer export with three seeds (`scripts/export_int8.py`, CPU)
 - 1-bit: not started. Route to a board as in `docs/binary_deployment.md` (Larq, LCE, TFLite Micro on the H7, as in
   `NAS-BNN/publish/nasbnn-wakevision-stm32`, or CBin-NN).
 
-## 2026-10-08 11:35 — Step 4 first results (seed 42); board files of the µNAS encoders; Pad export fix
+## 2026-10-08 11:24 — Step 4 first results (seed 42); board files of the µNAS encoders; Pad export fix
 
 Full programme, seed 42 (`scripts/run_unas_full.py`; reference 64-5-384 from P1 for comparison):
 
@@ -569,7 +569,7 @@ Full programme, seed 42 (`scripts/run_unas_full.py`; reference 64-5-384 from P1 
 Integer files (`scripts/export_int8.py`), seed 42: µNAS H7 0.5984 (PyTorch) = 0.5984 (ONNX FP32), 0.5986 (ONNX INT8),
 72,032 B; µNAS F401 0.5949 = 0.5949, 0.5931, 56,783 B.
 
-Board runs, ST Edge AI Developer Cloud (Core 4.0.1), INT8 files of seed 42, 11:20-11:33:
+Board runs, ST Edge AI Developer Cloud (Core 4.0.1), INT8 files of seed 42, 11:17-11:23:
 
 | file | board | ms | MACC | weights B | flash B | RAM B | cycles/MACC |
 |---|---|--:|--:|--:|--:|--:|--:|
@@ -596,7 +596,7 @@ Pad export fix
   (`--op_types_to_quantize Conv Gemm MatMul`, as for the reference, so that the files compare). Quantising those
   operators too would cut RAM and time further; not done yet.
 
-## 2026-10-08 12:25 — Step 4: µNAS encoders over three seeds; full-integer files; first comparator signal
+## 2026-10-08 12:08 — Step 4: µNAS encoders over three seeds; full-integer files; first comparator signal
 
 µNAS encoders, English clicks, seeds 42, 12, 1 (10:53-11:53, one process; distillation 1.2-3.2 min, clicks 5.6-11.0 min):
 
@@ -615,7 +615,7 @@ files measured so far; `int8full` = every operator ONNX Runtime quantises, ReLU 
 | µNAS F401 | 0.5905 | 0.5896 ± 0.0025 | 0.5899 ± 0.0028 |
 | reference 64-5-384 | 0.6285 | 0.6242 ± 0.0036 | 0.6257 ± 0.0025 |
 
-Board runs of the full-integer files (seed 42), 12:10-12:22:
+Board runs of the full-integer files (seed 42), 12:01-12:08:
 
 | file | board | int8qdq ms | int8full ms | int8qdq RAM B | int8full RAM B |
 |---|---|--:|--:|--:|--:|
