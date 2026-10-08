@@ -15,15 +15,13 @@ $root = Split-Path -Parent $PSScriptRoot
 $env:PYTHONPATH = $root
 $log = Join-Path $root "logs\$Tag.log"
 $gpu = Join-Path $root "logs\${Tag}_gpu.csv"
-$sampler = Start-Process -FilePath "nvidia-smi" -ArgumentList @(
-    "--query-gpu=timestamp,utilization.gpu,memory.used,power.draw,temperature.gpu",
-    "--format=csv,noheader", "-l", "30", "-f", $gpu) -WindowStyle Hidden -PassThru
 $pyArgs = @("-u", "-m", $Module) + @($ArgString -split '\s+' | Where-Object { $_ -ne "" })
 $p = Start-Process -FilePath (Join-Path $root ".venv\Scripts\python.exe") -ArgumentList $pyArgs `
         -WorkingDirectory $root -RedirectStandardOutput $log -RedirectStandardError "$log.err" `
         -NoNewWindow -PassThru
 $p.PriorityClass = "BelowNormal"
+Start-Process -FilePath powershell.exe -WindowStyle Hidden -ArgumentList `
+    "-NoProfile -ExecutionPolicy Bypass -File `"$PSScriptRoot\gpu_sampler.ps1`" -Out `"$gpu`" -WatchPid $($p.Id)"
 "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') started pid $($p.Id): $Module $ArgString -> $log"
 $p.WaitForExit()
-Stop-Process -Id $sampler.Id -ErrorAction SilentlyContinue
 "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') $Module exit code $($p.ExitCode)"
