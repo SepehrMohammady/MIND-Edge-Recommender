@@ -334,7 +334,14 @@ if (RES / "unas_summary.json").exists() and (RES / "int8_export.json").exists():
            json.loads(sorted(bench.glob("latency_*.json"))[-1].read_text(encoding="utf-8"))["rows"]}
     chk = json.loads(sorted(bench.glob("check_*.json"))[-1].read_text(encoding="utf-8"))
     app = load("app_encoder.json")
-    expect(f"the 8-bit encoder takes {f(lat[('int8', 1)]['medianMs'], 2)}\\,ms per title.", "abstract, phone")
+    pe = load("phone_energy.json")                     # scripts/phone_energy.py
+    expect(f"the 8-bit encoder takes {f(lat[('int8', 1)]['medianMs'], 2)}\\,ms and about "
+           f"{f(pe['energy_per_title_mj'], 2)}\\,mJ per title.", "abstract, phone")
+    expect(f"({pe['titles_per_second']:,.0f} titles per second), the unplugged phone draws "
+           f"{f(pe['phases']['load']['power_w'], 2)}\\,W against {f(pe['phases']['idle']['power_w'], 2)}\\,W with the "
+           f"encoder idle and the screen on, about {f(pe['energy_per_title_mj'], 2)}\\,mJ per title", "phone energy")
+    expect(f"which give {f(pe['check_capacity_pct_mj'], 2)} and {f(pe['check_charge_counter_mj'], 1)}\\,mJ",
+           "phone energy, coarse checks")
     expect(f"(largest difference ${chk['int8']['maxAbsDiff']:.1e}".replace("e-07", "\\times10^{-7}"), "phone check")
     expect(f"takes {f(lat[('int8', 1)]['medianMs'], 2)}\\,ms per title on one core (median over "
            f"{lat[('int8', 1)]['repeats']:,} calls", "phone, 8-bit, one thread")

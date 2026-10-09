@@ -928,3 +928,24 @@ English clicks, seeds 42 / 12 / 1 (14:54-15:45):
   (8-bit loss of the in-budget encoders now at most 0.003; the phone ran the encoder), conclusion; the phone latency in
   setup, results and abstract; TODOs left: energy on the boards and the phone, a one-bit runtime.
 - Course lesson 7 (`scripts/sync_course.py`): table of the seven encoders on both boards, the re-choice, phone timing.
+
+## 2026-10-09 16:14 — Step 6: battery test on the phone (energy per title)
+
+Sepehr ran the battery test from the research screen with the cable unplugged (14:37-15:07 phone time by the file
+stamp, result pulled 16:12): 15 min with the app open and the encoder idle, then 15 min encoding the test titles in a
+loop (8-bit file, one thread); screen kept on by the app; every sample unplugged.
+
+| phase | mean power | current (fuel-gauge average) | voltage | capacity | temperature |
+|---|--:|--:|--:|--:|--:|
+| idle | 1.151 W (sd 0.054) | 272 mA | 4.236 V | 99 -> 96 % | 35.5 -> 33.6 °C |
+| encoding | 2.860 W (sd 0.190) | 695 mA | 4.112 V | 96 -> 90 % | 33.6 -> 37.7 °C |
+
+- 1,625,209 titles in 900 s: 1,806 per second, 0.554 ms each (the latency test gave a 0.535 ms median per call).
+- Extra power while encoding 1.709 W, so **0.95 mJ per title**. A feed of 100 titles costs about 0.1 J.
+- Limits of this phone's battery readings: CURRENT_NOW is always 0, and the charge counter moves in steps of 29.46 mAh
+  (one step during the whole idle phase while the capacity fell 3 %). Coarse checks: capacity percentage 0.83 mJ,
+  charge counter 1.6 mJ per title. The paper reads it as roughly one millijoule per title.
+- `scripts/phone_energy.py` -> `paper/results/phone_energy.json`; raw file in `paper/results/phone/edge_bench/`.
+- Paper: abstract, setup (method), results (phone paragraph), limitations, conclusion; TODOs left: board energy and a
+  one-bit runtime. `check_numbers.py` extended (energy sentences) and passes; PDF 11 pages. Course lesson 7: phone
+  energy.

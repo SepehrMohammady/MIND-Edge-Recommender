@@ -197,7 +197,12 @@ lat = {(r["kind"], r["threads"]): r for r in
 phone = (f"همان فایل .onnx با onnxruntime-android اجرا می‌شود؛ برنامهٔ FeedWell-Edge میزبان مدل است. روی DOOGEE S98Pro "
          f"(MediaTek Helio G96) فایل 8-bit برای هر عنوان {f(lat[('int8', 1)]['medianMs'], 2)} میلی‌ثانیه طول می‌کشد "
          f"(میانهٔ 2000 اجرا، یک هسته) و فایل FP32 {f(lat[('fp32', 1)]['medianMs'], 2)} میلی‌ثانیه؛ بردارها با لپ‌تاپ "
-         f"یکی‌اند. مصرف باتری هنوز اندازه‌گیری نشده است.")
+         f"یکی‌اند. ")
+pe = json.loads((RES / "phone_energy.json").read_text(encoding="utf-8"))
+phone += (f"آزمون باتری (گوشی از برق جدا، 15 دقیقه بی‌کار و 15 دقیقه کدگذاری روی یک هسته، {pe['titles_per_second']:,.0f} "
+          f"عنوان در ثانیه): {f(pe['phases']['load']['power_w'], 2)} وات در برابر {f(pe['phases']['idle']['power_w'], 2)} وات، "
+          f"یعنی حدود {f(pe['energy_per_title_mj'], 2)} میلی‌ژول برای هر عنوان؛ برای فیدی با 100 عنوان حدود "
+          f"{f(pe['energy_per_title_mj'] * 100 / 1000, 2)} ژول.")
 s = re.sub(r"همان فایل \.onnx با onnxruntime-android اجرا می‌شود؛[^<]*", phone, s, count=1)
 p7.write_text(s, encoding="utf-8")
 print("lesson 5 rows:", len(rows5), "lesson 6 rows:", len(rows6), "lesson 4 rows:", len(rows4), "lesson 7 rows:", len(rows7))

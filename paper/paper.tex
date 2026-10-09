@@ -55,8 +55,8 @@ NUCLEO-F401RE. A $\mu$NAS search under the budgets of the two boards, with the
 final choice made after full training, finds encoders of 0.605 and 0.608 AUC
 against 0.599 and 0.589 for the best hand-designed shapes of the same budgets;
 the one for the NUCLEO-F401RE takes 60.6\,ms per title there, against 88.7\,ms
-for that shape. On an Android phone the 8-bit encoder takes 0.53\,ms per title.
-\TODO{energy on the boards and on the phone}. Code
+for that shape. On an Android phone the 8-bit encoder takes 0.53\,ms and about
+0.95\,mJ per title. \TODO{energy on the boards}. Code
 and artefacts are released.
 \keywords{Edge AI \and Neural Architecture Search \and Binarized Neural Networks
 \and Multilingual News Recommendation \and TinyML \and Knowledge Distillation}
@@ -233,9 +233,11 @@ RTX~5070 Laptop GPU and 32\,GB of memory, PyTorch~2.12 on CUDA~13. The targets
 are STM32 microcontrollers and an Android phone. Board latency, flash and RAM
 come from the ST Edge AI Developer Cloud (ST Edge AI Core 4.0.1) on an
 STM32H7B3I-DK (Cortex-M7, 280\,MHz) and a NUCLEO-F401RE (Cortex-M4, 84\,MHz).
-Phone latency comes from a DOOGEE S98Pro (MediaTek Helio G96, two Cortex-A76 and
-six Cortex-A55 cores, Android~12), with ONNX Runtime~1.27 inside our reader app;
-\TODO{board and phone energy}. Every run is seeded (seeds 42, 1 and 2 for
+Phone latency and energy come from a DOOGEE S98Pro (MediaTek Helio G96, two
+Cortex-A76 and six Cortex-A55 cores, Android~12), with ONNX Runtime~1.27 inside
+our reader app; the energy is read from the phone's own battery gauge, unplugged,
+over 15 minutes with the encoder idle and 15 minutes with it running;
+\TODO{board energy}. Every run is seeded (seeds 42, 1 and 2 for
 Table~\ref{tab:matrix}; 42, 12 and 1 for Tables~\ref{tab:p1} and~\ref{tab:unas}),
 uses the loop of Sect.~3, which redraws the negatives at every step, and is
 reported as the mean and standard deviation over its three seeds. The June
@@ -339,7 +341,11 @@ one built into our reader app, computes the same vectors as on the laptop
 0.53\,ms per title on one core (median over 2,000 calls, from the title's bytes to
 its vector; 0.48\,ms with two threads); the full-precision file takes 0.59\,ms.
 At this size eight bits buy no speed on the phone. The file scores 0.607 AUC in
-English and 0.592 over the fourteen translations.
+English and 0.592 over the fourteen translations. Encoding in a loop on one core
+(1,806 titles per second), the unplugged phone draws 2.86\,W against 1.15\,W with
+the encoder idle and the screen on, about 0.95\,mJ per title. The phone reports
+only an averaged current and a charge counter in steps of 1\,\%, which give 0.83
+and 1.6\,mJ, so we read the cost as roughly one millijoule per title.
 
 \input{tab_unas}
 Table~\ref{tab:unas} gives the outcome of the board searches. The recipe choices
@@ -380,8 +386,8 @@ with its max-pooling into an integer kernel that took 20.2\,ms alone.
 \section{Limitations}
 The main gap is hardware. We timed the matrix models on the laptop and estimated
 size, RAM and energy from parameter and operation counts; only the deployed
-encoders ran on the boards and the phone, and the energy of neither has been
-measured yet. In the matrix the
+encoders ran on the boards and the phone; the phone's energy comes from its own
+battery gauge, and the boards' energy has not been measured yet. In the matrix the
 quantisation is simulated on weights only: activations, the byte embedding and the
 outer layers stay in floating point, so the eight-bit and one-bit rows may
 overstate accuracy and their sizes are not those of an 8-bit file; for the
@@ -417,7 +423,7 @@ multiply-accumulates reaches 0.608 at 60.6\,ms per title on that board, 0.019
 above the best hand-designed shape of that budget; the one-bit model with ReActNet blocks,
 started from distilled weights, reaches 0.587 at 194\,KB; trained on clicks shown in a random
 language, the distilled byte-CNN reads fourteen languages at 0.589 AUC on average.
-What is still missing: \TODO{board and phone energy and a one-bit runtime}
+What is still missing: \TODO{board energy and a one-bit runtime}
 --- that is where we take it next.
 
 \bibliographystyle{splncs04}
