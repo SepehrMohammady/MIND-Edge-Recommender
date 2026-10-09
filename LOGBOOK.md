@@ -949,3 +949,23 @@ loop (8-bit file, one thread); screen kept on by the app; every sample unplugged
 - Paper: abstract, setup (method), results (phone paragraph), limitations, conclusion; TODOs left: board energy and a
   one-bit runtime. `check_numbers.py` extended (energy sentences) and passes; PDF 11 pages. Course lesson 7: phone
   energy.
+
+## 2026-10-09 16:48 — Schedule, updated
+
+Nothing runs in the background (GPU idle, WSL stopped; the idle Gradle daemon of the app build stopped at 16:48).
+
+| # | Step | Needs | Effort | Status |
+|---|---|---|---|---|
+| 0 | Audit and repair | – | done | done 10-05 |
+| 1 | P1 experiments, 3 seeds | laptop GPU | done | done 10-06 |
+| 2 | Paper update with P1, notebook, course | 1 | done | done 10-06/07 |
+| 3 | µNAS searches (H7, F401), grid, seed-based choice; matrix rerun over 3 seeds | WSL, GPU | done | done 10-08 |
+| 4 | Full training of the chosen encoders and comparators; 8-bit files with AUC from the file; full-integer variant; ReActNet one-bit over 3 seeds; re-choice after full distillation | 3 | done | done 10-09 (final picks H7 140: 0.605, F401 142: 0.608); a one-bit file for a board waits for step 5 |
+| 5 | Boards: latency, flash, RAM (ST cloud); energy with the lab probe; one-bit on the physical H7 | 4; lab board and probe | 1-2 days | cloud measurements done for all files (10-08/09); energy and one-bit next week (Sepehr prepares the hardware) |
+| 6 | FeedWell-Edge: encoder in the app; phone latency and battery | 4; phone | about 1 week | encoder on the phone, check against the laptop, latency 0.53 ms and about 0.95 mJ per title done 10-09; ranking integration next (2-3 days) |
+| 7 | Offline replay through the app learner | 2 | 2-3 days | not started; optional for paper A |
+| 8 | Paper A final | 3-5; venue; authors | 1 week | draft 11 pp, all numbers checked; venue and authors next week; board energy and one-bit to add |
+| 9 | Houriyeh's thesis | – | done | delivered 10-07 |
+| 10 | Paper B: app and on-device adaptation, pilot | 6, 7; days of real use | PhD Y2-Y3 | later; the ranking integration of step 6 starts it |
+
+Critical path for paper A: step 5 (board energy, one-bit; next week), then step 8 (venue, authors). Step 6 can go on now.
