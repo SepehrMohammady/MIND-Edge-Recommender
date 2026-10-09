@@ -876,3 +876,27 @@ Step 6 (FeedWell-Edge, branch `edge-encoder`, from `rebuild-on-feedwell-1.18`):
   against the laptop's vectors, latency for 8-bit and FP32 at 1/2/4/default threads, battery test 2 x 15 min), model
   files in `assets/models/edge_encoder_v1`, `metro.config.js` (onnx, f32 assets).
 - Release build for arm64-v8a started 15:05 (`logs/app_build_10091505.log`).
+
+## 2026-10-09 15:35 — Step 6: encoder runs on the phone; check against the laptop; latency per title
+
+- First release build (15:05, 2 min 39 s, arm64 only: 107 MB against 169 MB for the 10-07 build with four ABIs)
+  installed as an update at 15:06 (same certificate, app data kept). The check crashed the app (15:30): R8 had renamed
+  ONNX Runtime's Java classes, which its native code finds by name (`ClassNotFoundException: ai.onnxruntime.TensorInfo`
+  in `OrtSession.run`, SIGABRT). Fix: keep rule `-keep class ai.onnxruntime.** { *; }` shipped with the module
+  (`consumerProguardFiles`); rebuilt in 1 min 32 s and installed 15:33.
+- The app was driven over adb (uiautomator dump to find the buttons, input tap); the phone was unlocked by Sepehr.
+- Check against the laptop (12 test titles in Latin, Chinese, Japanese, Georgian and Persian script, and an empty one):
+  largest difference to the laptop's ONNX Runtime vectors 4.9e-7 (8-bit file) and 8.6e-7 (FP32), cosine 1.0. The
+  phone computes the same vectors, so the dev AUCs of the 8-bit file (English 0.607, 14 languages 0.592) apply to it.
+- Latency per title on the DOOGEE S98Pro (MediaTek Helio G96), whole path (UTF-8 bytes, table lookup, ONNX Runtime
+  1.27.0 CPU), 2,000 calls after 200 warm-up calls, phone on USB at 99 %, 35.9 °C:
+
+  | file | 1 thread | 2 threads | 4 threads | default |
+  |---|--:|--:|--:|--:|
+  | 8-bit, median (p90) ms | 0.535 (0.722) | 0.481 (0.925) | 0.562 (1.287) | 0.560 (1.256) |
+  | FP32, median (p90) ms | 0.589 (0.669) | 0.457 (0.768) | 0.533 (1.044) | 0.565 (1.059) |
+
+  Model load 5-30 ms. At this size the 8-bit file is not faster than FP32 on this phone; two threads give the lowest
+  median, one thread the narrowest spread. A feed of 100 titles costs about 50 ms.
+- Raw files: `paper/results/phone/edge_bench/` (pulled from `Android/data/com.feedwelledge.app/files/edge_bench/`).
+- Next: battery test (2 x 15 min, unplugged), then the encoder in the ranking.
