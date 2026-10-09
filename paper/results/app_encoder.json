@@ -1,0 +1,57 @@
+{
+ "checkpoint": "artifacts\\runs\\p1\\distill_ft_mixed_seed42.pt",
+ "encoder": "64-5-384, distilled start, mixed-language clicks, seed 42",
+ "int8_file_auc": {
+  "en": 0.607,
+  "zho": 0.5913,
+  "fin": 0.6135,
+  "grn": 0.6072,
+  "hat": 0.5996,
+  "ind": 0.5993,
+  "jpn": 0.5857,
+  "kat": 0.5385,
+  "ron": 0.6034,
+  "som": 0.6096,
+  "swh": 0.6115,
+  "tam": 0.5647,
+  "tha": 0.5407,
+  "tur": 0.6081,
+  "vie": 0.6177
+ },
+ "int8_file_mean_xlang_auc": 0.5922,
+ "torch_auc": {
+  "en": 0.6139,
+  "mean_xlang": 0.5955
+ },
+ "agreement_on_test_titles": {
+  "torch_vs_fp32_max_abs": 1.257285475730896e-06,
+  "fp32_vs_int8_cos_min": 0.9740030169487
+ },
+ "minutes": 6.13,
+ "files": {
+  "byte_table.f32": {
+   "bytes": 65792,
+   "sha256": "c91fc0d795691e664b1fe89abaf16bfd916c6154c14ad7ca3eceb1341e75ead0"
+  },
+  "news_encoder_fp32.onnx": {
+   "bytes": 208970,
+   "sha256": "ec75a0b4357813e7d8372b23fc6c6e5af9539d5e47329ea65cc3f6595091c6ac"
+  },
+  "news_encoder_int8.onnx": {
+   "bytes": 90911,
+   "sha256": "148b1a1dbf1226c6fc0d0e6145126462ea9696ea866aff4819754e483b106257"
+  },
+  "test_vectors.json": {
+   "bytes": 284018,
+   "sha256": "6a83623ad8340062e1490359f047de0de67d46f64e2819f949fefc2a2e41cbf4"
+  },
+  "user_encoder.json": {
+   "bytes": 1093085,
+   "sha256": "17a3aa85fe699d81eff5c8b3fe47881b80e29bdf05d025176c4bf831ba490663"
+  },
+  "user_encoder.onnx": {
+   "bytes": 199138,
+   "sha256": "920a547420259d9a1d2e846aaa566221e2b25ee0bf22315e293af54fe991f639"
+  }
+ }
+}
