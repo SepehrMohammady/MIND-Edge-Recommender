@@ -26,5 +26,47 @@
   "macs_fork": 650624,
   "fork_minus_ours": 1888,
   "pass": true
+ },
+ "mind_f401_c142": {
+  "candidate": 142,
+  "rows": 64,
+  "input_max_abs_diff": 0.0,
+  "output_max_abs_diff": 1.9073486328125e-05,
+  "output_max_abs_keras": 61.35749435424805,
+  "cosine_min": 0.9999997615814209,
+  "trainable_params": 61603,
+  "byte_table_params": 16448,
+  "macs_conv_dense": 823080,
+  "macs_fork": 836968,
+  "fork_minus_ours": 13888,
+  "pass": true
+ },
+ "mind_f401_c133": {
+  "candidate": 133,
+  "rows": 64,
+  "input_max_abs_diff": 0.0,
+  "output_max_abs_diff": 1.71661376953125e-05,
+  "output_max_abs_keras": 55.152557373046875,
+  "cosine_min": 0.9999998807907104,
+  "trainable_params": 59488,
+  "byte_table_params": 16448,
+  "macs_conv_dense": 767120,
+  "macs_fork": 780768,
+  "fork_minus_ours": 13648,
+  "pass": true
+ },
+ "mind_f401_c101": {
+  "candidate": 101,
+  "rows": 64,
+  "input_max_abs_diff": 0.0,
+  "output_max_abs_diff": 1.9073486328125e-05,
+  "output_max_abs_keras": 63.88313293457031,
+  "cosine_min": 0.9999998807907104,
+  "trainable_params": 92135,
+  "byte_table_params": 16448,
+  "macs_conv_dense": 409241,
+  "macs_fork": 419449,
+  "fork_minus_ours": 10208,
+  "pass": true
  }
 }
