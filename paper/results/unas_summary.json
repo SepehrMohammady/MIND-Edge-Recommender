@@ -1,7 +1,7 @@
 [
  {
   "group": "h7",
-  "label": "$\\mu$NAS, candidate 144",
+  "label": "$\\mu$NAS 144, recipe choice",
   "name": "mind_h7",
   "macs": 1995648,
   "weights_bytes": 53156,
@@ -48,6 +48,63 @@
     "rom_bytes": 74935,
     "ram_bytes": 26020,
     "macc": 2047954
+   }
+  },
+  "seeds_full": [
+   1,
+   12,
+   42
+  ]
+ },
+ {
+  "group": "h7",
+  "label": "$\\mu$NAS 140, final choice",
+  "name": "mind_h7_c140",
+  "macs": 1928176,
+  "weights_bytes": 67329,
+  "activation_bytes": 14336,
+  "search_cos": {
+   "mean": 0.3184,
+   "n": 3
+  },
+  "teacher_cos_dev": {
+   "mean": 0.3977,
+   "std": 0.0018,
+   "n": 3
+  },
+  "en_auc": {
+   "mean": 0.6045,
+   "std": 0.01,
+   "n": 3
+  },
+  "xlang_auc": {
+   "mean": 0.5527,
+   "std": 0.0078,
+   "n": 3
+  },
+  "torch_auc_export": {
+   "mean": 0.6045,
+   "std": 0.01,
+   "n": 3
+  },
+  "int8_auc": {
+   "mean": 0.6019,
+   "std": 0.0093,
+   "n": 3
+  },
+  "int8_file_bytes": 90053,
+  "boards": {
+   "STM32H7B3I-DK": {
+    "duration_ms": 28.389242314267904,
+    "rom_bytes": 91006,
+    "ram_bytes": 28752,
+    "macc": 1969811
+   },
+   "NUCLEO-F401RE": {
+    "duration_ms": 226.6483003348112,
+    "rom_bytes": 91846,
+    "ram_bytes": 22372,
+    "macc": 1969811
    }
   },
   "seeds_full": [
@@ -115,7 +172,7 @@
  },
  {
   "group": "f401",
-  "label": "$\\mu$NAS, candidate 134",
+  "label": "$\\mu$NAS 134, recipe choice",
   "name": "mind_f401",
   "macs": 650624,
   "weights_bytes": 42534,
@@ -162,6 +219,63 @@
     "rom_bytes": 64297,
     "ram_bytes": 17956,
     "macc": 661128
+   }
+  },
+  "seeds_full": [
+   1,
+   12,
+   42
+  ]
+ },
+ {
+  "group": "f401",
+  "label": "$\\mu$NAS 142, final choice",
+  "name": "mind_f401_c142",
+  "macs": 836968,
+  "weights_bytes": 61393,
+  "activation_bytes": 6656,
+  "search_cos": {
+   "mean": 0.2869,
+   "n": 3
+  },
+  "teacher_cos_dev": {
+   "mean": 0.3666,
+   "std": 0.001,
+   "n": 3
+  },
+  "en_auc": {
+   "mean": 0.6078,
+   "std": 0.0065,
+   "n": 3
+  },
+  "xlang_auc": {
+   "mean": 0.5521,
+   "std": 0.0027,
+   "n": 3
+  },
+  "torch_auc_export": {
+   "mean": 0.6078,
+   "std": 0.0065,
+   "n": 3
+  },
+  "int8_auc": {
+   "mean": 0.6053,
+   "std": 0.0058,
+   "n": 3
+  },
+  "int8_file_bytes": 90001,
+  "boards": {
+   "STM32H7B3I-DK": {
+    "duration_ms": 12.12606047699228,
+    "rom_bytes": 92519,
+    "ram_bytes": 43244,
+    "macc": 868725
+   },
+   "NUCLEO-F401RE": {
+    "duration_ms": 60.55383379757404,
+    "rom_bytes": 93319,
+    "ram_bytes": 36252,
+    "macc": 868725
    }
   },
   "seeds_full": [

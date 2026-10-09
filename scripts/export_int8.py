@@ -25,6 +25,7 @@ paper/results/int8_export.json. Runs on the CPU (the GPU belongs to the training
     set CUDA_VISIBLE_DEVICES=-1 & python -m scripts.export_int8
 """
 import json
+import re
 import statistics
 import time
 from pathlib import Path
@@ -57,6 +58,12 @@ MODELS = {
 }
 for _arch in ("64-5-384", "64-2-384", "32-5-384"):
     MODELS[f"hand_{_arch}"] = (f"hand_{_arch}", ROOT / f"artifacts/runs/unas_full/hand_{_arch}_distill_ft_en_seed{{seed}}.pt")
+# any µNAS candidate trained on English clicks under its candidate name (scripts/rechoose_unas.py: mind_h7_c140, ...)
+for _key in json.loads((ROOT / "paper/results/unas_full.json").read_text(encoding="utf-8")):
+    _m = re.fullmatch(r"(mind_[a-z0-9]+_c\d+)/distill_ft_en/seed\d+", _key)
+    if _m:
+        MODELS.setdefault(f"unas_{_m[1][len('mind_'):]}",
+                          (_m[1], ROOT / f"artifacts/runs/unas_full/{_m[1]}_distill_ft_en_seed{{seed}}.pt"))
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
