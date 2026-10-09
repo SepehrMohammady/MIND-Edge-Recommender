@@ -21,7 +21,9 @@ learner sees that impression's clicks:
                replay itself runs through the whole dev split; the halves only select impressions to score)
 
 Clicks only: MIND has no reading time or scroll depth, so only "open" events are replayed. AUC counts ties
-as one half; MRR and nDCG break ties in a seeded random order (the app's score ties within a topic).
+as one half; MRR and nDCG break ties in a seeded random order (the app's score ties within a topic). The
+gains on the late dev half get a 95 % interval from 1,000 bootstrap resamples of users (all impressions of a
+drawn user count, since one user's impressions are not independent).
 Writes paper/results/app_replay.json and one record per split to experiments.jsonl.
 
     python -m scripts.replay_app          (CPU)
@@ -135,7 +137,7 @@ def replay(split):
                for f in ("cat", "subcat")}
         u = uvec[user]
         content = vecs[[row[n] for n in cands]] @ u if u is not None else np.zeros(len(cands), dtype=np.float32)
-        rows.append({"labels": labels, "app": app, "content": content.astype(np.float64),
+        rows.append({"user": user, "labels": labels, "app": app, "content": content.astype(np.float64),
                      "jitter": rng.random(len(cands)), "hist": len(clicked[user])})
         new = [n for n, y in zip(cands, labels) if y == 1]
         if new:
@@ -146,25 +148,39 @@ def replay(split):
     return rows
 
 
+def scores_of(r, kind, field, lam=None):
+    if kind == "app":
+        return r["app"][field]
+    if kind == "content":
+        return r["content"]
+    c = r["content"]
+    z = (c - c.mean()) / c.std() if c.std() > 0 else np.zeros_like(c)
+    return r["app"][field] + lam * z
+
+
 def evaluate(rows, kind, field, lam=None, full=True):
     """AUC (ties count one half); with full=True also MRR and nDCG with ties broken in a seeded random order."""
-    scored = []
-    for r in rows:
-        if kind == "app":
-            s = r["app"][field]
-        elif kind == "content":
-            s = r["content"]
-        else:
-            c = r["content"]
-            z = (c - c.mean()) / c.std() if c.std() > 0 else np.zeros_like(c)
-            s = r["app"][field] + lam * z
-        scored.append((r["labels"], s, r["jitter"]))
+    scored = [(r["labels"], scores_of(r, kind, field, lam), r["jitter"]) for r in rows]
     aucs = [metrics._auc(y.astype(float), s) for y, s, _ in scored if 0 < y.sum() < len(y)]
     out = {"auc": round(float(np.mean(aucs)), 4), "n_impressions": len(aucs)}
     if full:
         tb = metrics.evaluate([{"labels": y, "scores": s + 1e-9 * j} for y, s, j in scored])
         out.update({k: round(tb[k], 4) for k in ("mrr", "ndcg@5", "ndcg@10")})
     return out
+
+
+def bootstrap_gain(rows, field, lam, against, n=1000):
+    """Mean AUC gain of app + lambda * content over `against` ("app" or "content"), 95 % interval over users."""
+    keep = [r for r in rows if 0 < r["labels"].sum() < len(r["labels"])]
+    gain = np.array([metrics._auc(r["labels"].astype(float), scores_of(r, "mix", field, lam))
+                     - metrics._auc(r["labels"].astype(float), scores_of(r, against, field)) for r in keep])
+    _, inv = np.unique([r["user"] for r in keep], return_inverse=True)
+    sums, counts = np.bincount(inv, weights=gain), np.bincount(inv)
+    rng = np.random.default_rng(42)
+    draws = [sums[p].sum() / counts[p].sum() for p in (rng.integers(0, len(sums), len(sums)) for _ in range(n))]
+    lo, hi = np.percentile(draws, [2.5, 97.5])
+    return {"gain": round(float(gain.mean()), 4), "ci95": [round(float(lo), 4), round(float(hi), 4)],
+            "resamples": n, "users": int(len(sums)), "impressions": len(keep)}
 
 
 results = {"lambdas": LAMBDAS, "runs": {f: {} for f in ("cat", "subcat")}}
@@ -176,6 +192,7 @@ for split in ("train", "dev"):
     if split == "dev":
         half = len(rows) // 2                  # rows are in time order
         parts.update({"dev_early": rows[:half], "dev_late": rows[half:]})
+        dev_late = rows[half:]
     for f in ("cat", "subcat"):
         for name, part in parts.items():
             full = name != "train"
@@ -197,8 +214,11 @@ for f in ("cat", "subcat"):
     best = max(LAMBDAS, key=lambda l: run["dev_early"]["app_plus_content"][str(l)]["auc"])
     run["lambda_chosen_on_dev_early"] = best
     run["dev_late_with_chosen_lambda"] = run["dev_late"]["app_plus_content"][str(best)]
+    run["dev_late_gain_over_app"] = bootstrap_gain(dev_late, f, best, "app")
+    run["dev_late_gain_over_content"] = bootstrap_gain(dev_late, f, best, "content")
     log(f"{f}: lambda chosen on the early dev half {best}; late dev half: app {run['dev_late']['app']['auc']} -> "
-        f"app + content {run['dev_late_with_chosen_lambda']['auc']} (content alone {run['dev_late']['content']['auc']})")
+        f"app + content {run['dev_late_with_chosen_lambda']['auc']} (content alone {run['dev_late']['content']['auc']}); "
+        f"gain over app {run['dev_late_gain_over_app']}, over content {run['dev_late_gain_over_content']}")
 results["minutes"] = round((time.time() - T0) / 60, 2)
 (ROOT / "paper/results/app_replay.json").write_text(json.dumps(results, indent=1), encoding="utf-8")
 log("REPLAY DONE")
