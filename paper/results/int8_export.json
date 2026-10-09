@@ -881,6 +881,153 @@
     "p05": 0.9722
    },
    "minutes": 1.24
+  },
+  "ref_mixed_64-5-384/seed42": {
+   "checkpoint": "artifacts\\runs\\p1\\distill_ft_mixed_seed42.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.6139,
+    "mrr": 0.3141,
+    "ndcg@5": 0.3012,
+    "ndcg@10": 0.363,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.6139,
+    "mrr": 0.3141,
+    "ndcg@5": 0.3012,
+    "ndcg@10": 0.363,
+    "n_impressions": 73152,
+    "file_bytes": 208970,
+    "file": "artifacts\\stedgeai\\models\\ref_mixed_64-5-384_seed42_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.607,
+    "mrr": 0.3105,
+    "ndcg@5": 0.2975,
+    "ndcg@10": 0.3588,
+    "n_impressions": 73152,
+    "file_bytes": 90911,
+    "file": "artifacts\\stedgeai\\models\\ref_mixed_64-5-384_seed42_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9909,
+    "min": 0.93,
+    "p05": 0.9821
+   },
+   "onnx_int8full": {
+    "auc": 0.6063,
+    "mrr": 0.3064,
+    "ndcg@5": 0.2921,
+    "ndcg@10": 0.3548,
+    "n_impressions": 73152,
+    "file_bytes": 88942,
+    "file": "artifacts\\stedgeai\\models\\ref_mixed_64-5-384_seed42_body_int8full.onnx"
+   },
+   "cosine_fp32_vs_int8full": {
+    "mean": 0.9923,
+    "min": 0.9525,
+    "p05": 0.9849
+   },
+   "minutes": 1.28
+  },
+  "ref_mixed_64-5-384/seed12": {
+   "checkpoint": "artifacts\\runs\\p1\\distill_ft_mixed_seed12.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.5976,
+    "mrr": 0.306,
+    "ndcg@5": 0.2885,
+    "ndcg@10": 0.3525,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.5976,
+    "mrr": 0.306,
+    "ndcg@5": 0.2885,
+    "ndcg@10": 0.3525,
+    "n_impressions": 73152,
+    "file_bytes": 208970,
+    "file": "artifacts\\stedgeai\\models\\ref_mixed_64-5-384_seed12_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.595,
+    "mrr": 0.3027,
+    "ndcg@5": 0.2869,
+    "ndcg@10": 0.351,
+    "n_impressions": 73152,
+    "file_bytes": 90884,
+    "file": "artifacts\\stedgeai\\models\\ref_mixed_64-5-384_seed12_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9894,
+    "min": 0.932,
+    "p05": 0.9789
+   },
+   "onnx_int8full": {
+    "auc": 0.5917,
+    "mrr": 0.3021,
+    "ndcg@5": 0.2851,
+    "ndcg@10": 0.3492,
+    "n_impressions": 73152,
+    "file_bytes": 88924,
+    "file": "artifacts\\stedgeai\\models\\ref_mixed_64-5-384_seed12_body_int8full.onnx"
+   },
+   "cosine_fp32_vs_int8full": {
+    "mean": 0.9918,
+    "min": 0.936,
+    "p05": 0.9836
+   },
+   "minutes": 1.21
+  },
+  "ref_mixed_64-5-384/seed1": {
+   "checkpoint": "artifacts\\runs\\p1\\distill_ft_mixed_seed1.pt",
+   "calibration_titles": 512,
+   "torch_fp32": {
+    "auc": 0.6143,
+    "mrr": 0.3161,
+    "ndcg@5": 0.302,
+    "ndcg@10": 0.3652,
+    "n_impressions": 73152
+   },
+   "onnx_fp32": {
+    "auc": 0.6143,
+    "mrr": 0.3161,
+    "ndcg@5": 0.302,
+    "ndcg@10": 0.3652,
+    "n_impressions": 73152,
+    "file_bytes": 208970,
+    "file": "artifacts\\stedgeai\\models\\ref_mixed_64-5-384_seed1_body_fp32.onnx"
+   },
+   "onnx_int8qdq": {
+    "auc": 0.6082,
+    "mrr": 0.3108,
+    "ndcg@5": 0.296,
+    "ndcg@10": 0.3591,
+    "n_impressions": 73152,
+    "file_bytes": 90884,
+    "file": "artifacts\\stedgeai\\models\\ref_mixed_64-5-384_seed1_body_int8qdq.onnx"
+   },
+   "cosine_fp32_vs_int8": {
+    "mean": 0.9879,
+    "min": 0.9131,
+    "p05": 0.9756
+   },
+   "onnx_int8full": {
+    "auc": 0.6086,
+    "mrr": 0.3136,
+    "ndcg@5": 0.2981,
+    "ndcg@10": 0.3613,
+    "n_impressions": 73152,
+    "file_bytes": 88924,
+    "file": "artifacts\\stedgeai\\models\\ref_mixed_64-5-384_seed1_body_int8full.onnx"
+   },
+   "cosine_fp32_vs_int8full": {
+    "mean": 0.9901,
+    "min": 0.9268,
+    "p05": 0.9802
+   },
+   "minutes": 1.32
   }
  },
  "summary": {
@@ -922,6 +1069,19 @@
    "onnx_int8full_auc": 0.6257,
    "onnx_int8full_auc_sd": 0.0025,
    "int8full_minus_fp32_auc": -0.0028
+  },
+  "ref_mixed_64-5-384": {
+   "n": 3,
+   "torch_fp32_auc": 0.6086,
+   "torch_fp32_auc_sd": 0.0078,
+   "onnx_fp32_auc": 0.6086,
+   "onnx_fp32_auc_sd": 0.0078,
+   "onnx_int8qdq_auc": 0.6034,
+   "onnx_int8qdq_auc_sd": 0.006,
+   "int8qdq_minus_fp32_auc": -0.0052,
+   "onnx_int8full_auc": 0.6022,
+   "onnx_int8full_auc_sd": 0.0075,
+   "int8full_minus_fp32_auc": -0.0064
   },
   "hand_64-5-384": {
    "n": 3,

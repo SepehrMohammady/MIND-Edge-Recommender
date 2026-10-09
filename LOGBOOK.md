@@ -799,3 +799,31 @@ Schedule, updated
 | 8 | Paper A final | draft current (11 pp); needs venue, authors, energy, phone |
 | 9 | Houriyeh's thesis | delivered 10-07 |
 | 10 | Paper B | later |
+
+## 2026-10-09 13:54 — Decisions (Sepehr); re-choice of the µNAS encoders started; step 6 prepared (phone, app model files)
+
+Decisions, 10-09: one-bit on the board next week (Sepehr prepares the hardware); re-choose the searched encoders
+after full distillation: yes; paper A (venue, authors) next week; start step 6 with the phone connected.
+
+Re-choice (`scripts/rechoose_unas.py`, started 13:40 in the background, one training process): the eight shortlisted
+candidates of each search fully distilled (seed 42), the three best per search also with seeds 12 and 1, choice by mean
+cosine on the search's validation rows (`mind_unas_val.npz`, 15 languages); a new choice then gets English-click
+training (three seeds). Candidate names `mind_h7_c<index>` in `src/unas_encoder.model_arch`; a distillation-only
+protocol in `run_unas_full.py`. Check: the first H7 choice, fully distilled (seed 42), scores 0.368 on these rows
+(0.331 under the search recipe).
+
+Step 6, read-only checks: phone DOOGEE S98Pro, MediaTek MT6781 (Helio G96: 2 x Cortex-A76 2.05 GHz, 6 x Cortex-A55
+2.0 GHz), 8 GB, Android 12 (SDK 31), arm64-v8a; FeedWell Edge 2.1.0 installed 10-07. Battery: `current_now` needs root;
+`charge_counter` and voltage are readable, and an app can read the current through Android's BatteryManager. App:
+Expo 54, React Native 0.81.4, New Architecture on; ranking today = topic weight + drift + freshness + unread
+(`src/edgeml/localLearningService.js`, `scoreArticleForRanking`), no text model. `onnxruntime-react-native` 1.24.3
+is the current release (Expo plugin included); whether it works under the New Architecture is to be tried.
+
+App encoder: 64-5-384, distilled start, mixed-language clicks (P1, seed 42), the best multilingual encoder of Table 2
+at this size. `scripts/export_int8.py` now exports it too (three seeds: PyTorch 0.609, 8-bit file 0.603);
+`scripts/export_app_assets.py` (6.1 min, CPU) writes `artifacts/app/edge_encoder_v1`: 8-bit and FP32 encoder files
+(90,911 and 208,970 B), byte table (65,792 B), user encoder (ONNX and plain weights), test vectors (12 titles in
+Latin, Chinese, Japanese, Georgian and Persian script, history and candidate scores) and a manifest with SHA-256.
+8-bit file, dev AUC: English 0.607 (PyTorch 0.614), mean of 14 languages 0.592 (0.596), from 0.539 (Georgian) to 0.618
+(Vietnamese); FP32 file against PyTorch 1.3e-6; INT8 against FP32 cosine at least 0.974 on the test titles
+(`paper/results/app_encoder.json`).

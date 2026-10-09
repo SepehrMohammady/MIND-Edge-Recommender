@@ -6,6 +6,8 @@ protocol) with seeds 42, 12 and 1:
   unas_h7       µNAS choice for the STM32H7B3I-DK budget   artifacts/runs/unas_full/mind_h7_distill_ft_en_seed*.pt
   unas_f401     µNAS choice for the NUCLEO-F401RE budget   artifacts/runs/unas_full/mind_f401_distill_ft_en_seed*.pt
   ref_64-5-384  hand-designed reference                    artifacts/runs/p1/distill_ft_en_seed*.pt
+  ref_mixed_64-5-384  the same, clicks in a random language (the FeedWell-Edge encoder)
+                                                           artifacts/runs/p1/distill_ft_mixed_seed*.pt
   hand_<C>-<D>-384  hand-designed family in the fork's terms (fixed table, mask channel, GAP):
                 64-5-384 and the best of the step-3 grid within each budget, 64-2-384 (H7) and 32-5-384
                 (F401)                                     artifacts/runs/unas_full/hand_*_distill_ft_en_seed*.pt
@@ -51,6 +53,7 @@ MODELS = {
     "unas_h7": ("mind_h7", ROOT / "artifacts/runs/unas_full/mind_h7_distill_ft_en_seed{seed}.pt"),
     "unas_f401": ("mind_f401", ROOT / "artifacts/runs/unas_full/mind_f401_distill_ft_en_seed{seed}.pt"),
     "ref_64-5-384": (None, ROOT / "artifacts/runs/p1/distill_ft_en_seed{seed}.pt"),
+    "ref_mixed_64-5-384": (None, ROOT / "artifacts/runs/p1/distill_ft_mixed_seed{seed}.pt"),   # the app encoder (step 6)
 }
 for _arch in ("64-5-384", "64-2-384", "32-5-384"):
     MODELS[f"hand_{_arch}"] = (f"hand_{_arch}", ROOT / f"artifacts/runs/unas_full/hand_{_arch}_distill_ft_en_seed{{seed}}.pt")
