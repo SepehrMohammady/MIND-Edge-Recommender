@@ -25,6 +25,7 @@ scripts/check_unas_port.py loads the weights of a Keras build into this one and 
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -157,10 +158,15 @@ def hand_designed(C: int, D: int) -> dict:
 
 def model_arch(name: str) -> tuple:
     """(label, architecture) of a step-4 model: "mind_h7" / "mind_f401" = the search's choice
-    (label = candidate index), "hand_<C>-<D>-384" = the hand-designed family in the fork's terms."""
+    (label = candidate index), "mind_h7_c142" = any candidate of a search by its index,
+    "hand_<C>-<D>-384" = the hand-designed family in the fork's terms."""
     if name.startswith("hand_"):
         C, D, _ = (int(v) for v in name[len("hand_"):].split("-"))
         return name[len("hand_"):], hand_designed(C, D)
+    m = re.fullmatch(r"(mind_[a-z0-9]+)_c(\d+)", name)
+    if m:
+        hist = json.loads((ROOT / f"paper/results/unas/{m[1]}_history.json").read_text(encoding="utf-8"))
+        return int(m[2]), next(c["arch"] for c in hist["candidates"] if c["index"] == int(m[2]))
     return chosen_arch(name)
 
 

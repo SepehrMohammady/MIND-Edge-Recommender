@@ -47,8 +47,10 @@ TRAIN_IMPRESSIONS = EVAL_IMPRESSIONS = DISTILL_TITLES = None          # None = e
 
 parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
 parser.add_argument("--models", nargs="+", default=["mind_h7", "mind_f401"],
-                    help="mind_h7, mind_f401 (the search's choices) or hand_<C>-<D>-384")
-parser.add_argument("--protocols", nargs="+", default=["distill_ft_en"], choices=list(PROTOCOLS))
+                    help="mind_h7, mind_f401 (the search's choices), mind_h7_c<index> (any candidate) "
+                         "or hand_<C>-<D>-384")
+parser.add_argument("--protocols", nargs="+", default=["distill_ft_en"], choices=list(PROTOCOLS) + ["distill"],
+                    help='"distill" alone: distillation and its record only (scripts/rechoose_unas.py)')
 parser.add_argument("--seeds", nargs="+", type=int, default=[42, 12, 1])
 parser.add_argument("--smoke", action="store_true", help="tiny settings, two languages, results kept out of paper/results")
 args = parser.parse_args()
@@ -127,7 +129,7 @@ def recommender_device() -> str:
 
 def run_model(name: str, seed: int) -> None:
     label, arch = model_arch(name)
-    todo = [p for p in args.protocols if f"{name}/{p}/seed{seed}" not in load_done()]
+    todo = [p for p in args.protocols if p != "distill" and f"{name}/{p}/seed{seed}" not in load_done()]
     if not todo and f"{name}/distill/seed{seed}" in load_done():
         return
     cfg["seed"] = seed
