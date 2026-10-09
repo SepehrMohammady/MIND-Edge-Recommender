@@ -17,8 +17,8 @@ architectures are rebuilt here from their architecture dictionaries with the Ker
 Input, as in the search (unas/mind_dataset.py): byte ids through the 257 x 64 byte table of the
 distilled reference student (seed 42), plus a padding-mask channel, 65 channels in all. The table
 is a frozen parameter: it stays fixed in every training stage, as during the search, and on a
-board the caller holds it (scripts/deploy_boards.py). Branch blocks and the strided pooling head
-of the fork's space are not supported; neither chosen architecture has them.
+board the caller holds it (scripts/deploy_boards.py). Branch blocks follow the fork (see
+UnasEncoder.__init__); the fork's strided pooling head is not supported (all candidates used here have GAP).
 
 scripts/check_unas_port.py loads the weights of a Keras build into this one and compares outputs.
 """
@@ -77,17 +77,49 @@ class UnasEncoder(nn.Module):
     def __init__(self, arch: dict, out_dim: int = 384, max_len: int = 128, table: np.ndarray | None = None):
         super().__init__()
         assert (arch.get("pooling") or {}).get("type") == "gap", "only the GAP head is supported"
-        assert not any(b["is_branch"] for b in arch["conv_blocks"]), "branch blocks are not supported"
         table = np.load(BYTE_TABLE) if table is None else table
         self.embed = nn.Embedding(table.shape[0], table.shape[1], padding_idx=0)
         self.embed.weight.data.copy_(torch.from_numpy(np.asarray(table, dtype=np.float32)))
         self.embed.weight.requires_grad_(False)
-        ch, length = table.shape[1] + 1, max_len
-        layers = []
+        # Blocks as in the fork's _assemble_a_network: a main block first adds up the pending outputs
+        # ("tie-up"), keeps that tensor as the input of a later branch, and runs its layers; a branch block
+        # runs its layers on that kept input, its last layer giving the main path's channels (a depthwise
+        # last layer is followed by a 1x1 projection), and waits for the next tie-up. Layers are kept in
+        # Keras creation order, so that load_keras_weights can copy them one by one.
+        layers, self.program = [], []
+        pending = [(table.shape[1] + 1, max_len)]           # (channels, length) of the pending outputs
+        kept = None
         for block in arch["conv_blocks"]:
-            for spec in block["layers"]:
-                layers.append(KerasConv1d(spec, ch, length))
-                ch, length = layers[-1].out_ch, layers[-1].out_len
+            if block["is_branch"]:
+                assert kept is not None, "the first block cannot be a branch"
+                prev_ch = pending[0][0]
+                ch, length = kept
+                idx = []
+                for j, spec in enumerate(block["layers"]):
+                    spec = dict(spec)
+                    if j == len(block["layers"]) - 1 and spec["type"] != "DWConv1D":
+                        spec["filters"] = prev_ch
+                    layers.append(KerasConv1d(spec, ch, length))
+                    idx.append(len(layers) - 1)
+                    ch, length = layers[-1].out_ch, layers[-1].out_len
+                if block["layers"][-1]["type"] == "DWConv1D":
+                    layers.append(KerasConv1d({"type": "1x1Conv1D", "filters": prev_ch, "has_bn": False,
+                                               "has_relu": False, "has_prepool": False}, ch, length))
+                    idx.append(len(layers) - 1)
+                    ch, length = layers[-1].out_ch, layers[-1].out_len
+                self.program.append(("branch", idx))
+                pending.append((ch, length))
+            else:
+                tie, (ch, length) = self._tie(pending)
+                kept = (ch, length)
+                idx = []
+                for spec in block["layers"]:
+                    layers.append(KerasConv1d(spec, ch, length))
+                    idx.append(len(layers) - 1)
+                    ch, length = layers[-1].out_ch, layers[-1].out_len
+                self.program.append(("main", idx, tie))
+                pending = [(ch, length)]
+        self.final_tie, (ch, length) = self._tie(pending)
         self.layers = nn.ModuleList(layers)
         self.dropout = float(arch.get("head_dropout", 0.0))
         dense = []
@@ -100,12 +132,62 @@ class UnasEncoder(nn.Module):
         self.head = nn.Linear(ch, out_dim)
         self.out_dim, self.arch = out_dim, arch
 
+    @staticmethod
+    def _tie(pending):
+        """Static plan of the fork's tie_up_pending_outputs: every output max-pooled ("same" padding,
+        pool size = round(length / shortest)) to the shortest length, zero-padded at the end to the
+        longest remaining one, then added. Returns (per-output (pool, pad_left, pad_right, zero_pad), shape)."""
+        if len(pending) == 1:
+            return None, pending[0]
+        shortest = min(l for _, l in pending)
+        plan, lengths = [], []
+        for ch, length in pending:
+            k = int(round(length / shortest))
+            if k > 1:
+                out = -(-length // k)
+                total = max((out - 1) * k + k - length, 0)
+                plan.append([k, total // 2, total - total // 2, 0])
+                lengths.append(out)
+            else:
+                plan.append([1, 0, 0, 0])
+                lengths.append(length)
+        longest = max(lengths)
+        for p, l in zip(plan, lengths):
+            p[3] = longest - l
+        return plan, (pending[0][0], longest)
+
+    @staticmethod
+    def _apply_tie(outputs, plan):
+        if plan is None:
+            return outputs[0]
+        total = 0
+        for x, (k, left, right, zero) in zip(outputs, plan):
+            if k > 1:
+                if left or right:
+                    x = F.pad(x, (left, right), value=float("-inf"))
+                x = F.max_pool1d(x, k)
+            if zero:
+                x = F.pad(x, (0, zero))
+            total = total + x
+        return total
+
     def body(self, embedded, mask):
         """Network after the byte-table lookup: embedded (B, 64, L) and mask (B, 1, L)."""
         x = torch.cat([embedded, mask], dim=1)
-        for layer in self.layers:
-            x = layer(x)
-        x = x.mean(-1)
+        pending, kept = [x], None
+        for step in self.program:
+            if step[0] == "main":
+                x = self._apply_tie(pending, step[2])
+                kept = x
+                for i in step[1]:
+                    x = self.layers[i](x)
+                pending = [x]
+            else:
+                y = kept
+                for i in step[1]:
+                    y = self.layers[i](y)
+                pending.append(y)
+        x = self._apply_tie(pending, self.final_tie).mean(-1)
         for lin, act in zip(self.dense, self.dense_act):
             x = lin(F.dropout(x, self.dropout, self.training))
             x = F.relu(x) if act == "relu" else x
@@ -117,16 +199,30 @@ class UnasEncoder(nn.Module):
 
 
 def load_keras_weights(model: UnasEncoder, npz) -> None:
-    """Copy the weights of a Keras build (unas/dump_keras.py) layer by layer."""
-    layers = [l for l in json.loads(str(npz["layers"])) if l["weights"]]
+    """Copy the weights of a Keras build (unas/dump_keras.py) layer by layer.
+
+    A functional Keras model lists its layers in graph order, which interleaves a branch with the main
+    path; the automatic layer names count up in creation order within each layer class (conv1d_6 before
+    conv1d_7), so the weights are matched class by class in that order to this build's creation order."""
+    def created(l):
+        m = re.search(r"_(\d+)$", l["name"])
+        return int(m[1]) if m else 0
+
+    queues = {}
+    for l in sorted((l for l in json.loads(str(npz["layers"])) if l["weights"]), key=created):
+        queues.setdefault(l["class"], []).append(l)
     targets = []
     for layer in model.layers:
-        targets.append(("conv", layer))
+        targets.append(("conv", layer, "DepthwiseConv1D" if layer.depthwise else "Conv1D"))
         if layer.bn is not None:
-            targets.append(("bn", layer.bn))
-    targets += [("dense", lin) for lin in model.dense] + [("dense", model.head)]
-    assert len(targets) == len(layers), (len(targets), [l["class"] for l in layers])
-    for (kind, mod), l in zip(targets, layers):
+            targets.append(("bn", layer.bn, "BatchNormalization"))
+    targets += [("dense", lin, "Dense") for lin in model.dense] + [("dense", model.head, "Dense")]
+    pairs = []
+    for kind, mod, cls in targets:
+        assert queues.get(cls), f"no Keras {cls} left for {kind}"
+        pairs.append(((kind, mod), queues[cls].pop(0)))
+    assert not any(queues.values()), f"Keras layers left over: {[(c, len(q)) for c, q in queues.items() if q]}"
+    for (kind, mod), l in pairs:
         w = {n: torch.from_numpy(np.asarray(npz[f"{l['index']}:{n}"])) for n in l["weights"]}
         if kind == "conv":
             k = w["kernel"]                       # Conv1D (k, in, out); DepthwiseConv1D (k, in, 1)

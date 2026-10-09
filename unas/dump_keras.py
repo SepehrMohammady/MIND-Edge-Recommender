@@ -30,10 +30,13 @@ table = np.load(DATA / "byte_table.npy").astype(np.float32)
 ids = np.load(DATA / "mind_unas_val.npz")["ids"][:64].astype(np.int64)
 x = np.concatenate([table[ids], (ids != 0).astype(np.float32)[..., None]], axis=-1)   # (64, 128, 65)
 
-for name in sys.argv[1:]:
-    sel = json.loads((REPO / f"paper/results/unas/{name}_selection.json").read_text())
-    hist = json.loads((REPO / f"paper/results/unas/{name}_history.json").read_text())
-    arch = next(c["arch"] for c in hist["candidates"] if c["index"] == sel["best"])
+for arg in sys.argv[1:]:                      # "mind_h7" (the chosen one) or "mind_f401:142" (any candidate)
+    search, _, idx = arg.partition(":")
+    sel = json.loads((REPO / f"paper/results/unas/{search}_selection.json").read_text())
+    hist = json.loads((REPO / f"paper/results/unas/{search}_history.json").read_text())
+    index = int(idx) if idx else sel["best"]
+    name = f"{search}_c{index}" if idx else search
+    arch = next(c["arch"] for c in hist["candidates"] if c["index"] == index)
     model = FaithfulGapCnn1DArchitecture(json.loads(json.dumps(arch))).to_keras_model(x.shape[1:], 384)
     rng = np.random.default_rng(0)
     arrays, layers = {}, []
@@ -53,5 +56,5 @@ for name in sys.argv[1:]:
     y = model(x, training=False).numpy()
     np.savez(OUT / f"{name}_keras.npz", arch=json.dumps(arch), layers=json.dumps(layers),
              ids=ids, x=x, y=y, **arrays)
-    print(f"{name}: candidate {sel['best']}, {len(layers)} layers, output {y.shape}, "
+    print(f"{name}: candidate {index}, {len(layers)} layers, output {y.shape}, "
           f"params {model.count_params()} -> {OUT / f'{name}_keras.npz'}")

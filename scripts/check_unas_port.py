@@ -35,7 +35,8 @@ for name in sys.argv[1:] or ["mind_h7", "mind_f401"]:
         y = model(ids).numpy()
     yk = z["y"]
     cos = (y * yk).sum(-1) / (np.linalg.norm(y, axis=-1) * np.linalg.norm(yk, axis=-1))
-    hist = json.loads((ROOT / f"paper/results/unas/{name}_history.json").read_text(encoding="utf-8"))
+    search = name.split("_c")[0] if "_c" in name else name
+    hist = json.loads((ROOT / f"paper/results/unas/{search}_history.json").read_text(encoding="utf-8"))
     cand = next(c for c in hist["candidates"] if c["arch"] == arch)
     macs = footprint.count_macs(model, ids[:1])
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -51,6 +52,8 @@ for name in sys.argv[1:] or ["mind_h7", "mind_f401"]:
     ok &= r["pass"]
     out[name] = r
     print(name, json.dumps(r))
-(ROOT / "paper/results/unas/port_check.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
+port = ROOT / "paper/results/unas/port_check.json"
+done = json.loads(port.read_text(encoding="utf-8")) if port.exists() else {}
+port.write_text(json.dumps({**done, **out}, indent=1), encoding="utf-8")
 print("PASS" if ok else "FAIL")
 sys.exit(0 if ok else 1)
