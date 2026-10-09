@@ -1,0 +1,27 @@
+{
+ "js_file": "C:\\Projects\\PhD\\FeedWell-Edge\\src\\edgeml\\localLearningService.js",
+ "events": 600,
+ "learning_steps": 30,
+ "articles_scored": 200,
+ "topics": [],
+ "weight_max_abs": 0.0,
+ "divergence_max_abs": 0.0,
+ "event_count_mismatch": [],
+ "flagged_js": [
+  "topic12",
+  "topic10",
+  "topic11",
+  "topic6",
+  "topic1"
+ ],
+ "flagged_py": [
+  "topic12",
+  "topic10",
+  "topic11",
+  "topic6",
+  "topic1"
+ ],
+ "score_mismatches": 0,
+ "score_max_abs": 0.0,
+ "pass": true
+}
