@@ -15,7 +15,10 @@ learner sees that impression's clicks:
   content      the app encoder (8-bit ONNX file of artifacts/app/edge_encoder_v1, the one on the phone) gives
                every title a vector; the trained user encoder of the same checkpoint pools the last 50 clicked
                titles; content score = dot product. app + content: app score + lambda * z-score of the content
-               scores within the impression (lambda chosen on the train split, reported on dev)
+               scores within the impression
+  splits       the encoder was trained on MINDsmall train clicks, so the train replay flatters it: lambda is
+               chosen on the first half of the dev impressions by time and reported on the second half (the
+               replay itself runs through the whole dev split; the halves only select impressions to score)
 
 Clicks only: MIND has no reading time or scroll depth, so only "open" events are replayed. AUC counts ties
 as one half; MRR and nDCG break ties in a seeded random order (the app's score ties within a topic).
@@ -42,7 +45,7 @@ from src.student import ByteCNNEncoder, text_to_bytes
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "artifacts/app/edge_encoder_v1"
 CKPT = ROOT / "artifacts/runs/p1/distill_ft_mixed_seed42.pt"
-LAMBDAS = [0.25, 0.5, 1.0, 2.0, 4.0, 8.0]
+LAMBDAS = [0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0]
 MAX_HISTORY = 50
 cfg = load_config()
 cfg["seed"] = 42
@@ -169,27 +172,33 @@ for split in ("train", "dev"):
     started = time.time()
     log(f"replay {split}")
     rows = replay(split)
+    parts = {split: rows}
+    if split == "dev":
+        half = len(rows) // 2                  # rows are in time order
+        parts.update({"dev_early": rows[:half], "dev_late": rows[half:]})
     for f in ("cat", "subcat"):
-        full = split == "dev"                      # train only chooses lambda: AUC is enough there
-        out = {"app": evaluate(rows, "app", f, full=full), "content": evaluate(rows, "content", f, full=full),
-               "app_plus_content": {str(l): evaluate(rows, "mix", f, l, full=full) for l in LAMBDAS},
-               "impressions": len(rows), "with_history": int(sum(r["hist"] > 0 for r in rows))}
-        results["runs"][f][split] = out
-        log(f"{split}/{f}: app {out['app']['auc']}, content {out['content']['auc']}, "
-            + ", ".join(f"l={l}: {out['app_plus_content'][str(l)]['auc']}" for l in LAMBDAS))
+        for name, part in parts.items():
+            full = name != "train"
+            out = {"app": evaluate(part, "app", f, full=full), "content": evaluate(part, "content", f, full=full),
+                   "app_plus_content": {str(l): evaluate(part, "mix", f, l, full=full) for l in LAMBDAS},
+                   "impressions": len(part), "with_history": int(sum(r["hist"] > 0 for r in part))}
+            results["runs"][f][name] = out
+            log(f"{name}/{f}: app {out['app']['auc']}, content {out['content']['auc']}, "
+                + ", ".join(f"l={l}: {out['app_plus_content'][str(l)]['auc']}" for l in LAMBDAS))
     minutes = round((time.time() - started) / 60, 2)
     for f in ("cat", "subcat"):
-        results["runs"][f][split]["minutes_for_both_topic_fields"] = minutes
-        runlog.append(cfg, f"replay/{f}/{split}", {"topic": f, "max_history": MAX_HISTORY,
-                      "encoder": "artifacts/app/edge_encoder_v1/news_encoder_int8.onnx", "checkpoint": CKPT.name,
-                      "lambdas": LAMBDAS}, results["runs"][f][split], started)
+        for name in parts:
+            results["runs"][f][name]["minutes_for_the_split_pass"] = minutes
+            runlog.append(cfg, f"replay/{f}/{name}", {"topic": f, "max_history": MAX_HISTORY,
+                          "encoder": "artifacts/app/edge_encoder_v1/news_encoder_int8.onnx", "checkpoint": CKPT.name,
+                          "lambdas": LAMBDAS}, results["runs"][f][name], started)
 for f in ("cat", "subcat"):
     run = results["runs"][f]
-    best = max(LAMBDAS, key=lambda l: run["train"]["app_plus_content"][str(l)]["auc"])
-    run["lambda_chosen_on_train"] = best
-    run["dev_with_chosen_lambda"] = run["dev"]["app_plus_content"][str(best)]
-    log(f"{f}: lambda chosen on train {best}; dev app {run['dev']['app']['auc']} -> "
-        f"app + content {run['dev_with_chosen_lambda']['auc']} (content alone {run['dev']['content']['auc']})")
+    best = max(LAMBDAS, key=lambda l: run["dev_early"]["app_plus_content"][str(l)]["auc"])
+    run["lambda_chosen_on_dev_early"] = best
+    run["dev_late_with_chosen_lambda"] = run["dev_late"]["app_plus_content"][str(best)]
+    log(f"{f}: lambda chosen on the early dev half {best}; late dev half: app {run['dev_late']['app']['auc']} -> "
+        f"app + content {run['dev_late_with_chosen_lambda']['auc']} (content alone {run['dev_late']['content']['auc']})")
 results["minutes"] = round((time.time() - T0) / 60, 2)
 (ROOT / "paper/results/app_replay.json").write_text(json.dumps(results, indent=1), encoding="utf-8")
 log("REPLAY DONE")
