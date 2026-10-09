@@ -931,8 +931,8 @@ English clicks, seeds 42 / 12 / 1 (14:54-15:45):
 
 ## 2026-10-09 16:14 — Step 6: battery test on the phone (energy per title)
 
-Sepehr ran the battery test from the research screen with the cable unplugged (14:37-15:07 phone time by the file
-stamp, result pulled 16:12): 15 min with the app open and the encoder idle, then 15 min encoding the test titles in a
+Sepehr ran the battery test from the research screen with the cable unplugged (15:37-16:07 local time; the file name carries the UTC
+time, 14:07), result pulled 16:12: 15 min with the app open and the encoder idle, then 15 min encoding the test titles in a
 loop (8-bit file, one thread); screen kept on by the app; every sample unplugged.
 
 | phase | mean power | current (fuel-gauge average) | voltage | capacity | temperature |
