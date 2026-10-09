@@ -155,4 +155,49 @@ a = s.index("</div>", i) + len("</div>")
 b = s.index("</div>", a)
 s = s[:a] + "\n  " + text + "\n" + s[b:]
 p5.write_text(s, encoding="utf-8")
-print("lesson 5 rows:", len(rows5), "lesson 6 rows:", len(rows6), "lesson 4 rows:", len(rows4))
+
+# lesson 7: the µNAS encoders on both boards (paper/results/unas_summary.json, Table 3) and the phone timing
+U = json.loads((RES / "unas_summary.json").read_text(encoding="utf-8"))
+budget = {"h7": "بودجهٔ H7", "f401": "بودجهٔ F401", "none": "بیرون از هر دو بودجه"}
+
+
+def label7(r):
+    if r["name"].startswith("mind_"):
+        kind = "انتخاب نهایی" if "final choice" in r["label"] else "انتخاب با دستور کوتاه"
+        idx = re.search(r"(\d+)", r["label"])[1]
+        return f"µNAS {idx} ({kind})، {budget[r['group']]}"
+    return f"دست‌ساز {r['name'][len('hand_'):]}، {budget[r['group']]}"
+
+
+rows7 = []
+for r in U:
+    b = r["boards"]
+    rows7.append(f"    <tr><td>{label7(r)}</td><td>{r['macs'] / 1e6:.2f} M</td><td>{f(r['en_auc']['mean'])}</td>"
+                 f"<td>{b['STM32H7B3I-DK']['duration_ms']:.1f} ms</td><td>{b['NUCLEO-F401RE']['duration_ms']:.1f} ms</td></tr>")
+p7 = ROOT / "course/07-deployment/index.html"
+s = p7.read_text(encoding="utf-8")
+s = replace_tbody(s, "<h3>روش ۵: جست‌وجوی µNAS زیر بودجهٔ هر برد</h3>", rows7)
+g = {r["name"]: r for r in U}
+fin = {r["group"]: r for r in U if "final choice" in r["label"]}
+ms = lambda r, b: r["boards"][b]["duration_ms"]                                   # noqa: E731
+para = (f"<p>دستور کوتاه جست‌وجو (96 هزار سطر، حداکثر 15 دوره) نامزدها را با ترتیبی می‌چیند که پس از آموزش کامل پابرجا "
+        f"نمی‌ماند؛ برای همین انتخاب نهایی میان همان هشت نامزد برتر، پس از تقطیر کامل انجام شد. انتخاب‌های نهایی "
+        f"به AUC {f(fin['h7']['en_auc']['mean'])} و {f(fin['f401']['en_auc']['mean'])} می‌رسند، در برابر "
+        f"{f(g['hand_64-2-384']['en_auc']['mean'])} و {f(g['hand_32-5-384']['en_auc']['mean'])} برای بهترین شکل دست‌سازِ "
+        f"همان بودجه. روی NUCLEO-F401RE انتخاب نهایی بودجهٔ F401 در {ms(fin['f401'], 'NUCLEO-F401RE'):.1f} میلی‌ثانیه "
+        f"اجرا می‌شود، {ms(g['hand_32-5-384'], 'NUCLEO-F401RE') / ms(fin['f401'], 'NUCLEO-F401RE'):.1f} برابر سریع‌تر "
+        f"از 32-5-384؛ در آن شکل دست‌ساز لایه‌های depthwise روی Cortex-M4 حدود 22 چرخه برای هر MAC می‌گیرند.</p>")
+a = s.index("</table>", s.index("<h3>روش ۵: جست‌وجوی µNAS زیر بودجهٔ هر برد</h3>"))
+a = s.index("</div>", a) + len("</div>")
+b = s.index("</p>", a) + len("</p>")
+s = s[:a] + "\n" + para + s[b:]
+bench = RES / "phone" / "edge_bench"
+lat = {(r["kind"], r["threads"]): r for r in
+       json.loads(sorted(bench.glob("latency_*.json"))[-1].read_text(encoding="utf-8"))["rows"]}
+phone = (f"همان فایل .onnx با onnxruntime-android اجرا می‌شود؛ برنامهٔ FeedWell-Edge میزبان مدل است. روی DOOGEE S98Pro "
+         f"(MediaTek Helio G96) فایل 8-bit برای هر عنوان {f(lat[('int8', 1)]['medianMs'], 2)} میلی‌ثانیه طول می‌کشد "
+         f"(میانهٔ 2000 اجرا، یک هسته) و فایل FP32 {f(lat[('fp32', 1)]['medianMs'], 2)} میلی‌ثانیه؛ بردارها با لپ‌تاپ "
+         f"یکی‌اند. مصرف باتری هنوز اندازه‌گیری نشده است.")
+s = re.sub(r"همان فایل \.onnx با onnxruntime-android اجرا می‌شود؛[^<]*", phone, s, count=1)
+p7.write_text(s, encoding="utf-8")
+print("lesson 5 rows:", len(rows5), "lesson 6 rows:", len(rows6), "lesson 4 rows:", len(rows4), "lesson 7 rows:", len(rows7))

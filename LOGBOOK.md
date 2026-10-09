@@ -900,3 +900,31 @@ Step 6 (FeedWell-Edge, branch `edge-encoder`, from `rebuild-on-feedwell-1.18`):
   median, one thread the narrowest spread. A feed of 100 titles costs about 50 ms.
 - Raw files: `paper/results/phone/edge_bench/` (pulled from `Android/data/com.feedwelledge.app/files/edge_bench/`).
 - Next: battery test (2 x 15 min, unplugged), then the encoder in the ranking.
+
+## 2026-10-09 16:04 — Re-choice complete: final µNAS choices trained, exported and on the boards; paper and course updated
+
+English clicks, seeds 42 / 12 / 1 (14:54-15:45):
+
+| encoder | MACs | teacher cos | EN AUC | 14 languages | 8-bit file | H7 ms | F401 ms |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| µNAS 144, recipe choice (H7) | 2.00 M | 0.392 | 0.595 ± 0.003 | 0.543 | 0.596 | 18.7 | 252.3 |
+| µNAS 140, final choice (H7) | 1.93 M | 0.398 | 0.605 ± 0.010 (0.617 / 0.605 / 0.592) | 0.553 | 0.602 | 28.4 | 226.6 |
+| hand 64-2-384 (H7) | 1.66 M | 0.371 | 0.599 ± 0.005 | 0.547 | 0.598 | 16.6 | 191.7 |
+| µNAS 134, recipe choice (F401) | 0.65 M | 0.349 | 0.591 ± 0.003 | 0.537 | 0.590 | 15.1 | 32.1 |
+| µNAS 142, final choice (F401) | 0.84 M | 0.367 | 0.608 ± 0.007 (0.617 / 0.603 / 0.604) | 0.552 | 0.605 | 12.1 | 60.6 |
+| hand 32-5-384 (F401) | 1.00 M | 0.333 | 0.589 ± 0.008 | 0.538 | 0.589 | 21.2 | 88.7 |
+
+- With the choice made after full distillation the searched encoders lead the best hand-designed shapes: +0.006 (H7,
+  inside the seed spread) and +0.019 (F401). The final F401 choice runs 1.5 times faster than 32-5-384 on the F401 and
+  is the fastest of the seven on the H7 (12.1 ms); the recipe's F401 choice stays the fastest on the F401 (32.1 ms).
+  Within the H7 budget, 64-2-384 is the fastest on the H7 (16.6 ms against 18.7 and 28.4 ms).
+- Board runs 15:55-16:00 (ST Edge AI Cloud): on-target validation error 0 for candidate 140, 0.019 for candidate 142
+  (branch network; 32-5-384 had 0.008).
+- `scripts/export_int8.py` picks up any candidate trained under its name; `scripts/make_tab_unas.py` shows recipe and
+  final choices; `check_numbers.py` rewritten for the new text (final choices, places after full distillation, the
+  boards paragraph, the phone sentences) and passes; it caught one rounding slip (phone median 0.534769 ms is 0.53, not
+  0.54).
+- Paper (11 pages): method (final choice after full distillation), Table 3 and its two paragraphs, abstract, limitations
+  (8-bit loss of the in-budget encoders now at most 0.003; the phone ran the encoder), conclusion; the phone latency in
+  setup, results and abstract; TODOs left: energy on the boards and the phone, a one-bit runtime.
+- Course lesson 7 (`scripts/sync_course.py`): table of the seven encoders on both boards, the re-choice, phone timing.

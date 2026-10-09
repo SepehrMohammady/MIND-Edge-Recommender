@@ -51,11 +51,12 @@ blocks started from distilled weights reach 0.587 at 194\,KB.
 Standard deviations over seeds reach 0.017, so smaller gaps are not resolved. Exported as an
 8-bit file, the distilled constrained encoder scores 0.622 (0.628 at full
 precision) and runs in 31.2\,ms per title on an STM32H7B3I-DK and 450\,ms on a
-NUCLEO-F401RE. A $\mu$NAS search under the budgets of the two boards finds
-encoders that rank as well as the best hand-designed shape of each budget (0.595
-and 0.591 AUC) but no better; the one for the NUCLEO-F401RE takes 32.1\,ms per
-title, 2.8 times less than that shape.
-\TODO{energy on the boards and timing on an Android phone}. Code
+NUCLEO-F401RE. A $\mu$NAS search under the budgets of the two boards, with the
+final choice made after full training, finds encoders of 0.605 and 0.608 AUC
+against 0.599 and 0.589 for the best hand-designed shapes of the same budgets;
+the one for the NUCLEO-F401RE takes 60.6\,ms per title there, against 88.7\,ms
+for that shape. On an Android phone the 8-bit encoder takes 0.53\,ms per title.
+\TODO{energy on the boards and on the phone}. Code
 and artefacts are released.
 \keywords{Edge AI \and Neural Architecture Search \and Binarized Neural Networks
 \and Multilingual News Recommendation \and TinyML \and Knowledge Distillation}
@@ -196,8 +197,11 @@ multiply-accumulates, eight-bit weight size and peak activation memory of the
 fork's resource model, under one budget per board: 256\,KiB of weights, 128\,KiB
 of activations and 2\,M multiply-accumulates per title for the STM32H7B3I-DK, and
 128\,KiB, 48\,KiB and 1\,M for the NUCLEO-F401RE. The eight best candidates within
-budget are trained again with three seeds and the best mean is kept; the choice
-uses validation rows only. The 30 hand-designed shapes of the June space with a
+budget are trained again with three seeds under the search recipe (the recipe
+choice). Because that short recipe ranks candidates differently from full
+training (Sect.~\ref{sec:results}), the final choice among the same eight is made
+after full distillation, by the mean validation cosine over three seeds. Both
+choices use validation rows only. The 30 hand-designed shapes of the June space with a
 384-wide output are trained under the same recipe and costed by the same model.
 For the ranking experiments the chosen networks, the best hand-designed shape within
 each budget and 64-5-384 are rebuilt in PyTorch with this input and pooling
@@ -228,8 +232,10 @@ Everything runs on one laptop: an Intel Core Ultra~9 275HX with an eight-gigabyt
 RTX~5070 Laptop GPU and 32\,GB of memory, PyTorch~2.12 on CUDA~13. The targets
 are STM32 microcontrollers and an Android phone. Board latency, flash and RAM
 come from the ST Edge AI Developer Cloud (ST Edge AI Core 4.0.1) on an
-STM32H7B3I-DK (Cortex-M7, 280\,MHz) and a NUCLEO-F401RE (Cortex-M4, 84\,MHz);
-\TODO{phone timing and board energy}. Every run is seeded (seeds 42, 1 and 2 for
+STM32H7B3I-DK (Cortex-M7, 280\,MHz) and a NUCLEO-F401RE (Cortex-M4, 84\,MHz).
+Phone latency comes from a DOOGEE S98Pro (MediaTek Helio G96, two Cortex-A76 and
+six Cortex-A55 cores, Android~12), with ONNX Runtime~1.27 inside our reader app;
+\TODO{board and phone energy}. Every run is seeded (seeds 42, 1 and 2 for
 Table~\ref{tab:matrix}; 42, 12 and 1 for Tables~\ref{tab:p1} and~\ref{tab:unas}),
 uses the loop of Sect.~3, which redraws the negatives at every step, and is
 reported as the mean and standard deviation over its three seeds. The June
@@ -327,34 +333,46 @@ precision (77.0\,ms), with 53.2\,KB of weights, 77.7\,KB of flash including the
 runtime and 49.4\,KB of RAM, plus the 64.3\,KB byte table; on the NUCLEO-F401RE it
 takes 450\,ms, no faster than full precision there (444\,ms). The board's own check
 of the generated code against the reference model gave zero error.
+On the phone the 8-bit file of the encoder trained on mixed-language clicks, the
+one built into our reader app, computes the same vectors as on the laptop
+(largest difference $4.9\times10^{-7}$ on titles in five scripts) and takes
+0.53\,ms per title on one core (median over 2,000 calls, from the title's bytes to
+its vector; 0.48\,ms with two threads); the full-precision file takes 0.59\,ms.
+At this size eight bits buy no speed on the phone. The file scores 0.607 AUC in
+English and 0.592 over the fourteen translations.
 
 \input{tab_unas}
-Table~\ref{tab:unas} gives the outcome of the board searches. Within the H7
-budget the search kept three convolutions (98, 26 and 94 channels, with one
-max-pooling) at 2.00\,M multiply-accumulates, and within the F401 budget a strided
-depthwise and a strided five-wide convolution at 0.65\,M. Both lead the best
-hand-designed shape of their budget in teacher cosine, under the short search
-recipe (0.331 against 0.303 and 0.298 against 0.296) and after full distillation
-(0.392 against 0.371 and 0.349 against 0.333). In ranking the lead disappears:
-0.595 against 0.599 AUC within the H7 budget and 0.591 against 0.589 within the
-F401 budget, differences smaller than the spread over seeds, and the same holds
-across the fourteen translations (0.543 against 0.547, 0.537 against 0.538).
-Trained on clicks shown in a random language, as in Table~\ref{tab:p1}, the two
-searched encoders read the translations at 0.562 and 0.556 and English at 0.571
-and 0.549. All of them stay below 64-5-384, which fits neither operation budget and scores 0.618
-in this form and 0.629 in its original one. The full programme also widened the
-gaps in teacher cosine: under the search recipe the H7 choice was 0.012 below
-64-5-384, after full distillation 0.067, so a short distillation is a weak
-predictor of how far a network gets with full training.
+Table~\ref{tab:unas} gives the outcome of the board searches. The recipe choices
+are, within the H7 budget, three convolutions (98, 26 and 94 channels, with one
+max-pooling) at 2.00\,M multiply-accumulates and, within the F401 budget, a
+strided depthwise and a strided five-wide convolution at 0.65\,M. Both lead the
+best hand-designed shape of their budget in teacher cosine (0.331 against 0.303
+and 0.298 against 0.296), but in ranking they only match it: 0.595 against 0.599
+AUC within the H7 budget and 0.591 against 0.589 within the F401 budget,
+differences smaller than the spread over seeds (0.543 against 0.547 and 0.537
+against 0.538 across the fourteen translations). Trained on clicks shown in a
+random language, as in Table~\ref{tab:p1}, the two recipe choices read the
+translations at 0.562 and 0.556 and English at 0.571 and 0.549. Full
+distillation reorders the eight finalists of each search: the recipe choices fall
+to fifth and fourth place, and the final choices are candidate 140 (H7, 1.93\,M)
+and candidate 142 (F401, 0.84\,M, with one residual branch). These reach 0.605
+and 0.608 AUC, ahead of the hand-designed shapes by 0.006, inside the spread over
+seeds, and by 0.019. All of them stay below 64-5-384, which fits neither
+operation budget and scores 0.618 in this form and 0.629 in its original one.
+Under the search recipe the H7 recipe choice was 0.012 below 64-5-384 in teacher
+cosine, after full distillation 0.067: a short distillation is a weak predictor
+of how far a network gets with full training.
 
-On the boards the searched F401 encoder is the fastest of the five on both boards
-(15.1\,ms per title on the STM32H7B3I-DK); on the NUCLEO-F401RE it takes
-32.1\,ms, against 88.7\,ms for 32-5-384 and 427\,ms for 64-5-384. It has a third fewer multiply-accumulates than 32-5-384 but runs 2.8
+On the NUCLEO-F401RE the recipe's F401 choice is the fastest of the seven
+encoders: 32.1\,ms per title, against 88.7\,ms for 32-5-384 and 427\,ms for
+64-5-384. It has a third fewer multiply-accumulates than 32-5-384 but runs 2.8
 times faster, at 4.1 cycles per multiply-accumulate against 7.2: in 32-5-384 the
 depthwise layers take 22 cycles per multiply-accumulate and the first pointwise
-layer, over the 65 input channels, 8.8. Within the H7 budget the hand-designed
-64-2-384 is the faster one on the STM32H7B3I-DK (16.6 against 18.7\,ms). All
-in-budget encoders keep their ranking accuracy as 8-bit files. Quantising every
+layer, over the 65 input channels, 8.8. The final F401 choice, larger and more
+accurate, takes 60.6\,ms there, 1.5 times less than 32-5-384, and is the fastest
+on the STM32H7B3I-DK (12.1\,ms). Within the H7 budget the hand-designed 64-2-384
+is faster on that board (16.6\,ms) than both searched choices (18.7 and
+28.4\,ms). All in-budget encoders keep their ranking accuracy as 8-bit files. Quantising every
 operator rather than only the convolutions and the output layer kept the accuracy
 but made no file faster; on the H7 the code generator then fused one convolution
 with its max-pooling into an integer kernel that took 20.2\,ms alone.
@@ -362,12 +380,13 @@ with its max-pooling into an integer kernel that took 20.2\,ms alone.
 \section{Limitations}
 The main gap is hardware. We timed the matrix models on the laptop and estimated
 size, RAM and energy from parameter and operation counts; only the deployed
-encoders ran on the boards, and nothing ran on a phone. In the matrix the
+encoders ran on the boards and the phone, and the energy of neither has been
+measured yet. In the matrix the
 quantisation is simulated on weights only: activations, the byte embedding and the
 outer layers stay in floating point, so the eight-bit and one-bit rows may
 overstate accuracy and their sizes are not those of an 8-bit file; for the
 constrained encoder the 8-bit file costs 0.004 AUC on average over three seeds and for the
-in-budget encoders of Table~\ref{tab:unas} at most 0.001. Eight-bit inference
+in-budget encoders of Table~\ref{tab:unas} at most 0.003. Eight-bit inference
 runs on STM32 boards through
 quantised ONNX models and ST Edge AI, as measured above. The one-bit path needs a
 binary runtime such as CBin-NN~\cite{sakr2024cbinnn} or Larq Compute
@@ -377,8 +396,9 @@ energy figure ignores SRAM and memory traffic, which can dominate on a Cortex-M.
 The June constrained search enforced its flash and RAM budgets but not the
 operation budget. The $\mu$NAS searches score a
 candidate by a short distillation, whose ranking did not survive full training
-(Sect.~\ref{sec:results}); a longer fitness, or a final choice among the best
-candidates after full training, would cost more search time. Even after mixed-language
+(Sect.~\ref{sec:results}); the final choice after full distillation of the eight
+finalists changed both choices, and a longer fitness inside the search would
+cost more search time. Even after mixed-language
 training the translations stay 0.020 below English and 0.039 below the
 English-only encoder. Finally, a byte sequence is about five times longer than the word
 sequence, trading flash for computation, and all of this is on the small MIND
@@ -392,11 +412,12 @@ removes the largest item of a news recommender's storage and gives every languag
 the same 256-row vocabulary. With eight-bit weights the constrained encoder
 reaches 0.614 AUC at an estimated 204\,KB, and as an 8-bit file it runs in
 31.2\,ms per title on an STM32H7B3I-DK; searched under the budget of a
-NUCLEO-F401RE, an encoder of 0.65\,M multiply-accumulates reaches 0.591 at
-32.1\,ms per title on that board; the one-bit model with ReActNet blocks,
+NUCLEO-F401RE and chosen after full training, an encoder of 0.84\,M
+multiply-accumulates reaches 0.608 at 60.6\,ms per title on that board, 0.019
+above the best hand-designed shape of that budget; the one-bit model with ReActNet blocks,
 started from distilled weights, reaches 0.587 at 194\,KB; trained on clicks shown in a random
 language, the distilled byte-CNN reads fourteen languages at 0.589 AUC on average.
-What is still missing: \TODO{board energy, phone timing and a one-bit runtime}
+What is still missing: \TODO{board and phone energy and a one-bit runtime}
 --- that is where we take it next.
 
 \bibliographystyle{splncs04}

@@ -256,20 +256,43 @@ if (RES / "unas_summary.json").exists() and (RES / "int8_export.json").exists():
            .replace("0.629", f(ref["torch_fp32_auc"], 3)), "reference 8-bit file, three seeds")
     expect(f"8-bit file costs {f(-ref['int8qdq_minus_fp32_auc'], 3)} AUC on average over three seeds",
            "reference 8-bit loss (mean of the per-seed differences)")
-    worst = max(abs(qs[k]["onnx_int8qdq_auc"] - qs[k]["torch_fp32_auc"])
-                for k in ("unas_h7", "unas_f401", "hand_64-2-384", "hand_32-5-384"))
+    final = {r["group"]: r for r in load("unas_summary.json") if "final choice" in r["label"]}
+    h7n, f4n = final["h7"], final["f401"]
+    ms = lambda r, b: r["boards"][b]["duration_ms"]                              # noqa: E731
+    H7, F4 = "STM32H7B3I-DK", "NUCLEO-F401RE"
+    in_budget = [r for r in load("unas_summary.json") if r["group"] != "none"]
+    qkey = lambda r: ("unas_" + r["name"][len("mind_"):]) if r["name"].startswith("mind_") else r["name"]  # noqa: E731
+    worst = max(abs(qs[qkey(r)]["onnx_int8qdq_auc"] - qs[qkey(r)]["torch_fp32_auc"]) for r in in_budget)
     expect(f"at most {f(worst, 3)}", "in-budget 8-bit loss")
-    expect(f"(0.595 and 0.591 AUC)".replace("0.595", m(h7, "en_auc")).replace("0.591", m(f4, "en_auc")), "abstract µNAS AUC")
-    expect(f"at {f(h7['macs'] / 1e6, 2)}\\,M multiply-accumulates, and within the F401 budget", "H7 MACs")
+    # abstract
+    expect(f"finds encoders of {m(h7n, 'en_auc')} and {m(f4n, 'en_auc')} AUC against {m(hh, 'en_auc')} and "
+           f"{m(hf, 'en_auc')} for the best hand-designed shapes", "abstract, final choices")
+    expect(f"takes {f(ms(f4n, F4), 1)}\\,ms per title there, against {f(ms(hf, F4), 1)}\\,ms", "abstract, F401 board")
+    # Table 3 paragraph
+    expect(f"at {f(h7['macs'] / 1e6, 2)}\\,M multiply-accumulates and, within the F401 budget", "H7 MACs")
     expect(f"convolution at {f(f4['macs'] / 1e6, 2)}\\,M", "F401 MACs")
     expect(f"({f(h7['search_cos']['mean'], 3)} against {f(hh['search_cos']['mean'], 3)} and "
            f"{f(f4['search_cos']['mean'], 3)} against {f(hf['search_cos']['mean'], 3)})", "search cosines")
-    expect(f"({m(h7, 'teacher_cos_dev')} against {m(hh, 'teacher_cos_dev')} and "
-           f"{m(f4, 'teacher_cos_dev')} against {m(hf, 'teacher_cos_dev')})", "full-distillation cosines")
-    expect(f"{m(h7, 'en_auc')} against {m(hh, 'en_auc')} AUC within the H7", "H7 AUCs")
-    expect(f"{m(f4, 'en_auc')} against {m(hf, 'en_auc')} within the", "F401 AUCs")
-    expect(f"({m(h7, 'xlang_auc')} against {m(hh, 'xlang_auc')}, {m(f4, 'xlang_auc')} against "
-           f"{m(hf, 'xlang_auc')})", "translation AUCs")
+    expect(f"{m(h7, 'en_auc')} against {m(hh, 'en_auc')} AUC within the H7 budget and {m(f4, 'en_auc')} against "
+           f"{m(hf, 'en_auc')} within the F401 budget", "recipe choices, AUC")
+    expect(f"({m(h7, 'xlang_auc')} against {m(hh, 'xlang_auc')} and {m(f4, 'xlang_auc')} against "
+           f"{m(hf, 'xlang_auc')} across the fourteen", "recipe choices, translations")
+    rc = load("unas/rechoice.json")["searches"]
+    words = {1: "first", 2: "second", 3: "third", 4: "fourth", 5: "fifth", 6: "sixth", 7: "seventh", 8: "eighth"}
+    place = {s: 1 + [r["index"] for r in rc[s]["stage1"]].index(rc[s]["first_choice"]) for s in rc}
+    expect(f"fall to {words[place['mind_h7']]} and {words[place['mind_f401']]} place", "recipe choices after full distillation")
+    hist_f = {c["index"]: c for c in load("unas/mind_f401_history.json")["candidates"]}
+    n_branch = sum(1 for b in hist_f[rc["mind_f401"]["best"]]["arch"]["conv_blocks"] if b["is_branch"])
+    if n_branch != 1:
+        missing.append(f"text says one residual branch; the final F401 choice has {n_branch}")
+    expect(f"candidate {rc['mind_h7']['best']} (H7, {f(h7n['macs'] / 1e6, 2)}\\,M) and candidate "
+           f"{rc['mind_f401']['best']} (F401, {f(f4n['macs'] / 1e6, 2)}\\,M", "final choices")
+    d7 = h7n["en_auc"]["mean"] - hh["en_auc"]["mean"]
+    d4 = f4n["en_auc"]["mean"] - hf["en_auc"]["mean"]
+    expect(f"These reach {m(h7n, 'en_auc')} and {m(f4n, 'en_auc')} AUC, ahead of the hand-designed shapes by "
+           f"{f(d7, 3)}, inside the spread over seeds, and by {f(d4, 3)}", "final choices against hand-designed")
+    if not abs(d7) < max(h7n["en_auc"]["std"], hh["en_auc"]["std"]):
+        missing.append("H7 final choice: the gap to 64-2-384 is not inside the spread over seeds")
     uf = load("unas_full.json")
 
     def mixed(name, field):
@@ -284,21 +307,41 @@ if (RES / "unas_summary.json").exists() and (RES / "int8_export.json").exists():
     p1s = load("p1_summary.json")
     expect(f"scores {m(h5, 'en_auc')} in this form and {f(p1s['student/distill_ft_en']['en_auc']['mean'], 3)} in its",
            "64-5-384 in both forms")
-    expect(f"the H7 choice was {f(h5['search_cos']['mean'] - h7['search_cos']['mean'], 3)} below",
+    expect(f"the H7 recipe choice was {f(h5['search_cos']['mean'] - h7['search_cos']['mean'], 3)} below",
            "search-recipe gap")
     expect(f"after full distillation {f(h5['teacher_cos_dev']['mean'] - h7['teacher_cos_dev']['mean'], 3)}",
            "full-distillation gap")
-    ms = lambda r, b: r["boards"][b]["duration_ms"]                              # noqa: E731
-    H7, F4 = "STM32H7B3I-DK", "NUCLEO-F401RE"
-    expect(f"({f(ms(f4, H7), 1)}\\,ms per title on the STM32H7B3I-DK)", "F401 encoder on the H7")
-    expect(f"it takes\n{f(ms(f4, F4), 1)}\\,ms".replace("\n", " "), "F401 encoder on the F401")
-    expect(f"against {f(ms(hf, F4), 1)}\\,ms for 32-5-384 and {f(ms(h5, F4), 0)}\\,ms for 64-5-384", "F401 board, hand")
+    # boards paragraph
+    rows_b = [r for r in load("unas_summary.json") if r["boards"]]
+    if min(rows_b, key=lambda r: ms(r, F4))["name"] != f4["name"] or len(rows_b) != 7:
+        missing.append("'the recipe's F401 choice is the fastest of the seven encoders' on the F401 does not hold")
+    if min(rows_b, key=lambda r: ms(r, H7))["name"] != f4n["name"]:
+        missing.append("'the final F401 choice is the fastest on the STM32H7B3I-DK' does not hold")
+    expect(f"encoders: {f(ms(f4, F4), 1)}\\,ms per title, against {f(ms(hf, F4), 1)}\\,ms for 32-5-384 and "
+           f"{f(ms(h5, F4), 0)}\\,ms for 64-5-384", "F401 board, recipe choice and hand-designed")
     expect(f"{f(ms(hf, F4) / ms(f4, F4), 1)}\ntimes faster".replace("\n", " "), "F401 speed-up")
-    expect(f"title, {f(ms(hf, F4) / ms(f4, F4), 1)} times less than that shape", "abstract speed-up")
-    expect(f"an encoder of {f(f4['macs'] / 1e6, 2)}\\,M multiply-accumulates reaches {m(f4, 'en_auc')} at "
-           f"{f(ms(f4, F4), 1)}\\,ms per title on that board", "conclusion F401")
-    expect(f"({f(ms(hh, H7), 1)} against {f(ms(h7, H7), 1)}\\,ms)", "H7 board, µNAS and 64-2-384")
-    expect(f"{f(f4['boards'][F4]['duration_ms'], 1)}\\,ms per\ntitle".replace("\n", " "), "abstract F401 latency")
+    expect(f"takes {f(ms(f4n, F4), 1)}\\,ms there, {f(ms(hf, F4) / ms(f4n, F4), 1)} times less than 32-5-384, and is "
+           f"the fastest on the STM32H7B3I-DK ({f(ms(f4n, H7), 1)}\\,ms)", "final F401 choice on the boards")
+    expect(f"64-2-384 is faster on that board ({f(ms(hh, H7), 1)}\\,ms) than both searched choices "
+           f"({f(ms(h7, H7), 1)} and {f(ms(h7n, H7), 1)}\\,ms)", "H7 board")
+    # conclusion
+    expect(f"an encoder of {f(f4n['macs'] / 1e6, 2)}\\,M multiply-accumulates reaches {m(f4n, 'en_auc')} at "
+           f"{f(ms(f4n, F4), 1)}\\,ms per title on that board, {f(d4, 3)} above the best hand-designed shape",
+           "conclusion F401")
+    # phone (FeedWell-Edge research screen, paper/results/phone/edge_bench)
+    bench = RES / "phone" / "edge_bench"
+    lat = {(r["kind"], r["threads"]): r for r in
+           json.loads(sorted(bench.glob("latency_*.json"))[-1].read_text(encoding="utf-8"))["rows"]}
+    chk = json.loads(sorted(bench.glob("check_*.json"))[-1].read_text(encoding="utf-8"))
+    app = load("app_encoder.json")
+    expect(f"the 8-bit encoder takes {f(lat[('int8', 1)]['medianMs'], 2)}\\,ms per title.", "abstract, phone")
+    expect(f"(largest difference ${chk['int8']['maxAbsDiff']:.1e}".replace("e-07", "\\times10^{-7}"), "phone check")
+    expect(f"takes {f(lat[('int8', 1)]['medianMs'], 2)}\\,ms per title on one core (median over "
+           f"{lat[('int8', 1)]['repeats']:,} calls", "phone, 8-bit, one thread")
+    expect(f"{f(lat[('int8', 2)]['medianMs'], 2)}\\,ms with two threads); the full-precision file takes "
+           f"{f(lat[('fp32', 1)]['medianMs'], 2)}\\,ms", "phone, two threads and FP32")
+    expect(f"The file scores {f(app['int8_file_auc']['en'], 3)} AUC in English and "
+           f"{f(app['int8_file_mean_xlang_auc'], 3)} over the fourteen translations", "app encoder file")
     cyc = {}
     for line in (RES / "stedgeai_cloud" / "runs.jsonl").read_text(encoding="utf-8").splitlines():
         r = json.loads(line)
