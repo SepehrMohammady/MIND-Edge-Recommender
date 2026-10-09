@@ -827,3 +827,18 @@ Latin, Chinese, Japanese, Georgian and Persian script, history and candidate sco
 8-bit file, dev AUC: English 0.607 (PyTorch 0.614), mean of 14 languages 0.592 (0.596), from 0.539 (Georgian) to 0.618
 (Vietnamese); FP32 file against PyTorch 1.3e-6; INT8 against FP32 cosine at least 0.974 on the test titles
 (`paper/results/app_encoder.json`).
+
+## 2026-10-09 14:11 — Re-choice: PyTorch build extended to branch blocks; driver restarted
+
+- The first re-choice run stopped at 14:07 at F401 candidate 142: two F401 shortlist candidates (142, 133) have a
+  residual branch block, which `src/unas_encoder.py` did not build. Ten distillations had finished (all eight H7
+  candidates, F401 134 and 135) and are kept.
+- Branch blocks now follow the fork's `_assemble_a_network`: a branch runs on the input of the previous main block,
+  its last layer gives the main path's channels (a depthwise last layer is followed by a 1x1 projection), and the
+  pending outputs are max-pooled ("same" padding) to the shortest length, zero-padded at the end and added.
+- Weight copy for the check: a functional Keras model lists layers in graph order, which interleaves the branch with
+  the main path; layers are now matched per class by the creation counter in their names.
+- Check against the Keras builds (`unas/dump_keras.py mind_f401:142 ...`, `scripts/check_unas_port.py`): F401
+  candidates 142 and 133 (branch) and 101 (hidden dense layer) agree to 1.9e-5 on outputs up to 61; the two first choices
+  still agree as before (2.3e-5, 8.6e-6).
+- Driver restarted 14:10 (`logs/rechoice_10091410.log`).
