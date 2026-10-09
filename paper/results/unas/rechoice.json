@@ -1,0 +1,278 @@
+{
+ "searches": {
+  "mind_h7": {
+   "stage1": [
+    {
+     "name": "mind_h7_c140",
+     "index": 140,
+     "macs": 1928176.0,
+     "search_recipe_val_cos": 0.3184167643388112,
+     "val_cos_seed42": 0.3818817138671875,
+     "dev_cos_seed42": 0.3959
+    },
+    {
+     "name": "mind_h7_c108",
+     "index": 108,
+     "macs": 1847856.0,
+     "search_recipe_val_cos": 0.31709960103034973,
+     "val_cos_seed42": 0.37411198019981384,
+     "dev_cos_seed42": 0.3912
+    },
+    {
+     "name": "mind_h7_c126",
+     "index": 126,
+     "macs": 1775536.0,
+     "search_recipe_val_cos": 0.31527572870254517,
+     "val_cos_seed42": 0.37392276525497437,
+     "dev_cos_seed42": 0.393
+    },
+    {
+     "name": "mind_h7_c112",
+     "index": 112,
+     "macs": 1740672.0,
+     "search_recipe_val_cos": 0.31792283058166504,
+     "val_cos_seed42": 0.368186891078949,
+     "dev_cos_seed42": 0.3878
+    },
+    {
+     "name": "mind_h7_c144",
+     "index": 144,
+     "macs": 1995648.0,
+     "search_recipe_val_cos": 0.3308599789937337,
+     "val_cos_seed42": 0.3673306107521057,
+     "dev_cos_seed42": 0.3909
+    },
+    {
+     "name": "mind_h7_c142",
+     "index": 142,
+     "macs": 1776768.0,
+     "search_recipe_val_cos": 0.32233760754267377,
+     "val_cos_seed42": 0.3627970814704895,
+     "dev_cos_seed42": 0.3881
+    },
+    {
+     "name": "mind_h7_c129",
+     "index": 129,
+     "macs": 1732992.0,
+     "search_recipe_val_cos": 0.3207744061946869,
+     "val_cos_seed42": 0.3597676455974579,
+     "dev_cos_seed42": 0.3791
+    },
+    {
+     "name": "mind_h7_c146",
+     "index": 146,
+     "macs": 1776768.0,
+     "search_recipe_val_cos": 0.32054828604062396,
+     "val_cos_seed42": 0.35625556111335754,
+     "dev_cos_seed42": 0.3791
+    }
+   ],
+   "stage2": [
+    {
+     "name": "mind_h7_c140",
+     "index": 140,
+     "macs": 1928176.0,
+     "search_recipe_val_cos": 0.3184167643388112,
+     "val_cos_seed42": 0.3818817138671875,
+     "dev_cos_seed42": 0.3959,
+     "val_cos": [
+      0.3818817138671875,
+      0.38015902042388916,
+      0.3824489712715149
+     ],
+     "mean_val_cos": 0.38149656852086383,
+     "se": 0.0006885301795567922,
+     "dev_cos": [
+      0.3959,
+      0.4001,
+      0.397
+     ]
+    },
+    {
+     "name": "mind_h7_c108",
+     "index": 108,
+     "macs": 1847856.0,
+     "search_recipe_val_cos": 0.31709960103034973,
+     "val_cos_seed42": 0.37411198019981384,
+     "dev_cos_seed42": 0.3912,
+     "val_cos": [
+      0.37411198019981384,
+      0.3735074996948242,
+      0.374254047870636
+     ],
+     "mean_val_cos": 0.3739578425884247,
+     "se": 0.00022887576479794762,
+     "dev_cos": [
+      0.3912,
+      0.394,
+      0.3944
+     ]
+    },
+    {
+     "name": "mind_h7_c126",
+     "index": 126,
+     "macs": 1775536.0,
+     "search_recipe_val_cos": 0.31527572870254517,
+     "val_cos_seed42": 0.37392276525497437,
+     "dev_cos_seed42": 0.393,
+     "val_cos": [
+      0.37392276525497437,
+      0.3762531876564026,
+      0.37530213594436646
+     ],
+     "mean_val_cos": 0.3751593629519145,
+     "se": 0.00067651194564469,
+     "dev_cos": [
+      0.393,
+      0.3964,
+      0.3915
+     ]
+    }
+   ],
+   "best": 140,
+   "smallest_within_one_se": 140,
+   "first_choice": 144,
+   "changed": true
+  },
+  "mind_f401": {
+   "stage1": [
+    {
+     "name": "mind_f401_c142",
+     "index": 142,
+     "macs": 836968.0,
+     "search_recipe_val_cos": 0.286901593208313,
+     "val_cos_seed42": 0.34546858072280884,
+     "dev_cos_seed42": 0.3674
+    },
+    {
+     "name": "mind_f401_c133",
+     "index": 133,
+     "macs": 780768.0,
+     "search_recipe_val_cos": 0.28657277425130206,
+     "val_cos_seed42": 0.34392425417900085,
+     "dev_cos_seed42": 0.3654
+    },
+    {
+     "name": "mind_f401_c101",
+     "index": 101,
+     "macs": 419449.0,
+     "search_recipe_val_cos": 0.28295643130938214,
+     "val_cos_seed42": 0.3344891369342804,
+     "dev_cos_seed42": 0.3624
+    },
+    {
+     "name": "mind_f401_c134",
+     "index": 134,
+     "macs": 650624.0,
+     "search_recipe_val_cos": 0.2977479000886281,
+     "val_cos_seed42": 0.3330933153629303,
+     "dev_cos_seed42": 0.3481
+    },
+    {
+     "name": "mind_f401_c135",
+     "index": 135,
+     "macs": 860480.0,
+     "search_recipe_val_cos": 0.29750244816144306,
+     "val_cos_seed42": 0.3309820294380188,
+     "dev_cos_seed42": 0.3508
+    },
+    {
+     "name": "mind_f401_c119",
+     "index": 119,
+     "macs": 419006.0,
+     "search_recipe_val_cos": 0.28234681487083435,
+     "val_cos_seed42": 0.3308670222759247,
+     "dev_cos_seed42": 0.356
+    },
+    {
+     "name": "mind_f401_c100",
+     "index": 100,
+     "macs": 427264.0,
+     "search_recipe_val_cos": 0.2810920874277751,
+     "val_cos_seed42": 0.3190970718860626,
+     "dev_cos_seed42": 0.3403
+    },
+    {
+     "name": "mind_f401_c36",
+     "index": 36,
+     "macs": 723392.0,
+     "search_recipe_val_cos": 0.27178170283635456,
+     "val_cos_seed42": 0.3077508807182312,
+     "dev_cos_seed42": 0.3265
+    }
+   ],
+   "stage2": [
+    {
+     "name": "mind_f401_c142",
+     "index": 142,
+     "macs": 836968.0,
+     "search_recipe_val_cos": 0.286901593208313,
+     "val_cos_seed42": 0.34546858072280884,
+     "dev_cos_seed42": 0.3674,
+     "val_cos": [
+      0.34546858072280884,
+      0.345551997423172,
+      0.3442315459251404
+     ],
+     "mean_val_cos": 0.3450840413570404,
+     "se": 0.00042692736795723474,
+     "dev_cos": [
+      0.3674,
+      0.3672,
+      0.3651
+     ]
+    },
+    {
+     "name": "mind_f401_c133",
+     "index": 133,
+     "macs": 780768.0,
+     "search_recipe_val_cos": 0.28657277425130206,
+     "val_cos_seed42": 0.34392425417900085,
+     "dev_cos_seed42": 0.3654,
+     "val_cos": [
+      0.34392425417900085,
+      0.3399519920349121,
+      0.34293273091316223
+     ],
+     "mean_val_cos": 0.3422696590423584,
+     "se": 0.0011936589217930724,
+     "dev_cos": [
+      0.3654,
+      0.3605,
+      0.359
+     ]
+    },
+    {
+     "name": "mind_f401_c101",
+     "index": 101,
+     "macs": 419449.0,
+     "search_recipe_val_cos": 0.28295643130938214,
+     "val_cos_seed42": 0.3344891369342804,
+     "dev_cos_seed42": 0.3624,
+     "val_cos": [
+      0.3344891369342804,
+      0.33243677020072937,
+      0.3321336507797241
+     ],
+     "mean_val_cos": 0.33301985263824463,
+     "se": 0.0007398350272821251,
+     "dev_cos": [
+      0.3624,
+      0.3597,
+      0.3575
+     ]
+    }
+   ],
+   "best": 142,
+   "smallest_within_one_se": 142,
+   "first_choice": 134,
+   "changed": true
+  }
+ },
+ "seeds": [
+  42,
+  12,
+  1
+ ],
+ "criterion": "mean cosine to the teacher anchor on the search's validation rows (mind_unas_val.npz, 4,000 rows, 15 languages) after full distillation"
+}

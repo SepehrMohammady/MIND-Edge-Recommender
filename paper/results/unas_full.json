@@ -7274,5 +7274,1527 @@
     "384": 0.3508
    }
   }
+ },
+ "mind_f401_c142/distill/seed42": {
+  "seed": 42,
+  "minutes": 3.56,
+  "settings": {
+   "model": 142,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 78,
+        "1x_stride": true,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 27,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 89,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 78051,
+    "macs": 823080,
+    "macs_fp32": 823080,
+    "macs_quantized": 0,
+    "size_kb": 304.89,
+    "size_mb": 0.2977,
+    "energy_uj_per_inf": 3.7862
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3464,
+    "128": 0.3574,
+    "256": 0.3638,
+    "384": 0.3674
+   }
+  }
+ },
+ "mind_f401_c133/distill/seed42": {
+  "seed": 42,
+  "minutes": 2.88,
+  "settings": {
+   "model": 133,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 78,
+        "1x_stride": true,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 22,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 89,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 75936,
+    "macs": 767120,
+    "macs_fp32": 767120,
+    "macs_quantized": 0,
+    "size_kb": 296.62,
+    "size_mb": 0.2897,
+    "energy_uj_per_inf": 3.5288
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3439,
+    "128": 0.3548,
+    "256": 0.3614,
+    "384": 0.3654
+   }
+  }
+ },
+ "mind_f401_c101/distill/seed42": {
+  "seed": 42,
+  "minutes": 1.89,
+  "settings": {
+   "model": 101,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 24,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 59,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 187,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 108583,
+    "macs": 409241,
+    "macs_fp32": 409241,
+    "macs_quantized": 0,
+    "size_kb": 424.15,
+    "size_mb": 0.4142,
+    "energy_uj_per_inf": 1.8825
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3399,
+    "128": 0.3528,
+    "256": 0.3582,
+    "384": 0.3624
+   }
+  }
+ },
+ "mind_f401_c119/distill/seed42": {
+  "seed": 42,
+  "minutes": 1.88,
+  "settings": {
+   "model": 119,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 24,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 59,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 186,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 108139,
+    "macs": 408798,
+    "macs_fp32": 408798,
+    "macs_quantized": 0,
+    "size_kb": 422.42,
+    "size_mb": 0.4125,
+    "energy_uj_per_inf": 1.8805
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3338,
+    "128": 0.3459,
+    "256": 0.3514,
+    "384": 0.356
+   }
+  }
+ },
+ "mind_f401_c100/distill/seed42": {
+  "seed": 42,
+  "minutes": 1.87,
+  "settings": {
+   "model": 100,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 29,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 59,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 50016,
+    "macs": 417056,
+    "macs_fp32": 417056,
+    "macs_quantized": 0,
+    "size_kb": 195.38,
+    "size_mb": 0.1908,
+    "energy_uj_per_inf": 1.9185
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3187,
+    "128": 0.3296,
+    "256": 0.3355,
+    "384": 0.3403
+   }
+  }
+ },
+ "mind_f401_c36/distill/seed42": {
+  "seed": 42,
+  "minutes": 2.03,
+  "settings": {
+   "model": 36,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 5,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 64,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 63048,
+    "macs": 714048,
+    "macs_fp32": 714048,
+    "macs_quantized": 0,
+    "size_kb": 246.28,
+    "size_mb": 0.2405,
+    "energy_uj_per_inf": 3.2846
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3,
+    "128": 0.3131,
+    "256": 0.3214,
+    "384": 0.3265
+   }
+  }
+ },
+ "mind_h7_c140/distill/seed12": {
+  "seed": 12,
+  "minutes": 3.95,
+  "settings": {
+   "model": 140,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 93,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 19,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 94,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 97,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 84001,
+    "macs": 1921184,
+    "macs_fp32": 1921184,
+    "macs_quantized": 0,
+    "size_kb": 328.13,
+    "size_mb": 0.3204,
+    "energy_uj_per_inf": 8.8374
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3826,
+    "128": 0.3927,
+    "256": 0.3968,
+    "384": 0.4001
+   }
+  }
+ },
+ "mind_h7_c108/distill/seed12": {
+  "seed": 12,
+  "minutes": 2.7,
+  "settings": {
+   "model": 108,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 16,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 94,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 97,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 82325,
+    "macs": 1841248,
+    "macs_fp32": 1841248,
+    "macs_quantized": 0,
+    "size_kb": 321.58,
+    "size_mb": 0.314,
+    "energy_uj_per_inf": 8.4697
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3757,
+    "128": 0.3863,
+    "256": 0.3908,
+    "384": 0.394
+   }
+  }
+ },
+ "mind_h7_c126/distill/seed12": {
+  "seed": 12,
+  "minutes": 2.6,
+  "settings": {
+   "model": 126,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 93,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 16,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 94,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 97,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 81745,
+    "macs": 1768928,
+    "macs_fp32": 1768928,
+    "macs_quantized": 0,
+    "size_kb": 319.32,
+    "size_mb": 0.3118,
+    "energy_uj_per_inf": 8.1371
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3776,
+    "128": 0.3883,
+    "256": 0.393,
+    "384": 0.3964
+   }
+  }
+ },
+ "mind_f401_c142/distill/seed12": {
+  "seed": 12,
+  "minutes": 2.43,
+  "settings": {
+   "model": 142,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 78,
+        "1x_stride": true,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 27,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 89,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 78051,
+    "macs": 823080,
+    "macs_fp32": 823080,
+    "macs_quantized": 0,
+    "size_kb": 304.89,
+    "size_mb": 0.2977,
+    "energy_uj_per_inf": 3.7862
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3443,
+    "128": 0.3562,
+    "256": 0.3632,
+    "384": 0.3672
+   }
+  }
+ },
+ "mind_f401_c133/distill/seed12": {
+  "seed": 12,
+  "minutes": 2.49,
+  "settings": {
+   "model": 133,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 78,
+        "1x_stride": true,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 22,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 89,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 75936,
+    "macs": 767120,
+    "macs_fp32": 767120,
+    "macs_quantized": 0,
+    "size_kb": 296.62,
+    "size_mb": 0.2897,
+    "energy_uj_per_inf": 3.5288
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3389,
+    "128": 0.3499,
+    "256": 0.3561,
+    "384": 0.3605
+   }
+  }
+ },
+ "mind_f401_c101/distill/seed12": {
+  "seed": 12,
+  "minutes": 1.75,
+  "settings": {
+   "model": 101,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 24,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 59,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 187,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 108583,
+    "macs": 409241,
+    "macs_fp32": 409241,
+    "macs_quantized": 0,
+    "size_kb": 424.15,
+    "size_mb": 0.4142,
+    "energy_uj_per_inf": 1.8825
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3363,
+    "128": 0.3494,
+    "256": 0.3546,
+    "384": 0.3597
+   }
+  }
+ },
+ "mind_h7_c140/distill/seed1": {
+  "seed": 1,
+  "minutes": 2.67,
+  "settings": {
+   "model": 140,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 93,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 19,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 94,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 97,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 84001,
+    "macs": 1921184,
+    "macs_fp32": 1921184,
+    "macs_quantized": 0,
+    "size_kb": 328.13,
+    "size_mb": 0.3204,
+    "energy_uj_per_inf": 8.8374
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3808,
+    "128": 0.3896,
+    "256": 0.3939,
+    "384": 0.397
+   }
+  }
+ },
+ "mind_h7_c108/distill/seed1": {
+  "seed": 1,
+  "minutes": 2.49,
+  "settings": {
+   "model": 108,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 98,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 16,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 94,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 97,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 82325,
+    "macs": 1841248,
+    "macs_fp32": 1841248,
+    "macs_quantized": 0,
+    "size_kb": 321.58,
+    "size_mb": 0.314,
+    "energy_uj_per_inf": 8.4697
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3767,
+    "128": 0.3861,
+    "256": 0.3913,
+    "384": 0.3944
+   }
+  }
+ },
+ "mind_h7_c126/distill/seed1": {
+  "seed": 1,
+  "minutes": 2.17,
+  "settings": {
+   "model": 126,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 93,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 16,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": false,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 94,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 97,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 81745,
+    "macs": 1768928,
+    "macs_fp32": 1768928,
+    "macs_quantized": 0,
+    "size_kb": 319.32,
+    "size_mb": 0.3118,
+    "energy_uj_per_inf": 8.1371
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3725,
+    "128": 0.3825,
+    "256": 0.3882,
+    "384": 0.3915
+   }
+  }
+ },
+ "mind_f401_c142/distill/seed1": {
+  "seed": 1,
+  "minutes": 2.28,
+  "settings": {
+   "model": 142,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 78,
+        "1x_stride": true,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 27,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 89,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 78051,
+    "macs": 823080,
+    "macs_fp32": 823080,
+    "macs_quantized": 0,
+    "size_kb": 304.89,
+    "size_mb": 0.2977,
+    "energy_uj_per_inf": 3.7862
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3443,
+    "128": 0.3554,
+    "256": 0.3614,
+    "384": 0.3651
+   }
+  }
+ },
+ "mind_f401_c133/distill/seed1": {
+  "seed": 1,
+  "minutes": 2.36,
+  "settings": {
+   "model": 133,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 78,
+        "1x_stride": true,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 3,
+        "filters": 22,
+        "1x_stride": false,
+        "has_bn": true,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     },
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "1x1Conv1D",
+        "filters": 89,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       }
+      ]
+     },
+     {
+      "is_branch": true,
+      "layers": [
+       {
+        "type": "DWConv1D",
+        "ker_size": 3,
+        "1x_stride": false,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [],
+    "head_dropout": 0.1,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 75936,
+    "macs": 767120,
+    "macs_fp32": 767120,
+    "macs_quantized": 0,
+    "size_kb": 296.62,
+    "size_mb": 0.2897,
+    "energy_uj_per_inf": 3.5288
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3384,
+    "128": 0.349,
+    "256": 0.3555,
+    "384": 0.359
+   }
+  }
+ },
+ "mind_f401_c101/distill/seed1": {
+  "seed": 1,
+  "minutes": 1.36,
+  "settings": {
+   "model": 101,
+   "arch": {
+    "conv_blocks": [
+     {
+      "is_branch": false,
+      "layers": [
+       {
+        "type": "1x1Conv1D",
+        "filters": 24,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": true
+       },
+       {
+        "type": "Conv1D",
+        "ker_size": 5,
+        "filters": 59,
+        "1x_stride": true,
+        "has_bn": false,
+        "has_relu": true,
+        "has_prepool": false
+       }
+      ]
+     }
+    ],
+    "pooling": {
+     "type": "gap",
+     "pool_size": 2
+    },
+    "dense_blocks": [
+     {
+      "units": 187,
+      "activation": "relu"
+     }
+    ],
+    "head_dropout": 0.0,
+    "_final_dense": {
+     "units": 384,
+     "activation": null
+    }
+   },
+   "distill_epochs": 15,
+   "distill_titles": null,
+   "loss": "Matryoshka cosine (64, 128, 256, 384)",
+   "byte_table": "fixed",
+   "encoder_cost": {
+    "precision": "fp32",
+    "params": 108583,
+    "macs": 409241,
+    "macs_fp32": 409241,
+    "macs_quantized": 0,
+    "size_kb": 424.15,
+    "size_mb": 0.4142,
+    "energy_uj_per_inf": 1.8825
+   }
+  },
+  "results": {
+   "teacher_cosine_dev": {
+    "64": 0.3345,
+    "128": 0.3473,
+    "256": 0.3528,
+    "384": 0.3575
+   }
+  }
  }
 }

@@ -842,3 +842,37 @@ Latin, Chinese, Japanese, Georgian and Persian script, history and candidate sco
   candidates 142 and 133 (branch) and 101 (hidden dense layer) agree to 1.9e-5 on outputs up to 61; the two first choices
   still agree as before (2.3e-5, 8.6e-6).
 - Driver restarted 14:10 (`logs/rechoice_10091410.log`).
+
+## 2026-10-09 15:03 — Re-choice: both searches change their pick; step 6 build started
+
+Re-choice stages 1-2 (14:10-14:54, `logs/rechoice_10091410.log`, `paper/results/unas/rechoice.json`). Full distillation
+(15 epochs, all 769k rows), cosine to the teacher on the search's validation rows (15 languages), seed 42:
+
+| H7 candidate | 140 | 108 | 126 | 112 | 144 (first choice) | 142 | 129 | 146 |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|
+| val cos | 0.382 | 0.374 | 0.374 | 0.368 | 0.367 | 0.363 | 0.360 | 0.356 |
+| search recipe | 0.318 | 0.317 | 0.315 | 0.318 | 0.331 | 0.322 | 0.321 | 0.321 |
+
+| F401 candidate | 142 | 133 | 101 | 134 (first choice) | 135 | 119 | 100 | 36 |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|
+| val cos | 0.346 | 0.344 | 0.335 | 0.333 | 0.331 | 0.331 | 0.319 | 0.308 |
+| search recipe | 0.287 | 0.287 | 0.283 | 0.298 | 0.298 | 0.282 | 0.281 | 0.272 |
+
+- The ranking after full distillation differs from the search recipe's: the first choices fall to 5th (H7) and 4th
+  (F401). Three seeds for the three best of each search: H7 candidate 140, 0.3815 ± 0.0007 (1.93 M MACs); F401
+  candidate 142, 0.3451 ± 0.0004 (0.84 M MACs, one residual branch). Both are also the smallest within one standard
+  error, so both choices change. Stage 3 (English clicks, three seeds) started 14:54.
+
+Step 6 (FeedWell-Edge, branch `edge-encoder`, from `rebuild-on-feedwell-1.18`):
+- Sepehr's answers: builds OK; plan OK; the phone is on another Wi-Fi network, so the battery test runs on the phone
+  by itself (start, unplug, plug back in) and needs no wireless adb.
+- Signing checked: the installed app (release build, not debuggable) carries certificate hash 51ed3f60, the same as
+  `android/app/debug.keystore`, so a new build updates the app in place and keeps its data.
+- Local Expo module `modules/edge-encoder` (Kotlin, `onnxruntime-android` 1.27.0, the version of the laptop
+  evaluation) instead of the React Native wrapper: it does the byte ids, the table lookup and the ONNX run, times the
+  whole path per title, reads BatteryManager (charge counter, current, voltage) and runs an idle or encoding loop with
+  battery samples; results are written to `Android/data/com.feedwelledge.app/files/edge_bench/`.
+- `src/edgeml/edgeEncoder.js`, `src/screens/EncoderLabModal.js` (Settings > On-device Encoder (research): check
+  against the laptop's vectors, latency for 8-bit and FP32 at 1/2/4/default threads, battery test 2 x 15 min), model
+  files in `assets/models/edge_encoder_v1`, `metro.config.js` (onnx, f32 assets).
+- Release build for arm64-v8a started 15:05 (`logs/app_build_10091505.log`).
