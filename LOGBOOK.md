@@ -969,3 +969,64 @@ Nothing runs in the background (GPU idle, WSL stopped; the idle Gradle daemon of
 | 10 | Paper B: app and on-device adaptation, pilot | 6, 7; days of real use | PhD Y2-Y3 | later; the ranking integration of step 6 starts it |
 
 Critical path for paper A: step 5 (board energy, one-bit; next week), then step 8 (venue, authors). Step 6 can go on now.
+
+## 2026-10-09 17:22 — Step 6: content-aware ranking in the app (code and build; not on the phone yet)
+
+FeedWell-Edge, branch edge-encoder, commit 29769d1 (pushed):
+
+- The feed's learned topic score gets a second term: the similarity of each title to the titles the user opened or
+  read. Native module: `loadUserEncoder` (user_encoder.onnx, 199,138 B, same checkpoint as the news encoder) and
+  `contentScores` (news vectors of the 8-bit file, one thread, cached per model and title, at most 5,000; user vector
+  from the last 50 read titles; dot products; one logcat line per call with its timing). `src/edgeml/contentRanker.js`
+  turns the scores into z-scores over the loaded articles; the feed adds weight x z-score to the topic score.
+- Settings, EdgeML section: "Content-aware Ranking" (on by default) and "Content Weight" (0.5, 1, 2, 4).
+- Event log: article snapshots keep the title (the history of the encoder); impressions and opens record the content
+  score and the weight, for later analysis (paper B).
+- Research screen check: besides the vectors, the content scores of the test history (3 titles) for 4 candidates,
+  against the laptop (`test_vectors.json`, PyTorch user encoder).
+- Release build, arm64: 2 min 24 s, Kotlin compiled; rebuilt 17:31 with the default weight 2 (76f8bf5, see the next
+  entry), 37 s. APK 107.4 MB. Install and test wait for the phone.
+
+## 2026-10-09 17:32 — Step 7: replay of MIND through the app's ranking rule
+
+Port of the app's rule: `src/app_learner.py`, equal to the app's JavaScript on 600 events, 30 learning steps and 200
+articles, every difference 0 (`scripts/check_app_learner.py`, 91cf6d3).
+
+Replay (`scripts/replay_app.py`): every MINDsmall impression in time order is scored before the rule learns from its
+clicks. Topic = MIND category (second run: subcategory); history column replayed as opens; freshness from the first
+appearance of a news item (MIND has no publication time); clicks only. Content score = dot product of the title's
+vector (the app's 8-bit file) with the user vector of the same checkpoint over the last 50 clicked titles; in the sum
+it is z-scored within the impression and multiplied by lambda.
+
+A first run (17:10-17:14, `logs/replay_10091710.log`) chose lambda on train: AUC rose up to the largest lambda (8),
+because the encoder was trained on those clicks. Stopped after train/category. Protocol now (953cb1f, fd7d5e0): lambda chosen on the earlier half of dev by time, reported
+on the later half; grid 0.25 to 32; 95 % interval of the gains from 1,000 bootstrap resamples of users.
+Run replay_1009: 17:17:35-17:30:19, 12.6 min, one CPU process (CUDA hidden).
+
+| topic | split | impressions | app rule | content | best lambda | app + content (best) |
+|---|---|--:|--:|--:|--:|--:|
+| category | train (in-sample for the encoder) | 156,965 | 0.5696 | 0.6883 | 16 | 0.6924 |
+| category | dev, earlier half | 36,576 | 0.5947 | 0.6225 | **4** | 0.6406 |
+| category | dev, later half | 36,576 | 0.5998 | 0.5944 | (2) | (0.6259) |
+| subcategory | train (in-sample) | 156,965 | 0.5909 | 0.6883 | 8 | 0.6945 |
+| subcategory | dev, earlier half | 36,576 | 0.5924 | 0.6225 | **2** | 0.6491 |
+| subcategory | dev, later half | 36,576 | 0.6055 | 0.5944 | (1) | (0.6352) |
+
+Reported (later half, lambda from the earlier half):
+
+- category, lambda 4: 0.5998 -> **0.6238**; gain over the rule 0.024 (95 % 0.021 to 0.027), over the content score
+  alone 0.029 (0.028 to 0.031); 28,445 users.
+- subcategory, lambda 2: 0.6055 -> **0.6317**; gain over the rule 0.026 (0.023 to 0.029), over content 0.037 (0.036 to
+  0.039).
+- Neither signal alone is good (0.59 to 0.61); the sum is better than both. The content score alone falls from 0.623 to
+  0.594 between the halves while the rule rises slightly as it learns.
+- App default weight: 2, the best on the earlier half averaged over both topic definitions (0.6438; 4: 0.6429; 1:
+  0.6395). FeedWell-Edge 76f8bf5 (pushed).
+
+Files: `paper/results/app_replay.json`, eight records in `experiments.jsonl` (replay/{cat,subcat}/{train,dev,dev_early,
+dev_late}), log `logs/replay_1009.log`.
+
+Paper: results paragraph after the phone paragraph, one limitation (clicks only, no publication time, no reader has
+used the ranking yet), one sentence in the conclusion. `check_numbers.py` extended (port check, replay sentences,
+default weight) and passes. PDF now 12 pages (was 11); the page limit depends on the venue. Course lesson 7: the replay
+numbers in the phone paragraph (`scripts/sync_course.py`).

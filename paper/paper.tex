@@ -347,6 +347,26 @@ the encoder idle and the screen on, about 0.95\,mJ per title. The phone reports
 only an averaged current and a charge counter in steps of 1\,\%, which give 0.83
 and 1.6\,mJ, so we read the cost as roughly one millijoule per title.
 
+In the app the encoder also feeds the ranking of the feed. The app orders
+articles by a rule it learns on the phone: a weight per topic that grows with
+every opened or read article, plus terms for drift, freshness and unread items.
+We ported the rule to Python (the port's scores equal the app's on 600 events
+and 200 articles) and replayed the MINDsmall clicks through it in time order,
+scoring each impression before the rule learns from its clicks, with the MIND
+category as topic and the first appearance of an article in place of its
+publication time. The content score of a candidate is the dot product of its
+vector from the app's 8-bit file with the user vector that the user encoder of
+the same checkpoint pools from the last 50 clicked titles; it enters the rule
+standardised within the impression and multiplied by a weight. The encoder was
+trained on the training clicks, so we chose the weight on the earlier half of
+the dev impressions and report the later half (36,576 impressions). There the
+rule alone scores 0.600 AUC and the content score alone 0.594; their sum, with
+the chosen weight of 4, scores 0.624, 0.024 above the rule (95\,\% interval
+0.021--0.027 over 1,000 resamples of the 28,445 users). With the subcategory as
+topic the rule scores 0.606 and the sum 0.632 (weight 2). The app now ranks
+with this sum and a weight of 2, the best on the earlier half averaged over
+both topic definitions.
+
 \input{tab_unas}
 Table~\ref{tab:unas} gives the outcome of the board searches. The recipe choices
 are, within the H7 budget, three convolutions (98, 26 and 94 channels, with one
@@ -408,7 +428,9 @@ cost more search time. Even after mixed-language
 training the translations stay 0.020 below English and 0.039 below the
 English-only encoder. Finally, a byte sequence is about five times longer than the word
 sequence, trading flash for computation, and all of this is on the small MIND
-split.
+split. The replay through the app's ranking rule has clicks only: MIND records
+no reading time or scrolling, from which the app also learns, and no
+publication time, and no reader has used the content-aware ranking yet.
 
 \section{Ethics and Conclusion}
 MIND and xMIND are used under their non-commercial research licences; the work
@@ -423,6 +445,8 @@ multiply-accumulates reaches 0.608 at 60.6\,ms per title on that board, 0.019
 above the best hand-designed shape of that budget; the one-bit model with ReActNet blocks,
 started from distilled weights, reaches 0.587 at 194\,KB; trained on clicks shown in a random
 language, the distilled byte-CNN reads fourteen languages at 0.589 AUC on average.
+Added to the ranking rule of our reader app, the content score of its 8-bit
+encoder raises the AUC of a time-ordered replay of MIND from 0.600 to 0.624.
 What is still missing: \TODO{board energy and a one-bit runtime}
 --- that is where we take it next.
 

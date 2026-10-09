@@ -203,6 +203,12 @@ phone += (f"آزمون باتری (گوشی از برق جدا، 15 دقیقه �
           f"عنوان در ثانیه): {f(pe['phases']['load']['power_w'], 2)} وات در برابر {f(pe['phases']['idle']['power_w'], 2)} وات، "
           f"یعنی حدود {f(pe['energy_per_title_mj'], 2)} میلی‌ژول برای هر عنوان؛ برای فیدی با 100 عنوان حدود "
           f"{f(pe['energy_per_title_mj'] * 100 / 1000, 2)} ژول.")
+rp = json.loads((RES / "app_replay.json").read_text(encoding="utf-8"))["runs"]["cat"]   # scripts/replay_app.py
+phone += (" در خود برنامه این بردارها در رتبه‌بندی فید هم به کار می‌روند: امتیاز محتوایی هر عنوان (ضرب داخلی بردار آن "
+          "با بردار کاربر که از 50 عنوان آخرِ خوانده‌شده ساخته می‌شود) به قاعدهٔ موضوعیِ برنامه افزوده می‌شود. در بازپخش "
+          "کلیک‌های MIND به ترتیب زمان (وزن روی نیمهٔ اول dev انتخاب شد و نتیجه روی نیمهٔ دوم آمده است)، قاعدهٔ برنامه "
+          f"به‌تنهایی AUC {f(rp['dev_late']['app']['auc'])} می‌گیرد، امتیاز محتوایی به‌تنهایی "
+          f"{f(rp['dev_late']['content']['auc'])} و جمع آن دو {f(rp['dev_late_with_chosen_lambda']['auc'])}.")
 s = re.sub(r"همان فایل \.onnx با onnxruntime-android اجرا می‌شود؛[^<]*", phone, s, count=1)
 p7.write_text(s, encoding="utf-8")
 print("lesson 5 rows:", len(rows5), "lesson 6 rows:", len(rows6), "lesson 4 rows:", len(rows4), "lesson 7 rows:", len(rows7))
