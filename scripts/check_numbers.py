@@ -373,6 +373,29 @@ if (RES / "unas_summary.json").exists() and (RES / "int8_export.json").exists():
 else:
     notes.append("µNAS results not present; Table 3 sentences unchecked")
 
+# replay of MIND through the app's ranking rule (scripts/check_app_learner.py, scripts/replay_app.py)
+alc = load("app_learner_check.json")
+if not (alc["pass"] and alc["score_mismatches"] == 0):
+    missing.append("app_learner_check.json: the Python port does not match the app")
+expect(f"equal the app's on {alc['events']} events and {alc['articles_scored']} articles", "app learner port")
+rp = load("app_replay.json")
+rc, rs = rp["runs"]["cat"], rp["runs"]["subcat"]
+lc, ls = rc["dev_late"], rs["dev_late"]
+g = rc["dev_late_gain_over_app"]
+expect(f"report the later half ({lc['impressions']:,} impressions)", "replay split")
+expect(f"There the rule alone scores {f(lc['app']['auc'], 3)} AUC and the content score alone "
+       f"{f(lc['content']['auc'], 3)}; their sum, with the chosen weight of {rc['lambda_chosen_on_dev_early']:g}, scores "
+       f"{f(rc['dev_late_with_chosen_lambda']['auc'], 3)}, {f(g['gain'], 3)} above the rule (95\\,\\% interval "
+       f"{f(g['ci95'][0], 3)}--{f(g['ci95'][1], 3)} over {g['resamples']:,} resamples of the {g['users']:,} users)",
+       "replay, category")
+expect(f"With the subcategory as topic the rule scores {f(ls['app']['auc'], 3)} and the sum "
+       f"{f(rs['dev_late_with_chosen_lambda']['auc'], 3)} (weight {rs['lambda_chosen_on_dev_early']:g})", "replay, subcategory")
+early = {l: rc["dev_early"]["app_plus_content"][str(l)]["auc"] + rs["dev_early"]["app_plus_content"][str(l)]["auc"]
+         for l in rp["lambdas"]}
+expect(f"The app now ranks with this sum and a weight of {max(early, key=early.get):g}", "app default weight")
+expect(f"time-ordered replay of MIND from {f(lc['app']['auc'], 3)} to {f(rc['dev_late_with_chosen_lambda']['auc'], 3)}",
+       "conclusion, replay")
+
 for line in notes:
     print("note:", line)
 if missing:
