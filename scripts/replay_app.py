@@ -15,7 +15,9 @@ learner sees that impression's clicks:
   content      the app encoder (8-bit ONNX file of artifacts/app/edge_encoder_v1, the one on the phone) gives
                every title a vector; the trained user encoder of the same checkpoint pools the last 50 clicked
                titles; content score = dot product. app + content: app score + lambda * z-score of the content
-               scores within the impression
+               scores of the unread candidates within the impression; a candidate already read gets 0, as in the
+               app (FeedWell-Edge, src/edgeml/contentRanker.js), where a title just read would otherwise rise to the
+               top of the feed for being closest to the reading history
   splits       the encoder was trained on MINDsmall train clicks, so the train replay flatters it: lambda is
                chosen on the first half of the dev impressions by time and reported on the second half (the
                replay itself runs through the whole dev split; the halves only select impressions to score)
@@ -138,6 +140,7 @@ def replay(split):
         u = uvec[user]
         content = vecs[[row[n] for n in cands]] @ u if u is not None else np.zeros(len(cands), dtype=np.float32)
         rows.append({"user": user, "labels": labels, "app": app, "content": content.astype(np.float64),
+                     "read": np.array([row[n] in read for n in cands]),
                      "jitter": rng.random(len(cands)), "hist": len(clicked[user])})
         new = [n for n, y in zip(cands, labels) if y == 1]
         if new:
@@ -153,8 +156,10 @@ def scores_of(r, kind, field, lam=None):
         return r["app"][field]
     if kind == "content":
         return r["content"]
-    c = r["content"]
-    z = (c - c.mean()) / c.std() if c.std() > 0 else np.zeros_like(c)
+    c, unread = r["content"], ~r["read"]
+    z = np.zeros_like(c)
+    if unread.sum() > 1 and c[unread].std() > 0:
+        z[unread] = (c[unread] - c[unread].mean()) / c[unread].std()
     return r["app"][field] + lam * z
 
 
@@ -198,7 +203,10 @@ for split in ("train", "dev"):
             full = name != "train"
             out = {"app": evaluate(part, "app", f, full=full), "content": evaluate(part, "content", f, full=full),
                    "app_plus_content": {str(l): evaluate(part, "mix", f, l, full=full) for l in LAMBDAS},
-                   "impressions": len(part), "with_history": int(sum(r["hist"] > 0 for r in part))}
+                   "impressions": len(part), "with_history": int(sum(r["hist"] > 0 for r in part)),
+                   "candidates": int(sum(len(r["labels"]) for r in part)),
+                   "read_candidates": int(sum(r["read"].sum() for r in part)),
+                   "read_candidates_clicked": int(sum((r["read"] & (r["labels"] == 1)).sum() for r in part))}
             results["runs"][f][name] = out
             log(f"{name}/{f}: app {out['app']['auc']}, content {out['content']['auc']}, "
                 + ", ".join(f"l={l}: {out['app_plus_content'][str(l)]['auc']}" for l in LAMBDAS))
