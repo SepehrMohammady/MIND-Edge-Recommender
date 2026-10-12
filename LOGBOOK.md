@@ -1030,3 +1030,43 @@ Paper: results paragraph after the phone paragraph, one limitation (clicks only,
 used the ranking yet), one sentence in the conclusion. `check_numbers.py` extended (port check, replay sentences,
 default weight) and passes. PDF now 12 pages (was 11); the page limit depends on the venue. Course lesson 7: the replay
 numbers in the phone paragraph (`scripts/sync_course.py`).
+
+## 2026-10-12 11:25 — Step 6: content-aware ranking on the phone; fix for read articles; replay rerun
+
+Phone connected 10:54 (DOOGEE S98Pro, unlocked, on USB power; no network on the phone, so the feed showed its 30
+cached BBC articles, 4-5 days old). APK of 76f8bf5 installed 10:55 with `adb install -r` (app data kept).
+
+- Research screen check (10:59): vectors as before (8-bit max |d| 4.9e-7, FP32 8.6e-7); content scores of the test
+  history (3 titles) for 4 candidates against the laptop: max |d| **3.2e-7** (8-bit) and 9.8e-7 (FP32).
+  File `paper/results/phone/edge_bench/check_2026-10-12T08-59-43-983Z.json`.
+- Feed: logcat lines of the native module (no titles logged):
+
+  | time | history | candidates | new vectors | ms |
+  |---|--:|--:|--:|--:|
+  | 11:01:18 | 2 | 30 | 30 | 35.1 |
+  | 11:01:18 | 2 | 30 | 0 | 1.4 |
+  | 11:04:16 | 2 | 30 | 0 | 0.8 |
+  | 11:05:28 (after opening one article) | 3 | 30 | 0 | 3.3 |
+  | 11:09:57 (fixed build, cold start) | 3 | 30 | 30 | 36.2 |
+  | 11:09:57 | 3 | 30 | 0 | 1.9 |
+
+  A cold call encodes the 30 titles (about 1.2 ms each with the user vector and the bridge); later calls reuse the
+  cache. No crash; the one FATAL line in logcat (10:58) was the `uiautomator` dump tool, not the app.
+- Order of the feed: content ranking off vs on (weight 2): none of the top 15 positions the same; on again: the same
+  order as before (15 of 15), so the ranking is deterministic.
+- **Bug found:** after opening the article at position 15, it came back at position 3. Its own title had joined the
+  reading history, so it was the closest title to it. Fix (FeedWell-Edge a273330): read articles get no content term,
+  and the z-scores are taken over the unread articles only. Rebuilt (1 min 53 s), installed 11:09: the same article
+  went back to position 16.
+- The replay now applies the same rule (7365047): a candidate the user already clicked gets no content term, z-scores
+  over the unread candidates. Already-read candidates: 0.95 % of train, 0.58 % of dev, 0.75 % of the later dev half.
+  Run replay_1012: 11:07:16-11:24:21, 16.8 min (CPU shared with the Gradle build).
+
+| topic | lambda (earlier half) | later half: rule | content | sum | gain over rule, 95 % (users) | gain over content |
+|---|--:|--:|--:|--:|---|---|
+| category | 4 | 0.5998 | 0.5944 | **0.6249** (was 0.6238) | 0.025 (0.022 to 0.028) | 0.031 (0.029 to 0.033) |
+| subcategory | 2 | 0.6055 | 0.5944 | **0.6327** (was 0.6317) | 0.027 (0.024 to 0.030) | 0.038 (0.036 to 0.040) |
+
+- App default weight stays 2 (earlier half, mean over both topics: 2 -> 0.6427, 4 -> 0.6417, 1 -> 0.6386).
+- Paper: replay paragraph (read rule, read share, new numbers, phone content-score check 3.2e-7), conclusion 0.600 ->
+  0.625. `check_numbers.py` extended and passes; PDF 12 pages. Course lesson 7 synced.

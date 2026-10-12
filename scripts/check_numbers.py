@@ -382,7 +382,9 @@ rp = load("app_replay.json")
 rc, rs = rp["runs"]["cat"], rp["runs"]["subcat"]
 lc, ls = rc["dev_late"], rs["dev_late"]
 g = rc["dev_late_gain_over_app"]
-expect(f"report the later half ({lc['impressions']:,} impressions)", "replay split")
+expect(f"report the later half ({lc['impressions']:,} impressions; "
+       f"{f(100 * lc['read_candidates'] / lc['candidates'], 2)}\\,\\% of their candidates had already been read)",
+       "replay split, read candidates")
 expect(f"There the rule alone scores {f(lc['app']['auc'], 3)} AUC and the content score alone "
        f"{f(lc['content']['auc'], 3)}; their sum, with the chosen weight of {rc['lambda_chosen_on_dev_early']:g}, scores "
        f"{f(rc['dev_late_with_chosen_lambda']['auc'], 3)}, {f(g['gain'], 3)} above the rule (95\\,\\% interval "
@@ -392,7 +394,10 @@ expect(f"With the subcategory as topic the rule scores {f(ls['app']['auc'], 3)} 
        f"{f(rs['dev_late_with_chosen_lambda']['auc'], 3)} (weight {rs['lambda_chosen_on_dev_early']:g})", "replay, subcategory")
 early = {l: rc["dev_early"]["app_plus_content"][str(l)]["auc"] + rs["dev_early"]["app_plus_content"][str(l)]["auc"]
          for l in rp["lambdas"]}
-expect(f"The app now ranks with this sum and a weight of {max(early, key=early.get):g}", "app default weight")
+expect(f"The app ranks with this sum and a weight of {max(early, key=early.get):g}", "app default weight")
+chk_rank = json.loads(sorted((RES / "phone" / "edge_bench").glob("check_*.json"))[-1].read_text(encoding="utf-8"))
+expect(f"equal the laptop's to within ${chk_rank['int8']['contentScoresMaxAbsDiff']:.1e}$".replace("e-07", "\\times10^{-7}"),
+       "phone content scores")
 expect(f"time-ordered replay of MIND from {f(lc['app']['auc'], 3)} to {f(rc['dev_late_with_chosen_lambda']['auc'], 3)}",
        "conclusion, replay")
 

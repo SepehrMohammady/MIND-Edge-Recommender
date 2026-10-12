@@ -357,15 +357,19 @@ category as topic and the first appearance of an article in place of its
 publication time. The content score of a candidate is the dot product of its
 vector from the app's 8-bit file with the user vector that the user encoder of
 the same checkpoint pools from the last 50 clicked titles; it enters the rule
-standardised within the impression and multiplied by a weight. The encoder was
-trained on the training clicks, so we chose the weight on the earlier half of
-the dev impressions and report the later half (36,576 impressions). There the
+standardised over the unread candidates of the impression and multiplied by a
+weight. A candidate already read gets no content term, since a title just read
+is the closest to the reading history and would otherwise rise to the top of the
+app's feed. The encoder was trained on the training clicks, so we chose the
+weight on the earlier half of the dev impressions and report the later half
+(36,576 impressions; 0.75\,\% of their candidates had already been read). There the
 rule alone scores 0.600 AUC and the content score alone 0.594; their sum, with
-the chosen weight of 4, scores 0.624, 0.024 above the rule (95\,\% interval
-0.021--0.027 over 1,000 resamples of the 28,445 users). With the subcategory as
-topic the rule scores 0.606 and the sum 0.632 (weight 2). The app now ranks
-with this sum and a weight of 2, the best on the earlier half averaged over
-both topic definitions.
+the chosen weight of 4, scores 0.625, 0.025 above the rule (95\,\% interval
+0.022--0.028 over 1,000 resamples of the 28,445 users). With the subcategory as
+topic the rule scores 0.606 and the sum 0.633 (weight 2). The app ranks with
+this sum and a weight of 2, the best on the earlier half averaged over both
+topic definitions; on the phone its content scores for a test history equal the
+laptop's to within $3.2\times10^{-7}$.
 
 \input{tab_unas}
 Table~\ref{tab:unas} gives the outcome of the board searches. The recipe choices
@@ -446,7 +450,7 @@ above the best hand-designed shape of that budget; the one-bit model with ReActN
 started from distilled weights, reaches 0.587 at 194\,KB; trained on clicks shown in a random
 language, the distilled byte-CNN reads fourteen languages at 0.589 AUC on average.
 Added to the ranking rule of our reader app, the content score of its 8-bit
-encoder raises the AUC of a time-ordered replay of MIND from 0.600 to 0.624.
+encoder raises the AUC of a time-ordered replay of MIND from 0.600 to 0.625.
 What is still missing: \TODO{board energy and a one-bit runtime}
 --- that is where we take it next.
 
