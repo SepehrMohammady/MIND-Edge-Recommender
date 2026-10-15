@@ -1070,3 +1070,18 @@ cached BBC articles, 4-5 days old). APK of 76f8bf5 installed 10:55 with `adb ins
 - App default weight stays 2 (earlier half, mean over both topics: 2 -> 0.6427, 4 -> 0.6417, 1 -> 0.6386).
 - Paper: replay paragraph (read rule, read share, new numbers, phone content-score check 3.2e-7), conclusion 0.600 ->
   0.625. `check_numbers.py` extended and passes; PDF 12 pages. Course lesson 7 synced.
+
+## 2026-10-15 11:21 — Step 6: content-aware ranking with a live refresh
+
+Phone connected with internet (build a273330, installed 10-12). App started 11:20:00 with Auto Refresh on; the feed
+went from 30 cached to 60 articles. Native module log (no titles logged):
+
+| time | history | candidates | new vectors | ms |
+|---|--:|--:|--:|--:|
+| 11:20:10.395 (cold start, cached articles) | 3 | 30 | 30 | 51.8 |
+| 11:20:10.396 | 3 | 30 | 0 | 0.8 |
+| 11:20:11.713 (after the refresh) | 3 | 60 | 30 | 29.4 |
+| 11:20:11.800 | 3 | 60 | 0 | 3.4 |
+
+- A refresh encodes only the new titles (30 in 29.4 ms, about 1 ms each); the old vectors come from the cache.
+- No crash and no JavaScript error in logcat. Nothing else needs the phone for paper A.
