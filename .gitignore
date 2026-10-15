@@ -31,3 +31,7 @@ logs/
 *.synctex.gz
 *.fls
 *.fdb_latexmk
+
+# board firmware: fetched sources and build outputs (firmware/fetch_deps.py, firmware/nucleo_f401re/build.py)
+firmware/third_party/
+firmware/*/build/
