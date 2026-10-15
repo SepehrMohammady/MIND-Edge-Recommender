@@ -1085,3 +1085,56 @@ went from 30 cached to 60 articles. Native module log (no titles logged):
 
 - A refresh encodes only the new titles (30 in 29.4 ms, about 1 ms each); the old vectors come from the cache.
 - No crash and no JavaScript error in logcat. Nothing else needs the phone for paper A.
+
+## 2026-10-15 14:13 — Step 5: the F401 encoder on our own NUCLEO-F401RE (latency, outputs, energy)
+
+Sepehr connected a NUCLEO-F401RE (ST-LINK/V2-1, COM3) through a Joy-IT JT-UM120 USB power meter at 12:05. No
+power probe on the MCU's supply yet (LPM01A or STLINK-V3PWR: asking a colleague, else order one).
+
+Firmware, built on the laptop without STM32CubeMX (`firmware/`, commit 4692f7e):
+- `stedgeai generate` of the local ST Edge AI Core 4.0.0 gives the same network as the cloud's 4.0.1 (weights
+  64,280 B, activations 33,280 B, 868,725 MACs). Legacy C API, because ST's validation application for the new
+  st-ai API needs a multi-network wrapper that the Core does not ship.
+- ST's validation application (Middlewares/ST/AI of the Core) + hand-written `app_x-cube-ai.c/h` and `bsp_ai.h`
+  after the X-CUBE-AI 10.2.0 templates + STM32F4 HAL v1.8.5, CMSIS device v2.6.11, CMSIS 5.9.0 (pinned,
+  `firmware/fetch_deps.py`) + GCC 14.3 of STM32CubeIDE 2.1.1. Clock as CubeMX: HSI -> PLL 84 MHz, 2 wait states,
+  ART prefetch and caches on. Validation build: flash 137,840 B, RAM 55,300 B. Built first time 12:43.
+
+On-target validation (`stedgeai validate --mode target -d serial:COM3:115200`):
+
+| inputs | duration per title | cycles | outputs vs ONNX model |
+|---|--:|--:|---|
+| 10 random (12:45) | 60.608 ms (60.606-60.610) | 5,091,028 | rmse 0, cos 1.0 |
+| 20 titles (12:50; 12 English MIND dev, 2 each in Chinese, Japanese, Georgian, Finnish) | 60.717 ms | 5,100,178 | rmse 0; vs our ONNX Runtime 1.27 max diff 3.0e-8, min cos 0.9999999 |
+
+ST's cloud board gave 60.554 ms for the same file. `scripts/board_validate.py` ->
+`paper/results/board/NUCLEO-F401RE__unas_f401_c142_seed42_int8qdq_validate.json` (+ the tool's report).
+
+Energy (`firmware/nucleo_f401re/Core/Src/main_energy.c`, flashed 12:53): the network in a loop on the first English
+dev title (N55528), input copied before every run, LD2 off, no serial traffic; B1 switches to STOP mode (flash
+powered down, low-power regulator) and back. Start-up check on the board: output for the embedded title equal to
+the laptop's 8-bit output (0 of 384 differ); one run 5,097,408 cycles (60.68 ms) + input copy 237,225 cycles
+(2.82 ms). Serial log (`scripts/serial_log.ps1`): loop 12:54:01-14:05:32, 68,351 runs in 4,340.8 s (mean
+5,334,665 cycles = 63.51 ms per run); STOP 14:05:33-14:06:05; loop again from 14:06:06.
+
+Meter readings (Sepehr, from the display, sent 14:09):
+
+| phase | V | A | W |
+|---|--:|--:|--:|
+| loop | 5.176 | 0.078 | 0.409 |
+| STOP | 5.179 | 0.055 | 0.287 |
+| loop | 5.176 | 0.078 | 0.406 |
+
+`scripts/board_energy.py` -> `paper/results/board/energy/NUCLEO-F401RE__unas_f401_c142_energy.json`:
+- dP = 0.1205 W at 5.177 V -> dI = 23.3 mA, the MCU's current for the encoder (STOP current neglected; the
+  board's 3.3 V regulator is linear, so the same current flows on the MCU supply).
+- **About 4.7 mJ per title at the MCU's 3.3 V supply** (76.8 mW for 60.68 ms); 7.3 mJ at the USB input.
+- 5.4 nJ per MAC, against about 1 pJ per MAC in the arithmetic-only proxy of Table 1 (0.958 pJ for Micro-NAS INT8).
+- Precision: 1 mW display steps, the two loop readings differ by 3 mW; dP is good to a few per cent. The meter
+  sees the whole board; a probe on the MCU supply (JP6) would measure the MCU alone.
+
+Paper: setup (own board, firmware, meter), results paragraph (60.7 ms, outputs equal, energy), abstract and
+conclusion (about 4.7 mJ per title), limitation (USB meter on the whole board); TODOs now only for the H7.
+`check_numbers.py` extended (board block) and passes; PDF 12 pages. Course lesson 7: the board sentence.
+Records for the validation and the energy computation in `experiments.jsonl`.
+Next: the same on the STM32H7B3I-DK (validation firmware for the H7, energy), then the one-bit model on the H7.

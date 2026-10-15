@@ -26,7 +26,7 @@ import numpy as np
 import onnxruntime as ort
 import torch
 
-from src import data_mind, data_xmind
+from src import data_mind, data_xmind, runlog
 from src.config import load_config
 from src.student import text_to_bytes
 
@@ -49,7 +49,7 @@ def titles():
 
 def parse_report(txt):
     def grab(pattern, cast=float):
-        m = re.search(pattern, txt)
+        m = re.search(pattern, txt, re.M)
         return cast(m.group(1).replace(",", "")) if m else None
     return {
         "device": (re.search(r"device\.desc\s*:\s*(.+?)\s*$", txt, re.M) or [None, None])[1],
@@ -72,6 +72,7 @@ def main():
     ap.add_argument("--port", default="COM3")
     ap.add_argument("--board", default="NUCLEO-F401RE")
     ap.add_argument("--target", default="stm32f4")
+    ap.add_argument("--reparse", action="store_true", help="rebuild the JSON from the last run's files, no board")
     a = ap.parse_args()
 
     onnx_path = ROOT / f"artifacts/stedgeai/models/{a.model}_seed{a.seed}_body_int8qdq.onnx"
@@ -93,13 +94,17 @@ def main():
     np.savez(npz, m_inputs_1=x.reshape(len(x), 64, 1, 128), m_inputs_2=m.reshape(len(m), 128, 1, 1))
 
     t0 = time.time()
+    OUT.mkdir(parents=True, exist_ok=True)
+    stem = f"{a.board}__{a.model}_seed{a.seed}_int8qdq"
+    old = OUT / f"{stem}_validate.json"
     cmd = [STEDGEAI, "validate", "-m", onnx_path, "--target", a.target, "--c-api", "legacy", "--name", "network",
            "--mode", "target", "-d", f"serial:{a.port}:115200", "--valinput", npz,
            "--output", vdir, "--workspace", work / "ws_val"]
-    r = subprocess.run([str(c) for c in cmd], capture_output=True, text=True)
-    if r.returncode != 0:
-        print(r.stdout[-3000:], r.stderr[-3000:])
-        raise SystemExit("stedgeai validate failed")
+    if not a.reparse:
+        r = subprocess.run([str(c) for c in cmd], capture_output=True, text=True)
+        if r.returncode != 0:
+            print(r.stdout[-3000:], r.stderr[-3000:])
+            raise SystemExit("stedgeai validate failed")
     report = (vdir / "network_validate_report.txt").read_text(encoding="utf-8", errors="replace")
     res = parse_report(report)
 
@@ -113,8 +118,6 @@ def main():
     ref = np.stack([sess.run(None, {names[0]: x[i:i + 1], names[1]: m[i:i + 1]})[0][0] for i in range(len(rows))])
     cos = (board * ref).sum(1) / (np.linalg.norm(board, axis=1) * np.linalg.norm(ref, axis=1))
 
-    OUT.mkdir(parents=True, exist_ok=True)
-    stem = f"{a.board}__{a.model}_seed{a.seed}_int8qdq"
     shutil.copy(vdir / "network_validate_report.txt", OUT / f"{stem}_validate_report.txt")
     result = {
         "board": a.board, "model": onnx_path.name, "checkpoint": str(ckpt.relative_to(ROOT)),
@@ -124,8 +127,14 @@ def main():
         "board_vs_onnxruntime": {"onnxruntime": ort.__version__, "max_abs_diff": float(np.abs(board - ref).max()),
                                  "min_cosine": float(cos.min()), "titles": len(rows)},
         "minutes": round((time.time() - t0) / 60, 2), "finished": time.strftime("%Y-%m-%d %H:%M:%S"),
+        **({k: json.loads(old.read_text(encoding="utf-8"))[k] for k in ("minutes", "finished")} if a.reparse else {}),
     }
     (OUT / f"{stem}_validate.json").write_text(json.dumps(result, indent=1, ensure_ascii=False), encoding="utf-8")
+    if not a.reparse:
+        cfg["seed"] = a.seed
+        runlog.append(cfg, f"board/{stem}_validate", {"port": a.port, "firmware": result["firmware"],
+                      "titles": len(rows)}, {k: result[k] for k in ("device", "duration_ms", "cycles", "cycles_per_macc",
+                      "cross", "board_vs_onnxruntime")}, t0)
     print(json.dumps({k: result[k] for k in ("device", "duration_ms", "cycles", "cycles_per_macc", "cross",
                                              "board_vs_onnxruntime")}, indent=1))
 

@@ -93,7 +93,7 @@
  "duration_min_max_std": "60.686/60.734/0.013",
  "cycles": 5100178,
  "cycles_per_macc": 5.87,
- "macc": null,
+ "macc": 868725,
  "cross": {
   "rmse": "0.000000000",
   "mae": "0.000000000",

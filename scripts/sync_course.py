@@ -186,7 +186,15 @@ para = (f"<p>دستور کوتاه جست‌وجو (96 هزار سطر، حدا�
         f"{f(g['hand_64-2-384']['en_auc']['mean'])} و {f(g['hand_32-5-384']['en_auc']['mean'])} برای بهترین شکل دست‌سازِ "
         f"همان بودجه. روی NUCLEO-F401RE انتخاب نهایی بودجهٔ F401 در {ms(fin['f401'], 'NUCLEO-F401RE'):.1f} میلی‌ثانیه "
         f"اجرا می‌شود، {ms(g['hand_32-5-384'], 'NUCLEO-F401RE') / ms(fin['f401'], 'NUCLEO-F401RE'):.1f} برابر سریع‌تر "
-        f"از 32-5-384؛ در آن شکل دست‌ساز لایه‌های depthwise روی Cortex-M4 حدود 22 چرخه برای هر MAC می‌گیرند.</p>")
+        f"از 32-5-384؛ در آن شکل دست‌ساز لایه‌های depthwise روی Cortex-M4 حدود 22 چرخه برای هر MAC می‌گیرند.")
+# our own NUCLEO-F401RE (scripts/board_validate.py, scripts/board_energy.py)
+bv = json.loads((RES / "board/NUCLEO-F401RE__unas_f401_c142_seed42_int8qdq_validate.json").read_text(encoding="utf-8"))
+be = json.loads((RES / "board/energy/NUCLEO-F401RE__unas_f401_c142_energy.json").read_text(encoding="utf-8"))
+para += (f" روی یک NUCLEO-F401RE در آزمایشگاه خودمان همین انکودر {f(bv['duration_ms'], 1)} میلی‌ثانیه برای هر عنوان "
+         f"طول می‌کشد و خروجی‌هایش برای {len(bv['titles'])} عنوان MIND و xMIND با مدل ONNX یکی است. یک توان‌سنج USB "
+         f"میان لپ‌تاپ و برد، اختلاف توان برد را بین اجرای پیوستهٔ انکودر و حالت STOP میکروکنترلر "
+         f"{f(be['delta_p_w'], 3)} وات نشان می‌دهد ({f(be['delta_i_ma'], 0)} میلی‌آمپر)، یعنی حدود "
+         f"{f(be['energy_per_title_mcu_mj'], 1)} میلی‌ژول برای هر عنوان در تغذیهٔ 3.3 ولتی میکروکنترلر.</p>")
 a = s.index("</table>", s.index("<h3>روش ۵: جست‌وجوی µNAS زیر بودجهٔ هر برد</h3>"))
 a = s.index("</div>", a) + len("</div>")
 b = s.index("</p>", a) + len("</p>")

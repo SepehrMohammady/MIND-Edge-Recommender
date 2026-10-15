@@ -1,0 +1,30 @@
+{
+ "board": "NUCLEO-F401RE (STM32F401RE, 84 MHz), powered from the laptop's USB port through the meter",
+ "meter": "Joy-IT JT-UM120 USB tester, between the laptop's USB port and the board; display resolution 1 mV, 1 mA, 1 mW as read",
+ "readings_file": "NUCLEO-F401RE__unas_f401_c142_usbmeter_readings.json",
+ "network_cycles": 5097408,
+ "network_ms": 60.683,
+ "input_copy_cycles": 237225,
+ "input_copy_ms": 2.824,
+ "loop_phase": {
+  "runs": 68351,
+  "ms": 4340848,
+  "mean_cycles_per_run": 5334665,
+  "mean_ms_per_run": 63.508
+ },
+ "output_check_values_differing": 0,
+ "p_loop_w": [
+  0.409,
+  0.406
+ ],
+ "p_stop_w": [
+  0.287
+ ],
+ "v_bus": 5.177,
+ "delta_p_w": 0.1205,
+ "delta_i_ma": 23.28,
+ "p_mcu_w": 0.0768,
+ "energy_per_title_usb_mj": 7.312,
+ "energy_per_title_mcu_mj": 4.661,
+ "v_mcu": 3.3
+}
