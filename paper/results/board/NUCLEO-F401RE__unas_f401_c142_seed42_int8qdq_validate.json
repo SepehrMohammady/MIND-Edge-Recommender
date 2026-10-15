@@ -1,0 +1,113 @@
+{
+ "board": "NUCLEO-F401RE",
+ "model": "unas_f401_c142_seed42_body_int8qdq.onnx",
+ "checkpoint": "artifacts\\runs\\unas_full\\mind_f401_c142_distill_ft_en_seed42.pt",
+ "firmware": "ST validation application (ST Edge AI Core 4.0.0, legacy C API), firmware/nucleo_f401re",
+ "titles": [
+  {
+   "lang": "eng",
+   "nid": "N55528"
+  },
+  {
+   "lang": "eng",
+   "nid": "N18955"
+  },
+  {
+   "lang": "eng",
+   "nid": "N61837"
+  },
+  {
+   "lang": "eng",
+   "nid": "N53526"
+  },
+  {
+   "lang": "eng",
+   "nid": "N38324"
+  },
+  {
+   "lang": "eng",
+   "nid": "N2073"
+  },
+  {
+   "lang": "eng",
+   "nid": "N11429"
+  },
+  {
+   "lang": "eng",
+   "nid": "N49186"
+  },
+  {
+   "lang": "eng",
+   "nid": "N2131"
+  },
+  {
+   "lang": "eng",
+   "nid": "N59295"
+  },
+  {
+   "lang": "eng",
+   "nid": "N24510"
+  },
+  {
+   "lang": "eng",
+   "nid": "N59883"
+  },
+  {
+   "lang": "zho",
+   "nid": "N55528"
+  },
+  {
+   "lang": "zho",
+   "nid": "N18955"
+  },
+  {
+   "lang": "jpn",
+   "nid": "N55528"
+  },
+  {
+   "lang": "jpn",
+   "nid": "N18955"
+  },
+  {
+   "lang": "kat",
+   "nid": "N55528"
+  },
+  {
+   "lang": "kat",
+   "nid": "N18955"
+  },
+  {
+   "lang": "fin",
+   "nid": "N55528"
+  },
+  {
+   "lang": "fin",
+   "nid": "N18955"
+  }
+ ],
+ "device": "stm32 family - 0x433 - STM32F401xD/E @84/84MHz",
+ "device_attrs": "fpu,art_lat=2,art_prefetch,art_icache,art_dcache",
+ "runtime": "v12.0.0-2ca1f59f compiled with GCC 13.3.1 (GCC)",
+ "samples": 20,
+ "duration_ms": 60.717,
+ "duration_min_max_std": "60.686/60.734/0.013",
+ "cycles": 5100178,
+ "cycles_per_macc": 5.87,
+ "macc": null,
+ "cross": {
+  "rmse": "0.000000000",
+  "mae": "0.000000000",
+  "l2r": "0.000000000",
+  "snr": "inf",
+  "nse": "1.000000",
+  "cos": "1.000000"
+ },
+ "board_vs_onnxruntime": {
+  "onnxruntime": "1.27.0",
+  "max_abs_diff": 2.9802322387695312e-08,
+  "min_cosine": 0.9999998807907104,
+  "titles": 20
+ },
+ "minutes": 1.63,
+ "finished": "2026-10-15 12:50:32"
+}
