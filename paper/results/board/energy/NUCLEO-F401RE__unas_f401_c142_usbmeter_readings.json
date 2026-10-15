@@ -1,0 +1,12 @@
+{
+ "board": "NUCLEO-F401RE (STM32F401RE, 84 MHz), powered from the laptop's USB port through the meter",
+ "firmware": "firmware/nucleo_f401re, app energy (Core/Src/main_energy.c), model unas_f401_c142_seed42_body_int8qdq.onnx",
+ "meter": "Joy-IT JT-UM120 USB tester, between the laptop's USB port and the board; display resolution 1 mV, 1 mA, 1 mW as read",
+ "read_by": "the experimenter, from the meter's display, 2026-10-15 at about 14:09",
+ "phase_times": "from paper/results/board/energy/NUCLEO-F401RE__unas_f401_c142_serial.log (laptop clock): loop 12:54:01-14:05:32, STOP 14:05:33-14:06:05, loop from 14:06:06",
+ "readings": [
+  {"phase": "loop", "v_bus": 5.176, "i_bus": 0.078, "p_bus": 0.409},
+  {"phase": "stop", "v_bus": 5.179, "i_bus": 0.055, "p_bus": 0.287},
+  {"phase": "loop", "v_bus": 5.176, "i_bus": 0.078, "p_bus": 0.406}
+ ]
+}

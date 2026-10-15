@@ -326,8 +326,8 @@ if (RES / "unas_summary.json").exists() and (RES / "int8_export.json").exists():
            f"({f(ms(h7, H7), 1)} and {f(ms(h7n, H7), 1)}\\,ms)", "H7 board")
     # conclusion
     expect(f"an encoder of {f(f4n['macs'] / 1e6, 2)}\\,M multiply-accumulates reaches {m(f4n, 'en_auc')} at "
-           f"{f(ms(f4n, F4), 1)}\\,ms per title on that board, {f(d4, 3)} above the best hand-designed shape",
-           "conclusion F401")
+           f"{f(ms(f4n, F4), 1)}\\,ms and about", "conclusion F401")
+    expect(f"per title on that board, {f(d4, 3)} above the best hand-designed shape", "conclusion F401, margin")
     # phone (FeedWell-Edge research screen, paper/results/phone/edge_bench)
     bench = RES / "phone" / "edge_bench"
     lat = {(r["kind"], r["threads"]): r for r in
@@ -400,6 +400,25 @@ expect(f"equal the laptop's to within ${chk_rank['int8']['contentScoresMaxAbsDif
        "phone content scores")
 expect(f"time-ordered replay of MIND from {f(lc['app']['auc'], 3)} to {f(rc['dev_late_with_chosen_lambda']['auc'], 3)}",
        "conclusion, replay")
+
+# physical NUCLEO-F401RE (scripts/board_validate.py, scripts/board_energy.py)
+bv = load("board/NUCLEO-F401RE__unas_f401_c142_seed42_int8qdq_validate.json")
+be = load("board/energy/NUCLEO-F401RE__unas_f401_c142_energy.json")
+if bv["cross"].get("rmse") not in ("0.000000000",) or be["output_check_values_differing"] != 0:
+    missing.append("board outputs differ from the ONNX model")
+expect(f"the final F401 choice takes {f(bv['duration_ms'], 1)}\\,ms per title, as on ST's board, and its outputs for "
+       f"{len(bv['titles'])} MIND and xMIND titles", "board validation")
+expect(f"board draws {f(be['p_loop_w'][0], 3)} and {f(be['p_loop_w'][1], 3)}\\,W from the laptop's USB port, against "
+       f"{f(be['p_stop_w'][0], 3)}\\,W with the MCU in STOP mode. The difference, {f(be['delta_i_ma'], 0)}\\,mA at "
+       f"{f(be['v_bus'], 2)}\\,V", "board energy readings")
+expect(f"about {f(be['energy_per_title_mcu_mj'], 1)}\\,mJ per title at its 3.3\\,V supply "
+       f"({f(be['energy_per_title_usb_mj'], 1)}\\,mJ at the USB input)", "board energy per title")
+proxy = cell[("micro_nas", "int8")]
+expect(f"That is {f(be['energy_per_title_mcu_mj'] * 1e6 / bv['macc'], 1)}\\,nJ per multiply-accumulate, against the "
+       f"{f(proxy['energy_uj'] * 1e6 / proxy['macs'], 0)}\\,pJ of the", "energy per MAC vs the proxy")
+expect(f"the whole chip runs at {f(be['p_mcu_w'] * 1000, 0)}\\,mW for the {f(be['network_ms'], 1)}\\,ms", "MCU power")
+expect(f"for that shape, and about {f(be['energy_per_title_mcu_mj'], 1)}\\,mJ per title on a board of ours", "abstract, board energy")
+expect(f"at 60.6\\,ms and about {f(be['energy_per_title_mcu_mj'], 1)}\\,mJ per title on that board", "conclusion, board energy")
 
 for line in notes:
     print("note:", line)
