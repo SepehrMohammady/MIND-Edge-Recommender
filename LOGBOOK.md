@@ -1071,7 +1071,7 @@ cached BBC articles, 4-5 days old). APK of 76f8bf5 installed 10:55 with `adb ins
 - Paper: replay paragraph (read rule, read share, new numbers, phone content-score check 3.2e-7), conclusion 0.600 ->
   0.625. `check_numbers.py` extended and passes; PDF 12 pages. Course lesson 7 synced.
 
-## 2026-10-15 11:21 — Step 6: content-aware ranking with a live refresh
+## 2026-10-15 11:20 — Step 6: content-aware ranking with a live refresh
 
 Phone connected with internet (build a273330, installed 10-12). App started 11:20:00 with Auto Refresh on; the feed
 went from 30 cached to 60 articles. Native module log (no titles logged):
