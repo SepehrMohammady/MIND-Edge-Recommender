@@ -6,6 +6,8 @@ Pinned versions (fetched 2026-10-15):
   cmsis-device-f4       v2.6.11  0fa0e489e053fa1ca7790bb40b4d76458f64c55d  (Apache-2.0)
   stm32f4xx-hal-driver  v1.8.5   b6f0ed3829f3829eb358a2e7417d80bba1a42db7  (BSD-3-Clause)
   CMSIS_5 (Core/Include) 5.9.0   2b7495b8535bdcb306dac29b9ded4cfb679d7e5c  (Apache-2.0)
+  cmsis-device-h7       v1.10.7  8f922cdc7cc6de2344e75ddd657889f4ff761790  (Apache-2.0, fetched 2026-10-16)
+  stm32h7xx-hal-driver  v1.11.6  a1996eed9172b59887bafaaa0ea1816ea14d48b5  (BSD-3-Clause, fetched 2026-10-16)
 
 ST Edge AI Core 4.0 (network code generator, runtime library and validation application) and the GNU
 toolchain of STM32CubeIDE are local installs; see firmware/README.md.
@@ -21,6 +23,10 @@ REPOS = [
      "b6f0ed3829f3829eb358a2e7417d80bba1a42db7", None),
     ("CMSIS_5", "https://github.com/ARM-software/CMSIS_5.git", "5.9.0",
      "2b7495b8535bdcb306dac29b9ded4cfb679d7e5c", "CMSIS/Core/Include"),
+    ("cmsis-device-h7", "https://github.com/STMicroelectronics/cmsis-device-h7.git", "v1.10.7",
+     "8f922cdc7cc6de2344e75ddd657889f4ff761790", None),
+    ("stm32h7xx-hal-driver", "https://github.com/STMicroelectronics/stm32h7xx-hal-driver.git", "v1.11.6",
+     "a1996eed9172b59887bafaaa0ea1816ea14d48b5", None),
 ]
 
 TP.mkdir(exist_ok=True)

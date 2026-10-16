@@ -1,0 +1,13 @@
+{
+ "_comment": "Memory pools of the STM32H7B3I-DK as in ST's Developer Cloud benchmark of 2026-10-09 (POOL_0_DTCMRAM1 0x20000000 61440 B, POOL_1_DTCMRAM2 0x20010000 65536 B, POOL_2_RAM 0x24000000 994303 B, POOL_EXTERNAL_SDRAM 0xD0000000 16 MB; paper/results/stedgeai_cloud/*__STM32H7B3I-DK.json), the first pool the privileged one",
+ "memory": {
+  "mempools": [
+   {"name": "DTCMRAM1", "prop": {"rights": "ACC_WRITE", "throughput": "HIGH", "latency": "LOW"},
+    "offset": {"value": "0x20000000", "magnitude": "BYTES"}, "size": {"value": "61440", "magnitude": "BYTES"}},
+   {"name": "DTCMRAM2", "prop": {"rights": "ACC_WRITE", "throughput": "HIGH", "latency": "LOW"},
+    "offset": {"value": "0x20010000", "magnitude": "BYTES"}, "size": {"value": "65536", "magnitude": "BYTES"}},
+   {"name": "RAM", "prop": {"rights": "ACC_WRITE", "throughput": "MID", "latency": "MID"},
+    "offset": {"value": "0x24000000", "magnitude": "BYTES"}, "size": {"value": "994303", "magnitude": "BYTES"}}
+  ]
+ }
+}

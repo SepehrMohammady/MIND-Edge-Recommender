@@ -55,9 +55,11 @@ NUCLEO-F401RE. A $\mu$NAS search under the budgets of the two boards, with the
 final choice made after full training, finds encoders of 0.605 and 0.608 AUC
 against 0.599 and 0.589 for the best hand-designed shapes of the same budgets;
 the one for the NUCLEO-F401RE takes 60.6\,ms per title there, against 88.7\,ms
-for that shape, and about 4.7\,mJ per title on a board of ours. On an Android
-phone the 8-bit encoder takes 0.53\,ms and about 0.95\,mJ per title.
-\TODO{energy on the H7 board}. Code and artefacts are released.
+for that shape. On boards of ours the two final choices draw about 7.3\,mJ (F401)
+and 3.5\,mJ (H7) per title from the USB port, and the H7 times of the same files
+vary by up to 2.4 times with the code generator's buffer layout. On an Android
+phone the 8-bit encoder takes 0.53\,ms and about 0.95\,mJ per title. Code and
+artefacts are released.
 \keywords{Edge AI \and Neural Architecture Search \and Binarized Neural Networks
 \and Multilingual News Recommendation \and TinyML \and Knowledge Distillation}
 \end{abstract}
@@ -233,14 +235,14 @@ RTX~5070 Laptop GPU and 32\,GB of memory, PyTorch~2.12 on CUDA~13. The targets
 are STM32 microcontrollers and an Android phone. Board latency, flash and RAM
 come from the ST Edge AI Developer Cloud (ST Edge AI Core 4.0.1) on an
 STM32H7B3I-DK (Cortex-M7, 280\,MHz) and a NUCLEO-F401RE (Cortex-M4, 84\,MHz).
-On a NUCLEO-F401RE of ours we flashed ST's validation firmware (ST Edge AI
-Core 4.0.0) and a firmware that alternates the encoder in a loop with the MCU
-in STOP mode; a USB power meter (Joy-IT JT-UM120) between the laptop and the
-board reads both phases. Phone latency and energy come from a DOOGEE S98Pro
-(MediaTek Helio G96, two Cortex-A76 and six Cortex-A55 cores, Android~12), with
-ONNX Runtime~1.27 inside our reader app; the energy is read from the phone's own
-battery gauge, unplugged, over 15 minutes with the encoder idle and 15 minutes
-with it running; \TODO{H7 board energy}. Every run is seeded (seeds 42, 1 and 2 for
+On a NUCLEO-F401RE and an STM32H7B3I-DK of ours, at the same clocks, we flashed
+ST's validation firmware (ST Edge AI Core 4.0.0) and a firmware that alternates
+the encoder in a loop with the MCU in STOP mode; a USB power meter (Joy-IT
+JT-UM120) between the laptop and the board reads both phases. Phone latency and
+energy come from a DOOGEE S98Pro (MediaTek Helio G96, two Cortex-A76 and six
+Cortex-A55 cores, Android~12), with ONNX Runtime~1.27 inside our reader app; the
+energy is read from the phone's own battery gauge, unplugged, over 15 minutes
+with the encoder idle and 15 minutes with it running. Every run is seeded (seeds 42, 1 and 2 for
 Table~\ref{tab:matrix}; 42, 12 and 1 for Tables~\ref{tab:p1} and~\ref{tab:unas}),
 uses the loop of Sect.~3, which redraws the negatives at every step, and is
 reported as the mean and standard deviation over its three seeds. The June
@@ -403,7 +405,7 @@ times faster, at 4.1 cycles per multiply-accumulate against 7.2: in 32-5-384 the
 depthwise layers take 22 cycles per multiply-accumulate and the first pointwise
 layer, over the 65 input channels, 8.8. The final F401 choice, larger and more
 accurate, takes 60.6\,ms there, 1.5 times less than 32-5-384, and is the fastest
-on the STM32H7B3I-DK (12.1\,ms). Within the H7 budget the hand-designed 64-2-384
+on ST's STM32H7B3I-DK (12.1\,ms). Within the H7 budget the hand-designed 64-2-384
 is faster on that board (16.6\,ms) than both searched choices (18.7 and
 28.4\,ms). All in-budget encoders keep their ranking accuracy as 8-bit files. Quantising every
 operator rather than only the convolutions and the output layer kept the accuracy
@@ -416,18 +418,35 @@ board, and its outputs for 20 MIND and xMIND titles (English, Chinese, Japanese,
 Georgian and Finnish) equal those of the ONNX model run on the laptop. With the encoder running back to back, the
 board draws 0.409 and 0.406\,W from the laptop's USB port, against 0.287\,W with
 the MCU in STOP mode. The difference, 23\,mA at 5.18\,V, is the MCU's current
-for the encoder: about 4.7\,mJ per title at its 3.3\,V supply (7.3\,mJ at the USB
-input). That is 5.4\,nJ per multiply-accumulate, against the 1\,pJ of the
-arithmetic-only estimate behind Table~\ref{tab:matrix}: the whole chip runs at
-77\,mW for the 60.7\,ms.
+for the encoder: 7.3\,mJ per title at the USB input, and about 4.7\,mJ at the
+MCU's 3.3\,V supply if a linear regulator feeds it. That is 5.4\,nJ per
+multiply-accumulate, against the 1\,pJ of the arithmetic-only estimate behind
+Table~\ref{tab:matrix}: the whole chip runs at 77\,mW for the 60.7\,ms.
+
+\input{tab_boards}
+On an STM32H7B3I-DK of our own the same files run faster or slower than on
+ST's board, depending on where the code generator places the network's buffers
+(Table~\ref{tab:boards}). The final H7 choice takes 40.4\,ms per title with the
+generator's default setting and 19.2\,ms with time optimisation, against
+28.4\,ms on ST's board; its first convolution alone takes 19.2 or 6.9\,ms, with
+the same weights and the same kernel. Across the seven encoders the times of one
+file differ by up to 2.4 times. With time optimisation the hand-designed 64-2-384
+stays the fastest within the H7 budget (16.5\,ms against 18.8 and 19.2\,ms), but
+the fastest encoder on our board is the recipe's F401 choice (6.7\,ms, against
+15.1\,ms on ST's), not the final F401 choice (9.9\,ms). For 20 titles the final H7
+choice gives the outputs of the ONNX model. With it running back to back, the
+board draws 1.030 and 1.029\,W from USB, against 0.847\,W in STOP mode: 0.18\,W,
+or 3.5\,mJ per title at 19.2\,ms. The board's 3.3\,V regulator is not documented,
+so we give only the USB-side figure.
 
 \section{Limitations}
 The main gap is hardware. We timed the matrix models on the laptop and estimated
 size, RAM and energy from parameter and operation counts; only the deployed
 encoders ran on the boards and the phone; the phone's energy comes from its own
-battery gauge, the F401's from a USB meter on the whole board as the difference
-between two phases (a probe on the MCU's own supply would measure it directly),
-and the H7's has not been measured yet. In the matrix the
+battery gauge, the boards' from a USB meter on the whole board as the difference
+between two phases (a probe on the MCU's own supply would measure it directly).
+Board times depend on the code generator's version and setting: the same file
+ran up to 2.4 times faster or slower on our H7 than on ST's. In the matrix the
 quantisation is simulated on weights only: activations, the byte embedding and the
 outer layers stay in floating point, so the eight-bit and one-bit rows may
 overstate accuracy and their sizes are not those of an 8-bit file; for the
@@ -461,13 +480,14 @@ the same 256-row vocabulary. With eight-bit weights the constrained encoder
 reaches 0.614 AUC at an estimated 204\,KB, and as an 8-bit file it runs in
 31.2\,ms per title on an STM32H7B3I-DK; searched under the budget of a
 NUCLEO-F401RE and chosen after full training, an encoder of 0.84\,M
-multiply-accumulates reaches 0.608 at 60.6\,ms and about 4.7\,mJ per title on
-that board, 0.019 above the best hand-designed shape of that budget; the one-bit model with ReActNet blocks,
+multiply-accumulates reaches 0.608 at 60.6\,ms per title on that board, 0.019
+above the best hand-designed shape of that budget, and draws about 7.3\,mJ per
+title from the USB port of ours; the one-bit model with ReActNet blocks,
 started from distilled weights, reaches 0.587 at 194\,KB; trained on clicks shown in a random
 language, the distilled byte-CNN reads fourteen languages at 0.589 AUC on average.
 Added to the ranking rule of our reader app, the content score of its 8-bit
 encoder raises the AUC of a time-ordered replay of MIND from 0.600 to 0.625.
-What is still missing: \TODO{H7 energy and a one-bit runtime}
+What is still missing: \TODO{a one-bit runtime on the board}
 --- that is where we take it next.
 
 \bibliographystyle{splncs04}

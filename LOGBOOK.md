@@ -1138,3 +1138,66 @@ conclusion (about 4.7 mJ per title), limitation (USB meter on the whole board); 
 `check_numbers.py` extended (board block) and passes; PDF 12 pages. Course lesson 7: the board sentence.
 Records for the validation and the energy computation in `experiments.jsonl`.
 Next: the same on the STM32H7B3I-DK (validation firmware for the H7, energy), then the one-bit model on the H7.
+
+## 2026-10-16 16:20 — Step 5: the encoders on our own STM32H7B3I-DK (latency sweep, outputs, energy)
+
+Sepehr connected the STM32H7B3I-DK (ST-LINK V3E, COM6) through the JT-UM120 USB meter at 15:24.
+
+Firmware: one build script for both boards now (`firmware/build.py --board nucleo_f401re|stm32h7b3i_dk`), the
+applications in `firmware/common/`, board files per board (`board.h` interface: init, LED, STOP). H7 set-up as
+CubeMX for this board and as ST's benchmark board ("@280/140MHz"): HSE 24 MHz, CPU 280 MHz, AXI 140 MHz, flash 3
+wait states, VOS0, direct SMPS, I- and D-cache on; data, stack and activations in DTCM. H7 HAL v1.11.6 and
+CMSIS-H7 v1.10.7 pinned (`firmware/fetch_deps.py`). The F401 build gives the same images as before (sizes equal).
+
+Finding: on the H7 the time of the same 8-bit file depends on where ST's code generator puts the buffers.
+µNAS 140 (final H7 choice): 40.4 ms with the generator's default (`-O balanced`, activations 20,528 B), 31.6 ms
+with the memory pools of ST's board (`firmware/stm32h7b3i_dk/mempools/`, 23,324 B), 19.2 ms with `-O time`
+(26,908 B, the activation size of ST's cloud run), 28.4 ms on ST's board (Core 4.0.1). Same weights, same kernel
+(`forward_conv2d_deep_sssa8_ch`); its first convolution takes 19.2 ms (default) or 6.9 ms (time): there the
+convolution's output buffer overlaps its input. µNAS 142 on the H7 matches ST's board (12.0 against 12.1 ms),
+so the board set-up itself is equivalent.
+
+Sweep (`scripts/board_sweep.py`, 16:07-16:16, 8.4 min; ten random inputs each, ST's validation firmware,
+`paper/results/board/STM32H7B3I-DK_sweep.json`, table `paper/tab_boards.tex` by `scripts/make_tab_boards.py`):
+
+| encoder | ST's board | ours, default | ours, -O time |
+|---|--:|--:|--:|
+| µNAS 144, recipe (H7) | 18.7 | 44.7 | 18.8 |
+| µNAS 140, final (H7) | 28.4 | 40.4 | 19.2 |
+| hand 64-2-384 | 16.6 | 32.4 | 16.5 |
+| µNAS 134, recipe (F401) | 15.1 | 6.7 | 6.7 |
+| µNAS 142, final (F401) | 12.1 | 12.0 | 9.9 |
+| hand 32-5-384 | 21.2 | 15.9 | 13.3 |
+| hand 64-5-384 | 31.5 | 69.5 | 31.2 |
+
+Outputs equal the ONNX models to within an RMSE of 0.0013 (exactly for four of seven). The time of one file
+varies by up to 2.4 times. 64-2-384 stays the fastest within the H7 budget; the fastest on our board is the
+F401 recipe choice (6.7 ms), not the final F401 choice as on ST's board: the paper's sentence is now limited
+to ST's board.
+
+µNAS 140 with `-O time` and 20 real titles (12 English, 8 in four scripts): 19.218 ms, outputs equal the ONNX
+model's (tool rmse 0; ONNX Runtime 1.27 max diff 6.0e-8).
+
+Energy firmware on the H7 (two bugs fixed first: µNAS 140's network takes 8-bit inputs, which ST's generator
+folds into the graph, so the embedded title is now quantised on the laptop with the input's scale and zero
+point; the output scale was read from the first QLinear of the report, which is the input's for such models).
+Start-up check: output for N55528 equal to the laptop's (0 of 384 differ); one run 5,370,157 cycles (19.18 ms) +
+input copy 0.1 ms. Loop 15:47:23-15:54:27 (22,004 runs, 19.26 ms each), STOP 15:54:28-15:55:02, loop again.
+
+Meter readings (Sepehr, sent about 16:00): loop 5.160 V 0.199 A 1.030 W; STOP 5.166 V 0.163 A 0.847 W; loop
+5.160 V 0.199 A 1.029 W. dP = 0.1825 W (35 mA): **3.5 mJ per title at the USB input** at 19.18 ms.
+
+Regulators: UM2569 (the DK's manual, read 16:05) does not name the board's 3.3 V regulator; MCU current jumper
+JP2 (for an LPM01A or STLINK-V3PWR). UM1724 (Nucleo-64) could not be downloaded today, so the F401's linear
+regulator is an assumption: the paper now gives USB-side energy for both boards (F401 7.3 mJ, H7 3.5 mJ) and
+the F401's 4.7 mJ at 3.3 V only "if a linear regulator feeds it". `scripts/board_energy.py` gives the MCU-side
+figure only when the readings file marks the regulator linear; CPU clock read from the firmware's log.
+
+Serial-port note: a 30-minute COM6 logger had to be stopped before the sweep (it would have blocked
+`stedgeai validate`).
+
+Paper: setup (both boards), F401 paragraph (USB-side first), new H7 paragraph and Table `tab:boards`, "fastest on
+ST's STM32H7B3I-DK", abstract (7.3 and 3.5 mJ, up to 2.4 times), limitation (generator version and setting),
+conclusion (USB-side energy; TODO only the one-bit runtime). `check_numbers.py` extended (H7 table rows, H7
+paragraph, energies, spread) and passes; PDF 13 pages (was 12). Course lesson 7: H7 sentence.
+Next: one-bit encoder on the H7 (LCE + TFLM or CBin-NN).

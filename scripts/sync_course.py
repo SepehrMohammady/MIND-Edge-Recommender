@@ -194,7 +194,17 @@ para += (f" روی یک NUCLEO-F401RE در آزمایشگاه خودمان هم�
          f"طول می‌کشد و خروجی‌هایش برای {len(bv['titles'])} عنوان MIND و xMIND با مدل ONNX یکی است. یک توان‌سنج USB "
          f"میان لپ‌تاپ و برد، اختلاف توان برد را بین اجرای پیوستهٔ انکودر و حالت STOP میکروکنترلر "
          f"{f(be['delta_p_w'], 3)} وات نشان می‌دهد ({f(be['delta_i_ma'], 0)} میلی‌آمپر)، یعنی حدود "
-         f"{f(be['energy_per_title_mcu_mj'], 1)} میلی‌ژول برای هر عنوان در تغذیهٔ 3.3 ولتی میکروکنترلر.</p>")
+         f"{f(be['energy_per_title_usb_mj'], 1)} میلی‌ژول برای هر عنوان از درگاه USB (و حدود "
+         f"{f(be['energy_per_title_mcu_mj'], 1)} میلی‌ژول در تغذیهٔ 3.3 ولتی میکروکنترلر، اگر رگولاتور برد خطی باشد).")
+# our own STM32H7B3I-DK (scripts/board_sweep.py, scripts/board_energy.py)
+sw = {r["model"]: r for r in json.loads((RES / "board/STM32H7B3I-DK_sweep.json").read_text(encoding="utf-8"))["rows"]}
+he = json.loads((RES / "board/energy/STM32H7B3I-DK__unas_h7_c140_Otime_energy.json").read_text(encoding="utf-8"))
+c140 = sw["unas_h7_c140"]
+para += (f" روی STM32H7B3I-DK خودمان زمان همان فایل‌ها به جای بافرها در حافظه بستگی دارد که تولیدکنندهٔ کد انتخاب "
+         f"می‌کند: انتخاب نهایی بودجهٔ H7 با تنظیم پیش‌فرض {f(c140['balanced_ms'], 1)} و با گزینهٔ -O time "
+         f"{f(c140['time_ms'], 1)} میلی‌ثانیه طول می‌کشد (روی برد ST {f(c140['cloud_ms'], 1)})، با همان وزن‌ها. "
+         f"این برد در اجرای پیوسته حدود {f(he['delta_p_w'], 2)} وات بیشتر از حالت STOP می‌کشد، یعنی حدود "
+         f"{f(he['energy_per_title_usb_mj'], 1)} میلی‌ژول برای هر عنوان از درگاه USB.</p>")
 a = s.index("</table>", s.index("<h3>روش ۵: جست‌وجوی µNAS زیر بودجهٔ هر برد</h3>"))
 a = s.index("</div>", a) + len("</div>")
 b = s.index("</p>", a) + len("</p>")

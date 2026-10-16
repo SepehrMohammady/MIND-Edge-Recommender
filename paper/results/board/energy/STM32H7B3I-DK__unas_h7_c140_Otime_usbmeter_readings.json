@@ -1,0 +1,13 @@
+{
+ "board": "STM32H7B3I-DK (STM32H7B3LIH6Q, CPU 280 MHz, AXI 140 MHz, direct SMPS), powered from the laptop's USB port (ST-LINK CN14) through the meter; LCD, SDRAM, Octo-SPI flash and Wi-Fi module not initialised by the firmware",
+ "firmware": "firmware/stm32h7b3i_dk, app energy (common/Src/main_energy.c), model unas_h7_c140_seed42_body_int8qdq.onnx generated with -O time",
+ "meter": "Joy-IT JT-UM120 USB tester, between the laptop's USB port and the board; display resolution 1 mV, 1 mA, 1 mW as read",
+ "regulator": "board 3.3 V regulator not documented in UM2569 (MCU current jumper JP2), so no MCU-side energy is derived",
+ "read_by": "Sepehr Mohammady, from the meter's display; sent in chat on 2026-10-16 at about 16:00",
+ "phase_times": "from paper/results/board/energy/STM32H7B3I-DK__unas_h7_c140_Otime_serial.log (laptop clock): loop 15:47:23-15:54:27, STOP 15:54:28-15:55:02, loop from 15:55:03",
+ "readings": [
+  {"phase": "loop", "v_bus": 5.160, "i_bus": 0.199, "p_bus": 1.030},
+  {"phase": "stop", "v_bus": 5.166, "i_bus": 0.163, "p_bus": 0.847},
+  {"phase": "loop", "v_bus": 5.160, "i_bus": 0.199, "p_bus": 1.029}
+ ]
+}
