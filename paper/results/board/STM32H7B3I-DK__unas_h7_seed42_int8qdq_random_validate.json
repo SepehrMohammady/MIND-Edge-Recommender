@@ -1,0 +1,36 @@
+{
+ "board": "STM32H7B3I-DK",
+ "model": "unas_h7_seed42_body_int8qdq.onnx",
+ "checkpoint": "artifacts\\runs\\unas_full\\mind_h7_distill_ft_en_seed42.pt",
+ "firmware": "ST validation application (ST Edge AI Core 4.0.0, legacy C API), firmware/stm32h7b3i_dk",
+ "optimization": "balanced",
+ "inputs": "random (the tool's)",
+ "titles": [],
+ "device": "stm32 family - 0x480 - STM32H7A/7B @280/140MHz",
+ "device_attrs": "fpu,art_lat=3,core_icache,core_dcache",
+ "runtime": "v12.0.0-2ca1f59f compiled with GCC 13.3.1 (GCC)",
+ "samples": 10,
+ "duration_ms": 44.698,
+ "duration_min_max_std": "44.696/44.704/0.002",
+ "cycles": 12515464,
+ "cycles_per_macc": 6.11,
+ "macc": 2047954,
+ "activations_bytes": 24440,
+ "weights_bytes": 55716,
+ "cross": {
+  "rmse": "0.000162899",
+  "mae": "0.000005878",
+  "l2r": "0.000417294",
+  "snr": "67.591143",
+  "nse": "1.000000",
+  "cos": "1.000000"
+ },
+ "board_vs_onnxruntime": {
+  "onnxruntime": "1.27.0",
+  "max_abs_diff": 0.004514425992965698,
+  "min_cosine": 0.9999991059303284,
+  "samples": 10
+ },
+ "minutes": 0.28,
+ "finished": "2026-10-16 16:08:03"
+}

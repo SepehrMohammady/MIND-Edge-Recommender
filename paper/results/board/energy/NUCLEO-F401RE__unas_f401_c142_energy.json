@@ -23,8 +23,10 @@
  "v_bus": 5.177,
  "delta_p_w": 0.1205,
  "delta_i_ma": 23.28,
- "p_mcu_w": 0.0768,
  "energy_per_title_usb_mj": 7.312,
+ "regulator": "assumed linear (Nucleo-64 boards feed the MCU's 3.3 V from an LDO; the board manual UM1724 could not be downloaded on 2026-10-16 to confirm the part)",
+ "f_cpu_hz": 84000000,
+ "p_mcu_w": 0.0768,
  "energy_per_title_mcu_mj": 4.661,
  "v_mcu": 3.3
 }
