@@ -1,0 +1,149 @@
+{
+ "model": "reactnet_64-5-384_seed42",
+ "checkpoint": "artifacts\\runs\\binary\\reactnet_64-5-384_seed42.pt",
+ "arch": {
+  "byte_embed_dim": 64,
+  "channels": 64,
+  "depth": 5,
+  "out_dim": 384
+ },
+ "torch": {
+  "auc": 0.5748,
+  "mrr": 0.2974,
+  "ndcg@5": 0.2775,
+  "ndcg@10": 0.3411,
+  "n_impressions": 73152
+ },
+ "test_titles": [
+  {
+   "lang": "eng",
+   "nid": "N55528"
+  },
+  {
+   "lang": "eng",
+   "nid": "N18955"
+  },
+  {
+   "lang": "eng",
+   "nid": "N61837"
+  },
+  {
+   "lang": "eng",
+   "nid": "N53526"
+  },
+  {
+   "lang": "eng",
+   "nid": "N38324"
+  },
+  {
+   "lang": "eng",
+   "nid": "N2073"
+  },
+  {
+   "lang": "eng",
+   "nid": "N11429"
+  },
+  {
+   "lang": "eng",
+   "nid": "N49186"
+  },
+  {
+   "lang": "eng",
+   "nid": "N2131"
+  },
+  {
+   "lang": "eng",
+   "nid": "N59295"
+  },
+  {
+   "lang": "eng",
+   "nid": "N24510"
+  },
+  {
+   "lang": "eng",
+   "nid": "N59883"
+  },
+  {
+   "lang": "zho",
+   "nid": "N55528"
+  },
+  {
+   "lang": "zho",
+   "nid": "N18955"
+  },
+  {
+   "lang": "jpn",
+   "nid": "N55528"
+  },
+  {
+   "lang": "jpn",
+   "nid": "N18955"
+  },
+  {
+   "lang": "kat",
+   "nid": "N55528"
+  },
+  {
+   "lang": "kat",
+   "nid": "N18955"
+  },
+  {
+   "lang": "fin",
+   "nid": "N55528"
+  },
+  {
+   "lang": "fin",
+   "nid": "N18955"
+  }
+ ],
+ "dev_titles": 42417,
+ "minutes_export": 0.35,
+ "lce_file": {
+  "auc": 0.5748,
+  "mrr": 0.2974,
+  "ndcg@5": 0.2775,
+  "ndcg@10": 0.3411,
+  "n_impressions": 73152
+ },
+ "lce_vs_torch_dev": {
+  "mean_cosine": 1.0,
+  "min_cosine": 0.99989,
+  "share_below_0.999": 0.0,
+  "titles": 42416
+ },
+ "convert": {
+  "model": "reactnet_64-5-384_seed42",
+  "tensorflow": "2.13.0",
+  "larq": "0.13.3",
+  "lce": "0.16.0",
+  "keras_vs_torch": {
+   "max_abs_diff": 3.8743019104003906e-07,
+   "min_cosine": 0.9999998211860657,
+   "titles": 20
+  },
+  "tflite_bytes": 140480,
+  "lce_vs_keras": {
+   "max_abs_diff": 5.662441253662109e-07,
+   "min_cosine": 0.9999998807907104
+  },
+  "lce_vs_torch": {
+   "max_abs_diff": 7.152557373046875e-07,
+   "min_cosine": 0.9999998211860657
+  },
+  "dev_titles": 42417,
+  "lce_interpreter_ms_per_title_x86": 0.567,
+  "minutes": 0.46,
+  "ops": [
+   "ADD",
+   "CONV_2D",
+   "DIV",
+   "FULLY_CONNECTED",
+   "LceBconv2d",
+   "LceQuantize",
+   "MAXIMUM",
+   "MUL",
+   "PRELU",
+   "SUM"
+  ]
+ }
+}
