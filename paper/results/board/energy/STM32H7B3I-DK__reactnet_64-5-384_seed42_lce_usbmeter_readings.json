@@ -1,0 +1,13 @@
+{
+ "board": "STM32H7B3I-DK (STM32H7B3LIH6Q, CPU 280 MHz, AXI 140 MHz, direct SMPS), powered from the laptop's USB port (ST-LINK CN14) through the meter; LCD, SDRAM, Octo-SPI flash and Wi-Fi module not initialised by the firmware",
+ "firmware": "firmware/stm32h7b3i_dk, app bnn (common/Src/main_bnn.cc), one-bit encoder reactnet_64-5-384_seed42_lce.tflite with TensorFlow Lite Micro and Larq Compute Engine reference kernels; the loop runs the byte-table lookup and Invoke() on the first test title",
+ "meter": "Joy-IT JT-UM120 USB tester, between the laptop's USB port and the board; display resolution 1 mV, 1 mA, 1 mW as read",
+ "regulator": "board 3.3 V regulator not documented in UM2569 (MCU current jumper JP2), so no MCU-side energy is derived",
+ "read_by": "the experimenter, from the meter's display, 2026-10-19 at about 14:20",
+ "phase_times": "not logged (no serial listener during the readings); the loop phase ran from the end of the start-up report (12:21) until the first button press",
+ "readings": [
+  {"phase": "loop", "v_bus": 5.158, "i_bus": 0.201, "p_bus": 1.039},
+  {"phase": "stop", "v_bus": 5.165, "i_bus": 0.162, "p_bus": 0.840},
+  {"phase": "loop", "v_bus": 5.158, "i_bus": 0.201, "p_bus": 1.037}
+ ]
+}

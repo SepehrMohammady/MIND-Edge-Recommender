@@ -14,6 +14,8 @@ the same in both, so
 
 t_network is the network's run time from the DWT cycle counter (startup line of the serial log); a loop run
 also copies the input (2.8 ms), which draws about the same power and is left out of the energy per title.
+For the one-bit firmware (app bnn) the log gives the mean cycles of Invoke() over its timing runs instead, and
+the byte-table lookup as the input preparation; its outputs are checked against LCE's interpreter.
 
     python -m scripts.board_energy paper/results/board/energy/NUCLEO-F401RE__unas_f401_c142_usbmeter_readings.json
 Writes <readings stem without _usbmeter_readings>_energy.json next to it.
@@ -33,10 +35,18 @@ path = Path(sys.argv[1])
 r = json.loads(path.read_text(encoding="utf-8"))
 log = path.with_name(path.name.replace("_usbmeter_readings.json", "_serial.log")).read_text(encoding="utf-8-sig")
 F_CPU = int(re.search(r"(\d+) Hz", log).group(1))                       # CPU clock printed by the firmware
-net_cycles = int(re.search(r"network (\d+) cycles", log).group(1))
-copy_cycles = int(re.search(r"input copy (\d+) cycles", log).group(1))
+bench = re.search(r"bench: (\d+) runs, invoke mean (\d+)", log)
+if bench:                                                                # one-bit firmware (main_bnn.cc)
+    net_cycles = int(bench.group(2))
+    looks = [int(x) for x in re.findall(r"title \d+ lookup (\d+) cycles", log)]
+    copy_cycles = round(sum(looks) / len(looks))
+    diffs = [int(x) * 1e-9 for x in re.findall(r"maxdiff_e9 (\d+)", log)]
+    differing = sum(d > 1e-5 for d in diffs)
+else:
+    net_cycles = int(re.search(r"network (\d+) cycles", log).group(1))
+    copy_cycles = int(re.search(r"input copy (\d+) cycles", log).group(1))
+    differing = int(re.search(r"output check: (\d+) of 384 values differ", log).group(1))
 loop = re.search(r"loop: (\d+) runs in (\d+) ms, mean (\d+) cycles per run", log)
-check = re.search(r"output check: (\d+) of 384 values differ", log)
 
 loop_p = [x["p_bus"] for x in r["readings"] if x["phase"] == "loop"]
 stop_p = [x["p_bus"] for x in r["readings"] if x["phase"] == "stop"]
@@ -48,9 +58,9 @@ out = {
     "board": r["board"], "meter": r["meter"], "readings_file": path.name,
     "network_cycles": net_cycles, "network_ms": round(1000 * t_net, 3),
     "input_copy_cycles": copy_cycles, "input_copy_ms": round(1000 * copy_cycles / F_CPU, 3),
-    "loop_phase": {"runs": int(loop.group(1)), "ms": int(loop.group(2)), "mean_cycles_per_run": int(loop.group(3)),
-                   "mean_ms_per_run": round(1000 * int(loop.group(3)) / F_CPU, 3)},
-    "output_check_values_differing": int(check.group(1)),
+    "loop_phase": ({"runs": int(loop.group(1)), "ms": int(loop.group(2)), "mean_cycles_per_run": int(loop.group(3)),
+                    "mean_ms_per_run": round(1000 * int(loop.group(3)) / F_CPU, 3)} if loop else None),
+    "output_check_values_differing": differing,
     "p_loop_w": loop_p, "p_stop_w": stop_p, "v_bus": round(v_bus, 4),
     "delta_p_w": round(dp, 4), "delta_i_ma": round(1000 * di, 2),
     "energy_per_title_usb_mj": round(1000 * dp * t_net, 3),

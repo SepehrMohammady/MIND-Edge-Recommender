@@ -1,0 +1,24 @@
+{
+ "board": "STM32H7B3I-DK (STM32H7B3LIH6Q, CPU 280 MHz, AXI 140 MHz, direct SMPS), powered from the laptop's USB port (ST-LINK CN14) through the meter; LCD, SDRAM, Octo-SPI flash and Wi-Fi module not initialised by the firmware",
+ "meter": "Joy-IT JT-UM120 USB tester, between the laptop's USB port and the board; display resolution 1 mV, 1 mA, 1 mW as read",
+ "readings_file": "STM32H7B3I-DK__reactnet_64-5-384_seed42_lce_usbmeter_readings.json",
+ "network_cycles": 22311996,
+ "network_ms": 79.686,
+ "input_copy_cycles": 73878,
+ "input_copy_ms": 0.264,
+ "loop_phase": null,
+ "output_check_values_differing": 0,
+ "p_loop_w": [
+  1.039,
+  1.037
+ ],
+ "p_stop_w": [
+  0.84
+ ],
+ "v_bus": 5.1603,
+ "delta_p_w": 0.198,
+ "delta_i_ma": 38.37,
+ "energy_per_title_usb_mj": 15.778,
+ "regulator": "board 3.3 V regulator not documented in UM2569 (MCU current jumper JP2), so no MCU-side energy is derived",
+ "f_cpu_hz": 280000000
+}

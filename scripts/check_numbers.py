@@ -488,6 +488,17 @@ expect(f"such an encoder takes {f(bb['invoke']['mean_ms'], 1)}\\,ms per title, {
        "as at eight bits", "abstract, one-bit")
 expect(f"but runs {f(bb['invoke']['mean_ms'] / t8, 1)} times slower than eight bits on the H7", "conclusion, one-bit")
 
+be1 = load("board/energy/STM32H7B3I-DK__reactnet_64-5-384_seed42_lce_energy.json")
+if be1["output_check_values_differing"] != 0 or abs(be1["network_ms"] - bb["invoke"]["mean_ms"]) > 0.01:
+    missing.append("one-bit energy: outputs or network time differ from the board run")
+expect(f"the board draws {f(be1['p_loop_w'][0], 3)} and {f(be1['p_loop_w'][1], 3)}\\,W from USB against "
+       f"{f(be1['p_stop_w'][0], 3)}\\,W in STOP mode: {f(be1['delta_p_w'], 2)}\\,W, close to the {f(he['delta_p_w'], 2)}\\,W "
+       f"of the 8-bit encoder, so the energy follows the time, {f(be1['energy_per_title_usb_mj'], 1)}\\,mJ per title",
+       "one-bit energy")
+expect(f"as long as at eight bits, and draws {f(be1['energy_per_title_usb_mj'], 1)}\\,mJ", "abstract, one-bit energy")
+if r"\TODO{" in TEX.replace(r"\newcommand{\TODO}", ""):
+    notes.append("paper.tex still has a TODO")
+
 for line in notes:
     print("note:", line)
 if missing:
