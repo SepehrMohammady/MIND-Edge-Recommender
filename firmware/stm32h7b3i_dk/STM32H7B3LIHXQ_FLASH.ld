@@ -115,6 +115,15 @@ SECTIONS
     . = ALIGN(8);
   } >DTCMRAM
 
+  /* large buffers that do not fit the DTCM (the TensorFlow Lite Micro arena of the one-bit firmware) */
+  .axisram (NOLOAD) :
+  {
+    . = ALIGN(64);
+    *(.axisram)
+    *(.axisram*)
+    . = ALIGN(4);
+  } >RAM
+
   /DISCARD/ :
   {
     libc.a ( * )

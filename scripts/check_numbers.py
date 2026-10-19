@@ -458,6 +458,36 @@ expect(f"vary by up to {f(spread, 1)} times with the code generator's buffer lay
 expect(f"ran up to {f(spread, 1)} times faster or slower on our H7 than on ST's", "limitations, spread")
 expect(f"and draws about {f(be['energy_per_title_usb_mj'], 1)}\\,mJ per title from the USB port of ours", "conclusion, energy")
 
+# one-bit encoder on the H7 (scripts/export_binary.py, scripts/lce_convert.py, scripts/board_bnn.py)
+bl = load("binary_lce.json")
+bb = load("board/STM32H7B3I-DK__reactnet_64-5-384_seed42_lce.json")
+conv = bl["convert"]
+if bl["lce_file"]["auc"] != bl["torch"]["auc"]:
+    missing.append("binary_lce.json: the LCE file's AUC differs from PyTorch on the CPU")
+gpu42 = load("binary_reactnet.json")["runs"]["seed42"]["results"]["auc"]
+eight_b = load("int8_export.json")["runs"]["hand_64-5-384/seed42"]["onnx_int8qdq"]["file_bytes"]
+head_b = (bl["arch"]["channels"] * bl["arch"]["out_dim"] + bl["arch"]["out_dim"]) * 4
+t8 = sw["hand_64-5-384"]["time_ms"]
+expect(f"is a {f(conv['tflite_bytes'] / 1000, 0)}\\,KB file whose outputs equal PyTorch's to\nwithin ${conv['lce_vs_torch']['max_abs_diff']:.1e}$".replace("e-07", "\\times10^{-7}").replace("\n", " "),
+       "one-bit file")
+expect(f"it scores {f(bl['lce_file']['auc'], 3)} dev AUC, as PyTorch does on the CPU ({f(gpu42, 3)} when evaluated on the GPU",
+       "one-bit AUC")
+expect(f"reproduces the laptop's outputs for {bb['titles']} titles and takes {f(bb['invoke']['mean_ms'], 1)}\\,ms per title, "
+       f"{f(bb['invoke']['mean_ms'] / t8, 1)} times the {f(t8, 1)}\\,ms of the 8-bit 64-5-384", "one-bit latency")
+if bb["board_vs_lce_interpreter"]["max_abs_diff"] > 1e-5:
+    missing.append("one-bit board outputs differ from LCE's interpreter")
+bconv = [o["cycles"] for o in bb["ops"] if o["op"] == "LceBconv2d"]
+bmacs = 128 * bl["arch"]["channels"] * bl["arch"]["channels"] * 3
+sh = bb["share_by_op_type"]
+expect(f"costs {f(sum(bconv) / len(bconv) / bmacs, 1)} cycles; the binary convolutions take {f(100 * sh['LceBconv2d'], 0)}\\,\\% "
+       f"of the time, the full-precision input projection {f(100 * sh['CONV_2D'], 0)}\\,\\% and the element-wise float "
+       f"operations of the ReActNet blocks {f(100 * sh['ADD'], 0)}\\,\\%", "one-bit profile")
+expect(f"({f(conv['tflite_bytes'] / 1000, 0)} against {f(eight_b / 1000, 0)}\\,KB), since its full-precision output layer "
+       f"alone holds {f(head_b / 1000, 0)}\\,KB", "one-bit file size")
+expect(f"such an encoder takes {f(bb['invoke']['mean_ms'], 1)}\\,ms per title, {f(bb['invoke']['mean_ms'] / t8, 1)} times as long "
+       "as at eight bits", "abstract, one-bit")
+expect(f"but runs {f(bb['invoke']['mean_ms'] / t8, 1)} times slower than eight bits on the H7", "conclusion, one-bit")
+
 for line in notes:
     print("note:", line)
 if missing:

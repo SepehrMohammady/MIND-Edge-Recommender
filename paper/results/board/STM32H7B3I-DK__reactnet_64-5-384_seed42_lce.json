@@ -1,0 +1,237 @@
+{
+ "board": "STM32H7B3I-DK",
+ "model": "reactnet_64-5-384_seed42_lce.tflite",
+ "runtime": "TensorFlow Lite Micro + Larq Compute Engine reference kernels (NAS-BNN's port, zero-padding fix of firmware/fetch_deps.py)",
+ "cpu_hz": 280000000,
+ "model_bytes": 140480,
+ "arena_used_bytes": 139392,
+ "titles": 20,
+ "invoke": {
+  "runs": 200,
+  "mean_cycles": 22311996,
+  "min_cycles": 22054951,
+  "max_cycles": 22445233,
+  "mean_ms": 79.686
+ },
+ "lookup_ms_mean": 0.264,
+ "board_vs_lce_interpreter": {
+  "max_abs_diff": 3.2782554626464844e-07,
+  "min_cosine": 0.9999998211860657
+ },
+ "board_vs_pytorch": {
+  "max_abs_diff": 7.152557373046875e-07,
+  "min_cosine": 0.9999997615814209
+ },
+ "ops": [
+  {
+   "index": 0,
+   "op": "SUM",
+   "cycles": 16357
+  },
+  {
+   "index": 1,
+   "op": "MAXIMUM",
+   "cycles": 1161
+  },
+  {
+   "index": 2,
+   "op": "CONV_2D",
+   "cycles": 4784030
+  },
+  {
+   "index": 3,
+   "op": "ADD",
+   "cycles": 224460
+  },
+  {
+   "index": 4,
+   "op": "LceQuantize",
+   "cycles": 59965
+  },
+  {
+   "index": 5,
+   "op": "LceBconv2d",
+   "cycles": 2363643
+  },
+  {
+   "index": 6,
+   "op": "PRELU",
+   "cycles": 118398
+  },
+  {
+   "index": 7,
+   "op": "ADD",
+   "cycles": 224512
+  },
+  {
+   "index": 8,
+   "op": "ADD",
+   "cycles": 225650
+  },
+  {
+   "index": 9,
+   "op": "ADD",
+   "cycles": 224302
+  },
+  {
+   "index": 10,
+   "op": "LceQuantize",
+   "cycles": 59786
+  },
+  {
+   "index": 11,
+   "op": "LceBconv2d",
+   "cycles": 2363867
+  },
+  {
+   "index": 12,
+   "op": "PRELU",
+   "cycles": 116578
+  },
+  {
+   "index": 13,
+   "op": "ADD",
+   "cycles": 224293
+  },
+  {
+   "index": 14,
+   "op": "ADD",
+   "cycles": 225582
+  },
+  {
+   "index": 15,
+   "op": "ADD",
+   "cycles": 224072
+  },
+  {
+   "index": 16,
+   "op": "LceQuantize",
+   "cycles": 59689
+  },
+  {
+   "index": 17,
+   "op": "LceBconv2d",
+   "cycles": 2363426
+  },
+  {
+   "index": 18,
+   "op": "PRELU",
+   "cycles": 118038
+  },
+  {
+   "index": 19,
+   "op": "ADD",
+   "cycles": 224456
+  },
+  {
+   "index": 20,
+   "op": "ADD",
+   "cycles": 225515
+  },
+  {
+   "index": 21,
+   "op": "ADD",
+   "cycles": 224727
+  },
+  {
+   "index": 22,
+   "op": "LceQuantize",
+   "cycles": 59707
+  },
+  {
+   "index": 23,
+   "op": "LceBconv2d",
+   "cycles": 2363882
+  },
+  {
+   "index": 24,
+   "op": "PRELU",
+   "cycles": 116913
+  },
+  {
+   "index": 25,
+   "op": "ADD",
+   "cycles": 224508
+  },
+  {
+   "index": 26,
+   "op": "ADD",
+   "cycles": 225480
+  },
+  {
+   "index": 27,
+   "op": "ADD",
+   "cycles": 224335
+  },
+  {
+   "index": 28,
+   "op": "LceQuantize",
+   "cycles": 59801
+  },
+  {
+   "index": 29,
+   "op": "LceBconv2d",
+   "cycles": 2363151
+  },
+  {
+   "index": 30,
+   "op": "PRELU",
+   "cycles": 110059
+  },
+  {
+   "index": 31,
+   "op": "ADD",
+   "cycles": 224307
+  },
+  {
+   "index": 32,
+   "op": "ADD",
+   "cycles": 225607
+  },
+  {
+   "index": 33,
+   "op": "MUL",
+   "cycles": 320962
+  },
+  {
+   "index": 34,
+   "op": "SUM",
+   "cycles": 907305
+  },
+  {
+   "index": 35,
+   "op": "DIV",
+   "cycles": 4450
+  },
+  {
+   "index": 36,
+   "op": "FULLY_CONNECTED",
+   "cycles": 198560
+  }
+ ],
+ "cycles_by_op_type": {
+  "SUM": 923662,
+  "MAXIMUM": 1161,
+  "CONV_2D": 4784030,
+  "ADD": 3371806,
+  "LceQuantize": 298948,
+  "LceBconv2d": 11817969,
+  "PRELU": 579986,
+  "MUL": 320962,
+  "DIV": 4450,
+  "FULLY_CONNECTED": 198560
+ },
+ "share_by_op_type": {
+  "SUM": 0.041,
+  "MAXIMUM": 0.0,
+  "CONV_2D": 0.214,
+  "ADD": 0.151,
+  "LceQuantize": 0.013,
+  "LceBconv2d": 0.53,
+  "PRELU": 0.026,
+  "MUL": 0.014,
+  "DIV": 0.0,
+  "FULLY_CONNECTED": 0.009
+ },
+ "finished": "2026-10-19 12:23:02"
+}
