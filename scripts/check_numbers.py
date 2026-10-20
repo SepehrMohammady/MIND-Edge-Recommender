@@ -100,7 +100,7 @@ expect(f"size 1.2 to\n{f(max(s_ratio), 0)} times".replace("\n", " ").replace("1.
 d_auc = max(abs(cell[(a, "int8")]["auc"] - cell[(a, "fp32")]["auc"]) for a in ARM)
 expect(f"changes AUC by at most {f(d_auc, 3)}", "FP32 to INT8 AUC change")
 drop = [cell[(a, "fp32")]["auc"] - cell[(a, "binary")]["auc"] for a in ARM]
-expect(f"it loses {f(min(drop), 3)} to {f(max(drop), 3)} AUC", "one-bit loss against FP32")
+expect(f"One-bit weights lose {f(min(drop), 3)} to {f(max(drop), 3)} AUC", "one-bit loss against FP32")
 expect(f"is {f(mi8['ram_kb'], 0)}\\,KB for the constrained model and {f(ni8['ram_kb'], 0)}\\,KB", "RAM estimate")
 expect(f"{f(mi8['auc'], 3)}, {f(mi8['size_kb'], 0)}\\,KB, {f(mi8['energy_uj'], 1)}\\uJ", "Fig. 2 sentence")
 expect(f"({f(ni8['auc'], 3)}, {f(ni8['size_kb'], 0)}\\,KB)", "Fig. 2 sentence, unconstrained")
@@ -456,7 +456,7 @@ expect(f"draw about {f(be['energy_per_title_usb_mj'], 1)}\\,mJ (F401) and {f(he[
        f"per title from the USB port", "abstract, board energy")
 expect(f"vary by up to {f(spread, 1)} times with the code generator's buffer layout", "abstract, spread")
 expect(f"ran up to {f(spread, 1)} times faster or slower on our H7 than on ST's", "limitations, spread")
-expect(f"and draws about {f(be['energy_per_title_usb_mj'], 1)}\\,mJ per title from the USB port of ours", "conclusion, energy")
+expect(f"and draws about {f(be['energy_per_title_usb_mj'], 1)}\\,mJ per title from the USB port of our board", "conclusion, energy")
 
 # one-bit encoder on the H7 (scripts/export_binary.py, scripts/lce_convert.py, scripts/board_bnn.py)
 bl = load("binary_lce.json")
@@ -493,7 +493,7 @@ if be1["output_check_values_differing"] != 0 or abs(be1["network_ms"] - bb["invo
     missing.append("one-bit energy: outputs or network time differ from the board run")
 expect(f"the board draws {f(be1['p_loop_w'][0], 3)} and {f(be1['p_loop_w'][1], 3)}\\,W from USB against "
        f"{f(be1['p_stop_w'][0], 3)}\\,W in STOP mode: {f(be1['delta_p_w'], 2)}\\,W, close to the {f(he['delta_p_w'], 2)}\\,W "
-       f"of the 8-bit encoder, so the energy follows the time, {f(be1['energy_per_title_usb_mj'], 1)}\\,mJ per title",
+       f"of the 8-bit encoder; over {f(be1['network_ms'], 1)}\\,ms that is {f(be1['energy_per_title_usb_mj'], 1)}\\,mJ per title",
        "one-bit energy")
 expect(f"as long as at eight bits, and draws {f(be1['energy_per_title_usb_mj'], 1)}\\,mJ", "abstract, one-bit energy")
 if r"\TODO{" in TEX.replace(r"\newcommand{\TODO}", ""):
