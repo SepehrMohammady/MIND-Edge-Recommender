@@ -1,42 +1,42 @@
 {
- "source": "paper\\results\\phone\\edge_bench\\battery_2026-10-09T14-07-05-382Z.json",
+ "source": "paper\\results\\phone\\edge_bench\\battery_2026-10-21T13-18-31-033Z.json",
  "file": "int8",
  "threads": 1,
  "phases": {
   "idle": {
-   "seconds": 900.1,
+   "seconds": 900.0,
    "titles": 0,
-   "power_w": 1.1509,
-   "power_sd_w": 0.0544,
-   "current_ma": 271.7,
-   "voltage_v": 4.2355,
+   "power_w": 1.2416,
+   "power_sd_w": 0.0721,
+   "current_ma": 293.8,
+   "voltage_v": 4.2265,
    "capacity_pct_drop": 3,
    "charge_counter_drop_mah": 29.46,
    "temperature_c": [
-    35.5,
-    33.6
+    30.7,
+    31.4
    ]
   },
   "load": {
    "seconds": 900.0,
-   "titles": 1625209,
-   "power_w": 2.8597,
-   "power_sd_w": 0.1897,
-   "current_ma": 695.4,
-   "voltage_v": 4.1123,
-   "capacity_pct_drop": 6,
+   "titles": 1561853,
+   "power_w": 3.0357,
+   "power_sd_w": 0.1224,
+   "current_ma": 742.3,
+   "voltage_v": 4.0897,
+   "capacity_pct_drop": 7,
    "charge_counter_drop_mah": 206.22,
    "temperature_c": [
-    33.6,
-    37.7
+    31.4,
+    36.7
    ]
   }
  },
- "titles_per_second": 1805.8,
- "ms_per_title": 0.5538,
- "extra_power_w": 1.7088,
- "energy_per_title_mj": 0.9463,
- "check_capacity_pct_mj": 0.8254,
- "check_charge_counter_mj": 1.6343,
- "capacity_from_counter_mah": 2976.0
+ "titles_per_second": 1735.4,
+ "ms_per_title": 0.5762,
+ "extra_power_w": 1.7941,
+ "energy_per_title_mj": 1.0338,
+ "check_capacity_pct_mj": 1.1294,
+ "check_charge_counter_mj": 1.6941,
+ "capacity_from_counter_mah": 2946.0
 }

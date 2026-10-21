@@ -272,10 +272,10 @@ E = res / "board" / "energy"
 f4 = json.loads((E / "NUCLEO-F401RE__unas_f401_c142_energy.json").read_text(encoding="utf-8"))
 h7 = json.loads((E / "STM32H7B3I-DK__unas_h7_c140_Otime_energy.json").read_text(encoding="utf-8"))
 bnn = json.loads((E / "STM32H7B3I-DK__reactnet_64-5-384_seed42_lce_energy.json").read_text(encoding="utf-8"))
-DEPLOY = [(f"phone, 8-bit 64-5-384, {phone_ms:.2f} ms (battery)", phone["energy_per_title_mj"]),
-          (f"H7, 8-bit $\\mu$NAS 140, {h7['network_ms']:.1f} ms (USB)", h7["energy_per_title_usb_mj"]),
-          (f"F401, 8-bit $\\mu$NAS 142, {f4['network_ms']:.1f} ms (USB)", f4["energy_per_title_usb_mj"]),
-          (f"H7, 1-bit 64-5-384, {bnn['network_ms']:.1f} ms (USB)", bnn["energy_per_title_usb_mj"])]
+DEPLOY = [(f"phone, 8-bit 64-5-384, {phone_ms:.2f} ms", phone["energy_per_title_mj"]),
+          (f"H7, 8-bit $\\mu$NAS 140, {h7['network_ms']:.1f} ms", h7["energy_per_title_usb_mj"]),
+          (f"F401, 8-bit $\\mu$NAS 142, {f4['network_ms']:.1f} ms", f4["energy_per_title_usb_mj"]),
+          (f"H7, 1-bit 64-5-384, {bnn['network_ms']:.1f} ms", bnn["energy_per_title_usb_mj"])]
 fig, (a, b) = plt.subplots(1, 2, figsize=(TW, 2.25), gridspec_kw={"width_ratios": [1.1, 1]})
 ys = list(range(len(ROWS)))[::-1]
 for y, (model, _) in zip(ys, ROWS):
@@ -300,7 +300,7 @@ yb = [3, 2, 1, 0]
 b.barh(yb, [e for _, e in DEPLOY], height=0.38, color=C1, zorder=2)
 for y, (label, e) in zip(yb, DEPLOY):
     b.text(0.25, y + 0.27, label, va="bottom", ha="left", fontsize=6, color=MUTED)
-    b.text(e + 0.3, y, f"{e:.2f}" if e < 1 else f"{e:.1f}", va="center", ha="left", fontsize=6.5, color=INK)
+    b.text(e + 0.3, y, f"{e:.2f}" if e < 2 else f"{e:.1f}", va="center", ha="left", fontsize=6.5, color=INK)
 b.set_yticks([])
 b.set_ylim(-0.4, 3.75)
 b.set_xlim(0, 18.5)

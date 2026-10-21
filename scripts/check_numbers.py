@@ -33,6 +33,12 @@ def f(x: float, nd: int) -> str:
     return str(Decimal(str(x)).quantize(Decimal(1).scaleb(-nd), rounding=ROUND_HALF_UP))
 
 
+def sci(x: float) -> str:
+    """4.9e-07 -> 4.9\\times10^{-7}, as the paper writes small differences."""
+    m, e = f"{x:.1e}".split("e")
+    return f"{m}\\times10^{{{int(e)}}}"
+
+
 def expect(text: str, why: str) -> None:
     if text not in TEX:
         missing.append(f"{why}: '{text}' not in paper.tex")
@@ -348,7 +354,8 @@ if (RES / "unas_summary.json").exists() and (RES / "int8_export.json").exists():
            f"encoder idle and the screen on, about {f(pe['energy_per_title_mj'], 2)}\\,mJ per title", "phone energy")
     expect(f"which give {f(pe['check_capacity_pct_mj'], 2)} and {f(pe['check_charge_counter_mj'], 1)}\\,mJ",
            "phone energy, coarse checks")
-    expect(f"(largest difference ${chk['int8']['maxAbsDiff']:.1e}".replace("e-07", "\\times10^{-7}"), "phone check")
+    expect(f"(largest difference ${sci(chk['int8']['maxAbsDiff'])}$", "phone check")
+    expect(f"over {chk['int8']['titles']} test titles", "phone check, titles of the test file")
     expect(f"takes {f(lat[('int8', 1)]['medianMs'], 2)}\\,ms per title on one core (median over "
            f"{lat[('int8', 1)]['repeats']:,} calls", "phone, 8-bit, one thread")
     expect(f"{f(lat[('int8', 2)]['medianMs'], 2)}\\,ms with two threads); the full-precision file takes "
@@ -402,7 +409,7 @@ early = {l: rc["dev_early"]["app_plus_content"][str(l)]["auc"] + rs["dev_early"]
          for l in rp["lambdas"]}
 expect(f"The app ranks with this sum and a weight of {max(early, key=early.get):g}", "app default weight")
 chk_rank = json.loads(sorted((RES / "phone" / "edge_bench").glob("check_*.json"))[-1].read_text(encoding="utf-8"))
-expect(f"equal the laptop's to within ${chk_rank['int8']['contentScoresMaxAbsDiff']:.1e}$".replace("e-07", "\\times10^{-7}"),
+expect(f"equal the laptop's to within ${sci(chk_rank['int8']['contentScoresMaxAbsDiff'])}$",
        "phone content scores")
 expect(f"time-ordered replay of MIND from {f(lc['app']['auc'], 3)} to {f(rc['dev_late_with_chosen_lambda']['auc'], 3)}",
        "conclusion, replay")
