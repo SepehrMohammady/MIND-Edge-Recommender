@@ -1,4 +1,4 @@
-"""Model files for the FeedWell-Edge app (schedule step 6), from one trained recommender.
+"""Model files for the FeedWell-Edge app, from one trained recommender.
 
 Encoder: 64-5-384, distilled start, clicks shown in a random one of 15 languages (scripts/run_p1.py,
 stage student, distill_ft_mixed, seed 42): the best multilingual encoder of Table 2 at this size.
@@ -10,9 +10,11 @@ Written to artifacts/app/edge_encoder_v1/:
   user_encoder.onnx        additive attention over the history: vectors (1, H, 384) and mask (1, H) in,
                            user vector (1, 384) out (score = dot product with a news vector)
   user_encoder.json        the same weights as plain arrays, for a JavaScript implementation
-  test_vectors.json        titles in several scripts with their byte ids, the news vectors of PyTorch and of
-                           both ONNX files, and one history with candidates and their scores, to check the
-                           phone's results against
+  test_vectors.json        MIND and xMIND dev titles (those of scripts/board_validate.py), the last 3 clicks and
+                           the first 4 candidates of one dev impression, and an empty title, with their byte ids,
+                           the news vectors of PyTorch and of both ONNX files and the candidates' scores, to
+                           check the phone's results against. It holds dataset text, so it is copied to the
+                           phone by hand and is not bundled with the app (listed apart in the manifest).
   manifest.json            sources, SHA-256 and sizes of the files, and the accuracy of the 8-bit file
 
 Accuracy of the 8-bit file: dev AUC in English and in each of the 14 xMIND languages (news vectors from
@@ -32,7 +34,7 @@ import onnx
 import onnxruntime as ort
 import torch
 
-from src import data_xmind, recommender
+from src import data_mind, data_xmind, recommender
 from src.config import load_config
 from src.student import ByteCNNEncoder, text_to_bytes
 
@@ -102,14 +104,27 @@ def ort_vec(kind, ids):
     return np.stack(out)
 
 
-# ---- test vectors: titles in several scripts (Latin, Cyrillic-free Romanian, Chinese, Japanese, Georgian, Persian,
-# Italian), a history and candidates
-titles = [""]
+# ---- test vectors: the titles of scripts/board_validate.py (the first 12 English titles of MINDsmall dev and the
+# xMIND translations of the first 2 in Chinese, Japanese, Georgian and Finnish), the last 3 clicks and the first 4
+# candidates of the first dev impression that has both, and an empty title (padding only)
+dev = data_mind.read_news(cfg, "dev")
+nids = [n for n, v in dev.items() if v["title"].strip()][:12]
+titles = [dev[n]["title"] for n in nids]
+for lang in ("zho", "jpn", "kat", "fin"):
+    tr = data_xmind.read_xmind_text(cfg, lang, "dev")
+    titles += [tr[n]["title"] for n in nids[:2] if n in tr]
+imp = next(b for b in data_mind.read_behaviors(cfg, "dev")
+           if len(b["history"]) >= 3 and len(b["cands"]) >= 4
+           and all(n in dev and dev[n]["title"].strip() for n in b["history"][-3:] + b["cands"][:4]))
+hist_idx = list(range(len(titles), len(titles) + 3))
+titles += [dev[n]["title"] for n in imp["history"][-3:]]
+cand_idx = list(range(len(titles), len(titles) + 4))
+titles += [dev[n]["title"] for n in imp["cands"][:4]]
+titles.append("")
 ids = np.array([text_to_bytes(t, L) for t in titles], dtype=np.int64)
 with torch.no_grad():
     v_torch = enc(torch.from_numpy(ids)).numpy() * (ids != 0).any(-1, keepdims=True)
 v_fp32, v_int8 = ort_vec("fp32", ids), ort_vec("int8", ids)
-hist_idx, cand_idx = [0, 2, 10], [1, 3, 8, 9]
 with torch.no_grad():
     scores = {}
     for name, V in (("torch", v_torch), ("onnx_fp32", v_fp32), ("onnx_int8", v_int8)):
@@ -117,7 +132,7 @@ with torch.no_grad():
         u = rec.user_vector(Vt[hist_idx][None], torch.ones(1, len(hist_idx)))[0]
         scores[name] = (Vt[cand_idx] @ u).numpy().round(6).tolist()
 (OUT / "test_vectors.json").write_text(json.dumps({
-    "titles": titles, "byte_ids": ids.tolist(),
+    "source": "MINDsmall dev and xMIND dev (scripts/export_app_assets.py)", "titles": titles, "byte_ids": ids.tolist(),
     "news_vectors": {"torch": v_torch.round(6).tolist(), "onnx_fp32": v_fp32.round(6).tolist(),
                      "onnx_int8": v_int8.round(6).tolist()},
     "history": hist_idx, "candidates": cand_idx, "candidate_scores": scores}, ensure_ascii=False), encoding="utf-8")
@@ -145,10 +160,15 @@ result = {"checkpoint": str(CKPT.relative_to(ROOT)), "encoder": "64-5-384, disti
           "agreement_on_test_titles": agree, "minutes": round((time.time() - t0) / 60, 2)}
 files = {}
 for p in sorted(OUT.iterdir()):
-    if p.name != "manifest.json":
+    if p.name not in ("manifest.json", "test_vectors.json"):
         files[p.name] = {"bytes": p.stat().st_size, "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}
-(OUT / "manifest.json").write_text(json.dumps({**result, "files": files, "byte_ids": "UTF-8 bytes, first 128, id = byte + 1, 0 = padding",
+tv = OUT / "test_vectors.json"
+test_file = {"name": tv.name, "bytes": tv.stat().st_size, "sha256": hashlib.sha256(tv.read_bytes()).hexdigest(),
+             "note": "copied to the phone by hand, not bundled with the app"}
+(OUT / "manifest.json").write_text(json.dumps({**result, "files": files, "test_file": test_file,
+                                               "byte_ids": "UTF-8 bytes, first 128, id = byte + 1, 0 = padding",
                                                "versions": {"torch": torch.__version__, "onnxruntime": ort.__version__}},
                                               indent=1, ensure_ascii=False), encoding="utf-8")
-(ROOT / "paper/results/app_encoder.json").write_text(json.dumps({**result, "files": files}, indent=1), encoding="utf-8")
+(ROOT / "paper/results/app_encoder.json").write_text(json.dumps({**result, "files": files, "test_file": test_file},
+                                                             indent=1), encoding="utf-8")
 print(json.dumps({k: v for k, v in result.items() if k != "int8_file_auc"}, indent=1))

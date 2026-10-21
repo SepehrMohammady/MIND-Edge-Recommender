@@ -24,10 +24,10 @@
   "mean_xlang": 0.5955
  },
  "agreement_on_test_titles": {
-  "torch_vs_fp32_max_abs": 1.257285475730896e-06,
-  "fp32_vs_int8_cos_min": 0.9740030169487
+  "torch_vs_fp32_max_abs": 7.82310962677002e-07,
+  "fp32_vs_int8_cos_min": 0.977332353591919
  },
- "minutes": 6.13,
+ "minutes": 4.96,
  "files": {
   "byte_table.f32": {
    "bytes": 65792,
@@ -41,10 +41,6 @@
    "bytes": 90911,
    "sha256": "148b1a1dbf1226c6fc0d0e6145126462ea9696ea866aff4819754e483b106257"
   },
-  "test_vectors.json": {
-   "bytes": 284018,
-   "sha256": "6a83623ad8340062e1490359f047de0de67d46f64e2819f949fefc2a2e41cbf4"
-  },
   "user_encoder.json": {
    "bytes": 1093085,
    "sha256": "17a3aa85fe699d81eff5c8b3fe47881b80e29bdf05d025176c4bf831ba490663"
@@ -53,5 +49,11 @@
    "bytes": 199138,
    "sha256": "920a547420259d9a1d2e846aaa566221e2b25ee0bf22315e293af54fe991f639"
   }
+ },
+ "test_file": {
+  "name": "test_vectors.json",
+  "bytes": 689367,
+  "sha256": "2773a87a3405c8d5dcaa045a7648dbc5fadfec75ffb740bc2b98b28000057d3c",
+  "note": "copied to the phone by hand, not bundled with the app"
  }
 }
