@@ -1,4 +1,4 @@
-# Copied from another project of the lab (unas/cnn1d_gap.py, same author) on 2026-10-07;
+# Copied from the lab's µNAS configurations (same author) on 2026-10-07;
 # kept here so the MIND search is reproducible from this repository alone.
 """1D search space of the ELIOS uNAS fork, extended with a global-average-pooling head.
 

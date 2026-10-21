@@ -6,8 +6,8 @@
 # Error bound: validation error of the hand-designed 64-5-384 under the third recipe, mean of
 # seeds 42, 1, 2 (paper/results/unas/reference.json): 1 - 0.3431 = 0.657.
 # Start detached from Windows so it survives the terminal:
-#   Start-Process -WindowStyle Hidden wsl.exe -ArgumentList '-e','bash','unas/run_queue.sh'
-R=.
+#   Start-Process -WindowStyle Hidden wsl.exe -ArgumentList '-e','bash','<repo in WSL>/unas/run_queue.sh'
+R=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 LOG=$R/logs/nas/queue_$(date +%m%d%H%M).log
 export MIND_ERROR_BOUND=${MIND_ERROR_BOUND:-0.657}
 mkdir -p "$R/logs/nas"
@@ -16,7 +16,7 @@ for c in mind_h7 mind_f401; do
   echo "$(date '+%F %T') $c search start" >> "$LOG"
   bash "$R/unas/run_mind_search.sh" search "$c" >> "$LOG" 2>&1
   echo "$(date '+%F %T') $c search end" >> "$LOG"
-  (cd ~/uNAS_mind && ~/unas_env/bin/python "$R/unas/harvest_search.py" "$c") >> "$LOG" 2>&1
+  (cd ~/uNAS_mind && "${UNAS_VENV:?set UNAS_VENV}/bin/python" "$R/unas/harvest_search.py" "$c") >> "$LOG" 2>&1
 done
 echo "$(date '+%F %T') grid start" >> "$LOG"
 bash "$R/unas/run_mind_search.sh" grid >> "$LOG" 2>&1

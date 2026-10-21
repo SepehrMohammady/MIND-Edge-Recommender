@@ -2,7 +2,7 @@
 (never from a run folder, so a smoke run cannot leak into a figure).
 
 Figures are drawn at the LNCS text width (122 mm), so their 7-point text prints at that size; each is
-written as PDF (included by the paper) and PNG (for previews and the course).
+written as PDF (included by the paper) and PNG (for previews).
 
 Run: python -m scripts.make_figures
 """

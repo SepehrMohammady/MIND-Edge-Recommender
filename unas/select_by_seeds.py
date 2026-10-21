@@ -12,7 +12,7 @@ ranking is only a shortlist. For each search given:
 Test rows are never used for the choice. Writes paper/results/unas/<name>_selection.json.
 
 Run in WSL inside the MIND fork copy:
-    cd ~/uNAS_mind && ~/unas_env/bin/python unas/select_by_seeds.py mind_h7 [K]
+    cd ~/uNAS_mind && $UNAS_VENV/bin/python <repo>/unas/select_by_seeds.py mind_h7 [K]
 """
 import json
 import os
@@ -30,7 +30,7 @@ from configs.mind_config import training_config  # noqa: E402
 from dataset.mind_dataset import MIND_Embedding_Dataset  # noqa: E402
 from uNAS.model_trainer import ModelTrainer  # noqa: E402
 
-RES = Path("paper/results/unas")
+RES = Path(__file__).resolve().parents[1] / "paper/results/unas"
 SEEDS = (42, 1, 2)
 
 name = sys.argv[1]

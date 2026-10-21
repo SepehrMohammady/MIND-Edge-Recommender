@@ -1,9 +1,9 @@
 #!/bin/bash
 # µNAS search of the MIND byte-level encoder in a MIND-only copy of the ELIOS uNAS fork.
 #
-# The shared fork ~/uNAS belongs to another project of the lab and is never modified: the first
-# run copies it to ~/uNAS_mind (without its artifacts), and only the copy gets the MIND files,
-# the trainer patch and the config registrations. The venv ~/unas_env is used as it is.
+# The fork checkout ($UNAS_FORK, default ~/uNAS) is never modified: the first run copies it to
+# ~/uNAS_mind (without its artifacts), and only the copy gets the MIND files, the trainer patch
+# and the config registrations. The venv $UNAS_VENV (TF 2.21, Keras 3.12) is used as it is.
 #
 # Usage (WSL):
 #   bash unas/run_mind_search.sh setup
@@ -11,10 +11,10 @@
 #   bash unas/run_mind_search.sh search mind_h7      # chunked, resumable
 # Settings through MIND_ROUNDS, MIND_EPOCHS, MIND_POPULATION, MIND_SAMPLE, MIND_PARALLEL,
 # MIND_ERROR_BOUND, MIND_SUFFIX (see unas/mind_config.py). Logs and GPU samples: logs/nas/.
-REPO=.
-FORK_SRC=$HOME/uNAS
+REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+FORK_SRC=${UNAS_FORK:-$HOME/uNAS}
 FORK=$HOME/uNAS_mind
-VENV=$HOME/unas_env
+VENV=${UNAS_VENV:?set UNAS_VENV to the venv of the fork}
 source "$VENV/env.sh"          # expands LD_LIBRARY_PATH, which may be unset: source before set -u
 set -u
 export TF_CPP_MIN_LOG_LEVEL=2 TF_FORCE_GPU_ALLOW_GROWTH=true MIND_UNAS_DATA=$REPO/artifacts/unas/data
@@ -30,7 +30,7 @@ setup() {
   cp "$REPO/unas/mind_config.py" "$FORK/configs/mind_config.py"
   cp "$REPO/unas/cnn1d_gap.py" "$FORK/configs/cnn1d_gap.py"
   cp "$REPO/unas/safe_saver.py" "$FORK/configs/safe_saver.py"
-  # fresh trainer from the shared fork (read only), then the MIND patch
+  # fresh trainer from the fork checkout (read only), then the MIND patch
   cp "$FORK_SRC/uNAS/model_trainer.py" "$FORK/uNAS/model_trainer.py"
   python3 "$REPO/unas/patch_trainer.py" "$FORK/uNAS/model_trainer.py"
   grep -q "from .mind_dataset import MIND_Embedding_Dataset" "$FORK/dataset/__init__.py" \

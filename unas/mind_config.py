@@ -2,7 +2,7 @@
 configs/mind_config.py by unas/run_mind_search.sh).
 
 Search space: the fork's 1D CNN space with the global-average-pooling head and the faithful
-resource graph (configs/cnn1d_gap.py, from another project of the lab). Fitness objectives,
+resource graph (configs/cnn1d_gap.py, from the lab's µNAS configurations). Fitness objectives,
 as in the fork: validation error (1 - mean cosine to the teacher anchor, mixed languages),
 peak activation memory, INT8 weight size and MACs, each normalised by its bound.
 
@@ -48,7 +48,7 @@ BUDGETS = {
 
 
 def training_config(dataset, epochs=None):
-    # keras.callbacks (Keras 3) as in the lab's configs: the fork's 1D models are Keras 3 models.
+    # keras.callbacks (Keras 3) as in the lab's 1D configs: the fork's 1D models are Keras 3 models.
     # No stopping before START_STOPPING epochs: in the first epochs BatchNorm's running statistics
     # lag the weights and the validation cosine dips while training improves (reference runs of
     # 2026-10-07, first recipe), so an early stop would score how fast a model starts.

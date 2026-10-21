@@ -14,7 +14,7 @@ NaN breaks sorting and dominance tests (first harvest of mind_h7, 2026-10-07: on
 moved the best in-budget candidate out of the selection shortlist).
 
 Run in WSL inside the MIND fork copy:
-    cd ~/uNAS_mind && ~/unas_env/bin/python unas/harvest_search.py mind_h7 [mind_f401]
+    cd ~/uNAS_mind && $UNAS_VENV/bin/python <repo>/unas/harvest_search.py mind_h7 [mind_f401]
 """
 import json
 import math
@@ -26,7 +26,7 @@ from pathlib import Path
 sys.path.insert(0, os.getcwd())
 from configs.mind_config import BUDGETS  # noqa: E402
 
-OUT = Path("paper/results/unas")
+OUT = Path(__file__).resolve().parents[1] / "paper/results/unas"
 OUT.mkdir(parents=True, exist_ok=True)
 
 

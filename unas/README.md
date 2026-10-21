@@ -1,13 +1,13 @@
 # µNAS search of the byte-level encoder (lab uNAS fork)
 
-Step 3 of the schedule: search the encoder's network with the ELIOS lab fork of µNAS
+Search of the encoder's network with the ELIOS lab fork of µNAS
 (https://github.com/Elios-Lab/uNAS, TensorFlow), under the budgets of the two boards the
-deployed files were measured on, with the same cost model as the lab searches.
+deployed files were measured on, with the fork's cost model.
 
-The fork has no licence file, so it is not vendored. The shared checkout `~/uNAS` (WSL)
-belongs to another project of the lab and carries its local patches; this project never
-edits it. `run_mind_search.sh` copies it once to `~/uNAS_mind` and installs the files below
-into the copy only. The venv `~/unas_env` (TF 2.21, Keras 3.12, GPU) is used as it is.
+The fork has no licence file, so it is not vendored. `run_mind_search.sh` copies a checkout of
+it (`$UNAS_FORK`, default `~/uNAS`, in WSL) once to `~/uNAS_mind` and installs the files below
+into the copy only; the checkout itself is not edited. The searches ran with TF 2.21 and
+Keras 3.12 on the GPU, in the virtual environment named by `$UNAS_VENV`.
 
 ## What is searched
 
@@ -22,7 +22,7 @@ into the copy only. The venv `~/unas_env` (TF 2.21, Keras 3.12, GPU) is used as 
   "embedding" task, `patch_trainer.py`), plus the fork's three cost objectives from the faithful
   resource graph: peak activation memory, INT8 weight size, MACs.
 - **Space**: the fork's 1D CNN space with a global-average-pooling head (`cnn1d_gap.py`, from the
-  lab project): up to 10 convolution blocks of 1–3 layers (standard, 1×1 or depthwise,
+  lab's µNAS configurations): up to 10 convolution blocks of 1–3 layers (standard, 1×1 or depthwise,
   kernel 3–7, stride 1 or 2, optional pre-pooling, batch norm, ReLU), optional residual branches,
   pooling or GAP, 0–3 hidden dense layers, a 384-unit linear output.
 
@@ -44,7 +44,7 @@ under the search recipe (`eval_reference.py`).
 |---|---|---|
 | `mind_dataset.py` | `dataset/` | serves the exported rows, applies the byte table, adds the mask channel |
 | `mind_config.py` | `configs/` | search configs, budgets, training recipe |
-| `cnn1d_gap.py`, `safe_saver.py` | `configs/` | GAP-head space with faithful cost graph; saver with unique names and JSON sidecars (copied from another project of the lab) |
+| `cnn1d_gap.py`, `safe_saver.py` | `configs/` | GAP-head space with faithful cost graph; saver with unique names and JSON sidecars (from the lab's µNAS configurations) |
 | `patch_trainer.py` | patches `uNAS/model_trainer.py` | cosine loss and error for the embedding task |
 | `eval_reference.py` | run in the copy | June winners and the hand-designed family under the search recipe (`reference.json`, `grid.json`) |
 | `harvest_search.py` | run in the copy | history and Pareto front of a search (`paper/results/unas/`) |
@@ -65,9 +65,10 @@ their accuracy: `scripts/export_int8.py`.
 ## Run
 
 ```bash
+export UNAS_VENV=<venv of the fork>          # and UNAS_FORK if the checkout is not ~/uNAS
 bash unas/run_mind_search.sh reference
 bash unas/run_mind_search.sh search mind_h7
-cd ~/uNAS_mind && ~/unas_env/bin/python unas/harvest_search.py mind_h7
+(cd ~/uNAS_mind && $UNAS_VENV/bin/python "$OLDPWD/unas/harvest_search.py" mind_h7)
 ```
 
 ## Recipe history
@@ -87,5 +88,4 @@ cd ~/uNAS_mind && ~/unas_env/bin/python unas/harvest_search.py mind_h7
    bound is the mean validation error of these three runs, 0.657.
 
 Because one run per candidate still carries some seed noise, the final choice from each search
-is made afterwards by re-training the best candidates with several seeds, as in the
-lab selection step.
+is made afterwards by re-training the best candidates with several seeds.

@@ -1,6 +1,6 @@
 # Board firmware (NUCLEO-F401RE, STM32H7B3I-DK)
 
-Firmware for measuring the 8-bit encoders on physical boards, built on this laptop without STM32CubeMX:
+Firmware for measuring the 8-bit and one-bit encoders on physical boards, built without STM32CubeMX:
 
 | app | what it does | how it is used |
 |---|---|---|
@@ -41,12 +41,12 @@ Clocks as set by STM32CubeMX for each board:
   instruction and data caches on; data, stack and activations in DTCM; USART1 (VCP). MCU current jumper JP2.
 
 When a network takes 8-bit inputs (ST's generator folds the input quantisation into the graph for some
-encoders), the energy firmware's embedded title is quantised on the laptop with the input's scale and zero
+encoders), the energy firmware's embedded title is quantised on the host with the input's scale and zero
 point, as an 8-bit byte table would do on a device.
 
 The one-bit app uses TensorFlow Lite Micro and the Larq Compute Engine ops for it as ported to this board by the
-lab's NAS-BNN project (copied by `fetch_deps.py`, pinned by a hash of the source trees). One fix is applied to the
+lab's NAS-BNN project (copied by `fetch_deps.py` from `NASBNN_DIR`, pinned by a hash of the source trees). One fix is applied to the
 copy: the border path of the binary convolution skipped padded taps; it now counts them as LCE pads (zero padding
 in our model), which makes the board's outputs equal those of LCE's interpreter on the laptop. The tensor arena
 sits in the AXI SRAM (`.axisram` section of the H7 linker script). Builds run three compiler jobs at below-normal
-priority (`FW_JOBS`), since other work shares the laptop.
+priority by default (`FW_JOBS`).

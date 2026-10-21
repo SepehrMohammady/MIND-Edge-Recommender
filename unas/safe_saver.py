@@ -1,4 +1,4 @@
-# Copied from another project of the lab (unas/safe_saver.py, same author) on 2026-10-07;
+# Copied from the lab's µNAS configurations (same author) on 2026-10-07;
 # kept here so the MIND search is reproducible from this repository alone.
 """Model saver for the ELIOS uNAS fork that survives chunked runs and parallel workers.
 

@@ -19,7 +19,7 @@ import tensorflow as tf
 
 from uNAS.dataset import Dataset
 
-DATA_ROOT = Path(os.environ.get("MIND_UNAS_DATA", "artifacts/unas/data"))
+DATA_ROOT = Path(os.environ.get("MIND_UNAS_DATA", "artifacts/unas/data"))   # set by unas/run_mind_search.sh
 
 
 class MIND_Embedding_Dataset(Dataset):

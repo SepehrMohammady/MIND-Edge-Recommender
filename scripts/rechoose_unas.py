@@ -2,8 +2,8 @@
 
 The first choice (unas/select_by_seeds.py) re-trained the eight best in-budget candidates of each
 search with three seeds under the search recipe (96,000 rows, at most 15 epochs) and kept the best
-mean validation cosine. After full training that recipe proved a weak predictor (LOGBOOK, 2026-10-08:
-the H7 choice was 0.012 below 64-5-384 under the recipe and 0.067 below after full distillation).
+mean validation cosine. After full training that recipe proved a weak predictor (the H7 choice was
+0.012 below 64-5-384 under the recipe and 0.067 below after full distillation).
 Here the same eight candidates per search go through the full distillation of scripts/run_unas_full.py
 (15 epochs on all 769k training rows, Matryoshka cosine loss) and are scored on the validation rows the
 search used (artifacts/unas/data/mind_unas_val.npz: 4,000 rows in 15 languages from one half of the dev

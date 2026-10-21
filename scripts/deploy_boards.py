@@ -17,8 +17,8 @@ check (relative L2 error 0.43 at full precision), so the lookup was moved out.
 2. 256-4-384 and 96-2-384 with random weights: the same two files each, for
    footprint and latency only (both are independent of the weight values).
 
-Runs under an interpreter whose torch loads (another virtual environment):
-    PYTHONPATH=. python -m scripts.deploy_boards
+Run from the repository root with torch, onnx and onnxruntime installed:
+    python -m scripts.deploy_boards
 Writes artifacts/stedgeai/models/<arch>_body_{fp32,int8qdq}.onnx and paper/results/deploy_int8.json.
 """
 import json

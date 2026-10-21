@@ -1,6 +1,7 @@
 """ST Edge AI Developer Cloud: analyze and benchmark the exported encoders on real
-boards, through the Python client vendored in ST's model-zoo services (the same
-procedure the lab uses for the lab models).
+boards, through the Python client vendored in ST's model-zoo services
+(https://github.com/STMicroelectronics/stm32ai-modelzoo-services; STM32AI_MODELZOO_SERVICES
+points to a checkout).
 
 Credentials are read from the environment (STEDGEAI_USER, STEDGEAI_PASS) and are
 never written to disk by this script; the token file the client caches in the
@@ -19,7 +20,8 @@ import pathlib
 import sys
 import time
 
-CLIENT = r"stm32ai-modelzoo-services"
+CLIENT = os.environ.get("STM32AI_MODELZOO_SERVICES", str(pathlib.Path(__file__).resolve().parents[2]
+                                                         / "stm32ai-modelzoo-services"))
 sys.path.insert(0, CLIENT)
 from common.stm32ai_dc import CliParameters, CloudBackend, Stm32Ai  # noqa: E402
 

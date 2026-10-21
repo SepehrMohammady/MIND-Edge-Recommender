@@ -19,7 +19,7 @@ from pathlib import Path
 from src.app_learner import AppLearner
 
 ROOT = Path(__file__).resolve().parents[1]
-JS = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("FeedWell-Edge/src/edgeml/localLearningService.js")
+JS = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT.parent / "FeedWell-Edge/src/edgeml/localLearningService.js"
 NOW = 1_760_000_000_000                                      # fixed clock (ms) for both sides
 
 rng = random.Random(7)

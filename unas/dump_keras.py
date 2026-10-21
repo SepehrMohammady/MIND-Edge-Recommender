@@ -9,7 +9,7 @@ layer in model order, the byte ids, the Keras input and output. scripts/check_un
 the same weights into src/unas_encoder.py and compares the outputs.
 
 CPU only (the GPU belongs to the training job). Run in WSL inside the MIND fork copy:
-    cd ~/uNAS_mind && CUDA_VISIBLE_DEVICES= ~/unas_env/bin/python unas/dump_keras.py mind_h7 mind_f401
+    cd ~/uNAS_mind && CUDA_VISIBLE_DEVICES= $UNAS_VENV/bin/python <repo>/unas/dump_keras.py mind_h7 mind_f401
 """
 import json
 import os
@@ -21,7 +21,7 @@ import numpy as np
 sys.path.insert(0, os.getcwd())
 from configs.cnn1d_gap import FaithfulGapCnn1DArchitecture  # noqa: E402
 
-REPO = Path(".")
+REPO = Path(__file__).resolve().parents[1]
 DATA = REPO / "artifacts/unas/data"
 OUT = REPO / "artifacts/unas/port"
 OUT.mkdir(parents=True, exist_ok=True)

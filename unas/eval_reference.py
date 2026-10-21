@@ -30,7 +30,7 @@ from dataset.mind_dataset import MIND_Embedding_Dataset  # noqa: E402
 from uNAS.model_trainer import ModelTrainer  # noqa: E402
 from uNAS.resource_models.models import inference_latency, model_size, peak_memory_usage  # noqa: E402
 
-OUT = Path("paper/results/unas/reference.json")
+OUT = Path(__file__).resolve().parents[1] / "paper/results/unas/reference.json"
 OUT.parent.mkdir(parents=True, exist_ok=True)
 
 

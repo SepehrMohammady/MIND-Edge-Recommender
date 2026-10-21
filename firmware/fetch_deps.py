@@ -12,6 +12,7 @@ Pinned versions (fetched 2026-10-15):
 ST Edge AI Core 4.0 (network code generator, runtime library and validation application) and the GNU
 toolchain of STM32CubeIDE are local installs; see firmware/README.md.
 """
+import os
 import subprocess
 from pathlib import Path
 
@@ -43,14 +44,15 @@ for name, url, tag, commit, sparse in REPOS:
     print(f"{name:22s} {tag:8s} {head}  {'ok' if head == commit else 'DIFFERENT FROM THE PINNED COMMIT'}")
 
 # TensorFlow Lite Micro and the Larq Compute Engine ops for it ("lce_micro"), as ported to the STM32H7B3I-DK by
-# the lab's NAS-BNN project (local copy; Apache-2.0). The source tree is pinned by a hash of its files. One fix
+# the lab's NAS-BNN project (Apache-2.0; NASBNN_DIR points to its STM32/NAS_BNN_Benchmark folder). The source
+# tree is pinned by a hash of its files. One fix
 # is applied to the copy: the border path of the binary convolution skipped padded taps, which is neither zero
 # nor one padding; it now counts them as LCE pads (zero padding: C_in/2 mismatches per padded tap, so that
 # K - 2 * accum is the dot product over the valid taps; one padding: the filter's own mismatches against +1).
 import hashlib
 import shutil
 
-NASBNN = Path(r"NAS-BNN\STM32\NAS_BNN_Benchmark")
+NASBNN = Path(os.environ.get("NASBNN_DIR", TP.parents[2] / "NAS-BNN" / "STM32" / "NAS_BNN_Benchmark"))
 PINNED = {"TFLM": "663a0d2f03858482", "LCE": "375d8cf0e9fae5a8"}   # sha256 prefixes of the source trees, 2026-10-19
 dst = TP / "tflm_lce"
 

@@ -1,6 +1,6 @@
 """Step 2 of scripts/export_binary.py, run in WSL (TensorFlow 2.13, larq 0.13.3, larq-compute-engine 0.16.0):
 
-    nice -n 10 ~/lce_env/bin/python scripts/lce_convert.py [--seed 42]
+    nice -n 10 ~/lce_env/bin/python scripts/lce_convert.py [--seed 42]      # from the repository root
 
 Rebuilds the one-bit ReActNet encoder in Larq from artifacts/binary_lce/<name>_params.npz, NHWC with height 1:
 embedded bytes (1, 1, 128, 64) and the padding mask (1, 1, 128, 1) in, the 384-d vector out (the byte-table

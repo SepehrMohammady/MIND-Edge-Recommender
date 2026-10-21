@@ -1,6 +1,6 @@
-"""Generate the master notebook: end-to-end (A->Z), valid nbformat, one markdown
-note per code cell, short code cells that only call src/ functions, and every
-knob driven from the notebook. Run: python -m scripts.make_notebook
+"""Generate the notebook: the pipeline from data to export, one markdown note per
+code cell, short code cells that only call src/ functions, settings from config.yaml
+or the notebook. Run: python -m scripts.make_notebook
 """
 import nbformat as nbf
 from pathlib import Path
@@ -11,19 +11,15 @@ def md(t): cells.append(nbf.v4.new_markdown_cell(t))
 def code(t): cells.append(nbf.v4.new_code_cell(t))
 
 # ── 0. Title / map ────────────────────────────────────────────────────────────
-md("""# MIND-Edge-Recommender — end-to-end
-**Tiny multilingual news recommender: offline pretraining on MIND + xMIND, with a
-NAS × precision study of flash / RAM / energy for the edge.**
+md("""# MIND-Edge-Recommender: the pipeline in one notebook
+Offline training of the byte-level news encoder on MIND and xMIND, with the architecture
+search and the precision sweep of the June study. Long code lives in `src/`; each cell is
+short, follows a note, and takes its settings from `config.yaml` or from this notebook.
 
-This notebook is the single control surface for the whole project (A→Z). Long
-code lives in `src/*.py`; every cell here is short and preceded by a note, and
-every knob is set from `config.yaml` / this notebook.
-
-**Map:** setup → data → teacher → student/distillation → NAS (3 arms) →
-train → precision sweep → baseline → ablation → multilingual → latency/energy →
-export → plots. Architecture axis: NAS → Micro-NAS → binarized-Micro-NAS.
-Precision axis: FP32 → INT8 → Binary (simulated on weights). Targets: STM32 boards and an
-Android phone; training runs on an RTX 5070 laptop.""")
+Order: setup, data, teacher, distilled student, search over three arms, training,
+precision sweep, NRMS baseline, ablation, multilingual evaluation, laptop latency and
+energy, export, plots. INT8 and one-bit weights are simulated here; the 8-bit and one-bit
+files that ran on the boards and the phone are described in the paper.""")
 
 # ── 1. Setup ──────────────────────────────────────────────────────────────────
 md("""## 1. Setup
@@ -41,16 +37,15 @@ cfg = load_config()
 print("device:", "cuda" if torch.cuda.is_available() else "cpu", "| artifacts:", cfg["paths"]["artifacts_dir"])""")
 
 # ── 2. Config control surface ─────────────────────────────────────────────────
-md("""## 2. Configuration (the control surface)
-Every experiment knob lives in `config.yaml` and can be overridden here in memory
-before running anything. The key groups:""")
+md("""## 2. Configuration
+Every setting lives in `config.yaml` and can be changed here in memory before a cell
+runs. The main groups:""")
 code("""{k: cfg[k] for k in ["data", "teacher", "student", "nas", "quant", "train"]}""")
 
 # ── 3. Run scale ──────────────────────────────────────────────────────────────
 md("""## 3. Run scale
-`QUICK=True` runs a fast smoke pass (few epochs / small NAS / capped impressions)
-so the whole notebook executes in minutes. Set `QUICK=False` for the full run.
-This single switch drives every heavy cell below. Outputs go to
+`QUICK=True` runs a short smoke pass (few epochs, a small search, capped impressions)
+so the notebook finishes in minutes; `QUICK=False` runs the full programme. Outputs go to
 `artifacts/runs/quick` or `artifacts/runs/full`, so a smoke pass never overwrites
 a full one, and the run is seeded from `config.yaml`.""")
 code("""QUICK = True
@@ -87,7 +82,7 @@ for lang in ["ron", "jpn", "zho"]:
 
 # ── 6. Teacher anchors ────────────────────────────────────────────────────────
 md("""## 6. Teacher anchors
-Compute (and cache) the frozen multilingual teacher's English-title embeddings —
+Compute and cache the frozen multilingual teacher's embeddings of the English titles,
 the shared distillation targets for all 14 languages.""")
 code("""experiment.ensure_anchors(cfg)""")
 
@@ -111,9 +106,9 @@ print("cosine(en, ron):", round(F.cosine_similarity(emb(dev_en[k]["title"]), emb
 
 # ── 9. NAS ────────────────────────────────────────────────────────────────────
 md("""## 9. Architecture search (3 arms)
-One search space; three arms differ by precision + constraints: `nas` (FP32,
-loose), `micro_nas` (INT8, hard MCU budget), `binarized_micro_nas` (Binary).
-Fitness = distillation quality under footprint feasibility.""")
+One search space; the three arms differ in precision and constraints: `nas` (FP32,
+loose), `micro_nas` (INT8, MCU budget), `binarized_micro_nas` (one-bit). Fitness:
+distillation quality of the candidates within the footprint budget.""")
 code("""arms = experiment.search_arms(cfg, **NAS)
 best = {arm: experiment.best_arch(res) for arm, res in arms.items()}
 pd.DataFrame([{"arm": a, **best[a], "quality": arms[a][0]["quality"],
@@ -126,18 +121,18 @@ code("""models = {arm: experiment.train_for_arch(cfg, best[arm], max_train_impre
           for arm in best}""")
 
 # ── 11. Precision sweep ───────────────────────────────────────────────────────
-md("""## 11. Precision sweep → results matrix
-Evaluate each model at FP32 / INT8 / Binary (PTQ + optional QAT) with ranking
-metrics and footprint (size, RAM, MACs, energy).""")
+md("""## 11. Precision sweep and results matrix
+Evaluate each model at FP32, INT8 and one bit (post-training, optional QAT) with
+ranking metrics and footprint (size, RAM, MACs, energy).""")
 code("""rows = []
 for arm in models:
     rows += experiment.precision_sweep(cfg, models[arm], best[arm], arm, qat_epochs=QAT, max_eval=EVAL_IMPR)
 matrix = experiment.save_matrix(cfg, rows); matrix""")
 
 # ── 12. Baseline ──────────────────────────────────────────────────────────────
-md("""## 12. NRMS baseline (FP32 ceiling)
-Reproduced NRMS on the **same** MINDsmall-dev split (like-for-like). External
-reference: published MINDlarge-test NRMS AUC 0.6776.""")
+md("""## 12. NRMS baseline
+NRMS reproduced on the same MINDsmall dev split. Published AUC of NRMS on the
+MINDlarge test set: 0.6776.""")
 code("""experiment.baseline_row(cfg, epochs=cfg["train"]["epochs"], max_eval=EVAL_IMPR)""")
 
 # ── 13. Ablation ──────────────────────────────────────────────────────────────
@@ -151,31 +146,32 @@ pd.DataFrame([{"init": "scratch", **abl["scratch"]},
 
 # ── 14. Multilingual ──────────────────────────────────────────────────────────
 md("""## 14. Multilingual evaluation (all 14 languages)
-Cross-lingual transfer: identical English impressions, news text swapped per
-language through the SAME byte-level model.""")
+Cross-lingual transfer: the same English impressions, with the news text swapped per
+language, read by the same byte-level model.""")
 code("""deploy = models["micro_nas"]
 experiment.eval_languages(cfg, deploy, max_impressions=EVAL_IMPR or 2000)""")
 
 # ── 15. Latency & energy ──────────────────────────────────────────────────────
-md("""## 15. Measured latency & energy (laptop)
-GPU latency and NVML energy on the laptop. Board and phone measurements are a
-separate step (ST Edge AI for STM32, the FeedWell-Edge app for Android).""")
+md("""## 15. Laptop latency and energy
+GPU latency and NVML energy on the laptop. The boards and the phone are measured
+separately (ST Edge AI for the STM32 boards, the FeedWell-Edge app on Android).""")
 code("""ex = torch.zeros(8, cfg["data"]["max_title_bytes"], dtype=torch.long)
 print("GPU latency ms:", round(measure_energy.latency_torch(deploy.news_encoder, ex), 4))
 print("Energy:", measure_energy.energy_nvml(deploy.news_encoder, ex, n=200))""")
 
 # ── 16. Export single ─────────────────────────────────────────────────────────
 md("""## 16. Export the deployment model
-ONNX content encoder + cold-start `topicWeights` prior, mapped to the app's
-`edgeml_model_state_v1` schema (Micro-NAS / INT8 sweet spot).""")
+ONNX content encoder and the cold-start `topicWeights` prior, in the app's
+`edgeml_model_state_v1` schema (Micro-NAS arm).""")
 code("""langs = ["en"] + data_xmind.available_langs(cfg)
 print(export.export_artifacts(cfg, deploy.news_encoder.cpu(), langs))""")
 
 # ── 17. Export all arms ───────────────────────────────────────────────────────
-md("""## 17. Export every arm + comparison manifest
-Export one ONNX per arm and a `models_manifest.json` so the app can pick a
-trade-off. INT8 and Binary are *simulated* on weights; the exported ONNX is the
-FP32 graph. A full-integer export is a later step.""")
+md("""## 17. Export every arm and a comparison manifest
+One ONNX file per arm and a `models_manifest.json`, so the app can pick a trade-off.
+INT8 and one bit are simulated on the weights here, and these files hold the FP32
+graph; the 8-bit files that ran on the boards come from `scripts/deploy_boards.py`
+and `scripts/export_int8.py`.""")
 code("""arm_label = {"nas": "nas", "micro_nas": "micro_nas", "binarized_micro_nas": "bin_unas"}
 to_export = {(arm_label[a], "fp32"): m.news_encoder.cpu() for a, m in models.items()}
 print(export.export_all(cfg, to_export, langs))""")
@@ -191,22 +187,23 @@ ax[0].set(xlabel="size (KB)", ylabel="AUC"); ax[1].set(xlabel="energy (uJ/inf)",
 ax[1].set_xscale("log"); ax[0].legend(); [a.grid(alpha=.3) for a in ax]; plt.tight_layout(); plt.show()""")
 
 # ── 19. Reproduce paper numbers ───────────────────────────────────────────────
-md("""## 19. The paper's numbers
-Frozen result files in `paper/results/`: the June 2026 full run with cost columns
-recomputed by `scripts/recompute_costs.py`. `scripts/check_numbers.py` compares
-them with `paper/paper.tex`.""")
+md("""## 19. The June run
+The June 2026 full run, with cost columns recomputed by `scripts/recompute_costs.py`
+(`paper/results/results_matrix.csv`). The tables of the paper come from the seeded
+reruns (`scripts/run_matrix.py`, `scripts/run_p1.py`); `scripts/check_numbers.py`
+compares every number in `paper/paper.tex` with `paper/results/`.""")
 code("""res = pathlib.Path(cfg["paths"]["results_dir"])
 s = json.load(open(res / "results_summary.json"))
 print("best archs:", s["best_arch"]); print("NRMS baseline (reduced):", s["baseline"])
 pd.read_csv(res / "results_matrix.csv")[["arm", "precision", "auc", "size_kb", "macs", "energy_uj"]]""")
 
 # ── 20. Conclusions ───────────────────────────────────────────────────────────
-md("""## 20. Where things stand
-- A 256-row byte vocabulary replaces the word table; the encoder is a few hundred kilobytes.
-- INT8 and 1-bit rows are weight-only simulations; sizes and energy are estimates until a
-  full-integer model is exported and measured on a board.
-- Initialising from the distilled student helps (see the ablation).
-- Frozen numbers in `paper/results/`, run outputs in `artifacts/runs/`, journal in `LOGBOOK.md`.""")
+md("""## 20. Notes
+- One 256-row byte vocabulary replaces the word table; the encoder needs a few hundred kilobytes.
+- In this notebook the INT8 and one-bit rows are weight-only simulations; the measured 8-bit
+  and one-bit files are described in the paper.
+- Starting from the distilled student helps (see the ablation).
+- Frozen numbers are in `paper/results/`, run outputs in `artifacts/runs/`.""")
 
 nb["cells"] = cells
 out = Path("notebooks"); out.mkdir(exist_ok=True)
