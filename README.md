@@ -62,6 +62,13 @@ The µNAS searches are described in `unas/README.md`, the board measurements in
 Both datasets are for non-commercial research. Downloaded data (`data/`) and run outputs
 (`artifacts/`) are not part of the repository.
 
+## Licence
+
+The code is under the MIT licence (`LICENSE`). Some files keep their own terms: the two HAL configuration
+headers in `firmware/*/Core/Inc/` (STMicroelectronics, see their headers), `paper/llncs.cls` and
+`paper/splncs04.bst` (Springer), and the model files in `models/`, which were trained on MIND and xMIND and
+are for non-commercial research only.
+
 ## Reproducibility
 
 - Every run script seeds Python, NumPy and PyTorch; the paper reports means and standard

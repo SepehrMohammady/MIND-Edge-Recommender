@@ -9,6 +9,7 @@ authors:
   - family-names: "Mohammady"
     given-names: "Sepehr"
 repository-code: "https://github.com/SepehrMohammady/MIND-Edge-Recommender"
+license: MIT
 keywords:
   - news recommendation
   - multilingual
