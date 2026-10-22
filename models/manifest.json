@@ -1,0 +1,606 @@
+{
+ "byte_ids": "UTF-8 bytes of the title, first 128, id = byte + 1, 0 = padding (src/student.text_to_bytes)",
+ "embedded_bytes": "byte_table[ids] as (1, 64, 128) for the ONNX files; mask = (ids != 0) as (1, 1, 128)",
+ "files": {
+  "unas_h7_seed42_body_int8qdq.onnx": {
+   "bytes": 72032,
+   "sha256": "ca6f14fbf523a53843d1172e05a717bf25e00d285257db40ec598265b90d4f4c",
+   "source": "artifacts/stedgeai/models/unas_h7_seed42_body_int8qdq.onnx",
+   "encoder": "muNAS 144, recipe choice under the STM32H7B3I-DK budget",
+   "reported_in": "Table 3, Figs. 5 and 6a",
+   "checkpoint": "artifacts/runs/unas_full/mind_h7_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "unas_h7_seed42_body_fp32.onnx": {
+   "bytes": 214848,
+   "sha256": "faa1c243ef908853158982d5f19c0fe01e563871be5d961b79ae7633501e4444",
+   "source": "artifacts/stedgeai/models/unas_h7_seed42_body_fp32.onnx",
+   "encoder": "muNAS 144, recipe choice under the STM32H7B3I-DK budget",
+   "reported_in": "Table 3, Figs. 5 and 6a",
+   "checkpoint": "artifacts/runs/unas_full/mind_h7_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "unas_h7_c140_seed42_body_int8qdq.onnx": {
+   "bytes": 90053,
+   "sha256": "79056ca93d03e688c0f4d5a95c371b75912d408279fd5cdc88f73530bfee621a",
+   "source": "artifacts/stedgeai/models/unas_h7_c140_seed42_body_int8qdq.onnx",
+   "encoder": "muNAS 140, final choice under the STM32H7B3I-DK budget",
+   "reported_in": "Table 3, Figs. 5 and 6",
+   "checkpoint": "artifacts/runs/unas_full/mind_h7_c140_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "unas_h7_c140_seed42_body_fp32.onnx": {
+   "bytes": 272148,
+   "sha256": "ca8fec494c5c00d4b6ee4798134c39f8f6840edb62aff9b93b8bfe43cbadb4c6",
+   "source": "artifacts/stedgeai/models/unas_h7_c140_seed42_body_fp32.onnx",
+   "encoder": "muNAS 140, final choice under the STM32H7B3I-DK budget",
+   "reported_in": "Table 3, Figs. 5 and 6",
+   "checkpoint": "artifacts/runs/unas_full/mind_h7_c140_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "unas_f401_seed42_body_int8qdq.onnx": {
+   "bytes": 56783,
+   "sha256": "49f2f8aff3585b086e19dc63444879617d4578da42b3da758d2c23e7f22b1eed",
+   "source": "artifacts/stedgeai/models/unas_f401_seed42_body_int8qdq.onnx",
+   "encoder": "muNAS 134, recipe choice under the NUCLEO-F401RE budget",
+   "reported_in": "Table 3, Figs. 5 and 6a",
+   "checkpoint": "artifacts/runs/unas_full/mind_f401_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "unas_f401_seed42_body_fp32.onnx": {
+   "bytes": 171726,
+   "sha256": "74cbb132ff4f7613df573e6343df64b6f79620bc9cd2608fb31922ba91884a8d",
+   "source": "artifacts/stedgeai/models/unas_f401_seed42_body_fp32.onnx",
+   "encoder": "muNAS 134, recipe choice under the NUCLEO-F401RE budget",
+   "reported_in": "Table 3, Figs. 5 and 6a",
+   "checkpoint": "artifacts/runs/unas_full/mind_f401_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "unas_f401_c142_seed42_body_int8qdq.onnx": {
+   "bytes": 89992,
+   "sha256": "4c814744d1b021f4d3f6dfcd0815bd1602bb399a9dde69fcc438a72eb71977f1",
+   "source": "artifacts/stedgeai/models/unas_f401_c142_seed42_body_int8qdq.onnx",
+   "encoder": "muNAS 142, final choice under the NUCLEO-F401RE budget",
+   "reported_in": "Table 3, Figs. 5 and 6",
+   "checkpoint": "artifacts/runs/unas_full/mind_f401_c142_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "unas_f401_c142_seed42_body_fp32.onnx": {
+   "bytes": 249624,
+   "sha256": "e6ce9ef6b28217d1160887a81587743b1d3ecbafdcaba3cc7d51c889bc1de3e3",
+   "source": "artifacts/stedgeai/models/unas_f401_c142_seed42_body_fp32.onnx",
+   "encoder": "muNAS 142, final choice under the NUCLEO-F401RE budget",
+   "reported_in": "Table 3, Figs. 5 and 6",
+   "checkpoint": "artifacts/runs/unas_full/mind_f401_c142_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "hand_64-2-384_seed42_body_int8qdq.onnx": {
+   "bytes": 60817,
+   "sha256": "7cd63910722d6a32e139ded010b98719f8c5a601612e66e2f0c619e0a9f75dc1",
+   "source": "artifacts/stedgeai/models/hand_64-2-384_seed42_body_int8qdq.onnx",
+   "encoder": "hand-designed 64-2-384, best within the STM32H7B3I-DK budget",
+   "reported_in": "Table 3, Fig. 6a",
+   "checkpoint": "artifacts/runs/unas_full/hand_64-2-384_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "hand_64-2-384_seed42_body_fp32.onnx": {
+   "bytes": 154594,
+   "sha256": "d4fd20867419fdcfc1198415f28633e4db4fcacfed5babc55d11cd99bd7b21e0",
+   "source": "artifacts/stedgeai/models/hand_64-2-384_seed42_body_fp32.onnx",
+   "encoder": "hand-designed 64-2-384, best within the STM32H7B3I-DK budget",
+   "reported_in": "Table 3, Fig. 6a",
+   "checkpoint": "artifacts/runs/unas_full/hand_64-2-384_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "hand_32-5-384_seed42_body_int8qdq.onnx": {
+   "bytes": 55334,
+   "sha256": "cbdf40b11572f2d99632e3b233fe1c057fd45df9134bbeb1bf5c3e29ddb5b300",
+   "source": "artifacts/stedgeai/models/hand_32-5-384_seed42_body_int8qdq.onnx",
+   "encoder": "hand-designed 32-5-384, best within the NUCLEO-F401RE budget",
+   "reported_in": "Table 3, Fig. 6a",
+   "checkpoint": "artifacts/runs/unas_full/hand_32-5-384_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "hand_32-5-384_seed42_body_fp32.onnx": {
+   "bytes": 87249,
+   "sha256": "b562b0e5b52e6835f7dcdce31f661c6d5d71b4bcd27c71d7e6f2bd485959cbd6",
+   "source": "artifacts/stedgeai/models/hand_32-5-384_seed42_body_fp32.onnx",
+   "encoder": "hand-designed 32-5-384, best within the NUCLEO-F401RE budget",
+   "reported_in": "Table 3, Fig. 6a",
+   "checkpoint": "artifacts/runs/unas_full/hand_32-5-384_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "hand_64-5-384_seed42_body_int8qdq.onnx": {
+   "bytes": 91533,
+   "sha256": "55ce47f01ff2e998bf911262e4f60b20517c2144b7efd9c507218f137ae8794e",
+   "source": "artifacts/stedgeai/models/hand_64-5-384_seed42_body_int8qdq.onnx",
+   "encoder": "hand-designed 64-5-384 in the search's terms (fixed byte table, mask channel, global average pooling)",
+   "reported_in": "Table 3, Fig. 6a",
+   "checkpoint": "artifacts/runs/unas_full/hand_64-5-384_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "hand_64-5-384_seed42_body_fp32.onnx": {
+   "bytes": 209501,
+   "sha256": "4ef06e511a52f61e367ab48491be0534b48971c0a55668e81102064038d273eb",
+   "source": "artifacts/stedgeai/models/hand_64-5-384_seed42_body_fp32.onnx",
+   "encoder": "hand-designed 64-5-384 in the search's terms (fixed byte table, mask channel, global average pooling)",
+   "reported_in": "Table 3, Fig. 6a",
+   "checkpoint": "artifacts/runs/unas_full/hand_64-5-384_distill_ft_en_seed42.pt",
+   "byte_table": "byte_table_fixed.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "ref_64-5-384_seed42_body_int8qdq.onnx": {
+   "bytes": 90893,
+   "sha256": "d46c1106512f717e2d16e5396fc2d6e5dacce856dd7d2f280c75b130e73db774",
+   "source": "artifacts/stedgeai/models/micro_nas_64-5-384_body_int8qdq.onnx",
+   "encoder": "reference byte-CNN 64-5-384, distilled start, English clicks",
+   "reported_in": "Sect. 5, board results of the reference encoder",
+   "checkpoint": "artifacts/runs/p1/distill_ft_en_seed42.pt",
+   "byte_table": "ref_64-5-384_seed42_byte_table.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "ref_64-5-384_seed42_body_fp32.onnx": {
+   "bytes": 208970,
+   "sha256": "15dc9937795be976255a9a86731e5da48fe96964303822fac8d508e6e05fe344",
+   "source": "artifacts/stedgeai/models/micro_nas_64-5-384_body_fp32.onnx",
+   "encoder": "reference byte-CNN 64-5-384, distilled start, English clicks",
+   "reported_in": "Sect. 5, board results of the reference encoder",
+   "checkpoint": "artifacts/runs/p1/distill_ft_en_seed42.pt",
+   "byte_table": "ref_64-5-384_seed42_byte_table.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "ref_mixed_64-5-384_seed42_body_int8qdq.onnx": {
+   "bytes": 90911,
+   "sha256": "148b1a1dbf1226c6fc0d0e6145126462ea9696ea866aff4819754e483b106257",
+   "source": "artifacts/stedgeai/models/ref_mixed_64-5-384_seed42_body_int8qdq.onnx",
+   "encoder": "reference byte-CNN 64-5-384, distilled start, clicks shown in a random xMIND language; the phone app's encoder",
+   "reported_in": "Sect. 5, phone results and replay",
+   "checkpoint": "artifacts/runs/p1/distill_ft_mixed_seed42.pt",
+   "byte_table": "ref_mixed_64-5-384_seed42_byte_table.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "ref_mixed_64-5-384_seed42_body_fp32.onnx": {
+   "bytes": 208970,
+   "sha256": "ec75a0b4357813e7d8372b23fc6c6e5af9539d5e47329ea65cc3f6595091c6ac",
+   "source": "artifacts/stedgeai/models/ref_mixed_64-5-384_seed42_body_fp32.onnx",
+   "encoder": "reference byte-CNN 64-5-384, distilled start, clicks shown in a random xMIND language; the phone app's encoder",
+   "reported_in": "Sect. 5, phone results and replay",
+   "checkpoint": "artifacts/runs/p1/distill_ft_mixed_seed42.pt",
+   "byte_table": "ref_mixed_64-5-384_seed42_byte_table.f32",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     64,
+     128
+    ],
+    "mask": [
+     1,
+     1,
+     128
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "byte_table_fixed.f32": {
+   "bytes": 65792,
+   "sha256": "43af8b7539fcc17d91c14dc21c4fd147787ff80522d02d993252180a86b1e3d1",
+   "source": "news_encoder.embed.weight of the Table 3 checkpoints (seed 42)",
+   "shape": [
+    257,
+    64
+   ]
+  },
+  "ref_64-5-384_seed42_byte_table.f32": {
+   "bytes": 65792,
+   "sha256": "dd201bc217b4d8062be3f21a63c23eec67bbb9ff3e50abaf52fcc9e02d0531be",
+   "source": "news_encoder.embed.weight of artifacts/runs/p1/distill_ft_en_seed42.pt",
+   "shape": [
+    257,
+    64
+   ]
+  },
+  "ref_mixed_64-5-384_seed42_byte_table.f32": {
+   "bytes": 65792,
+   "sha256": "c91fc0d795691e664b1fe89abaf16bfd916c6154c14ad7ca3eceb1341e75ead0",
+   "source": "news_encoder.embed.weight of artifacts/runs/p1/distill_ft_mixed_seed42.pt",
+   "shape": [
+    257,
+    64
+   ]
+  },
+  "user_encoder.onnx": {
+   "bytes": 199138,
+   "sha256": "920a547420259d9a1d2e846aaa566221e2b25ee0bf22315e293af54fe991f639",
+   "source": "artifacts/app/edge_encoder_v1/user_encoder.onnx",
+   "checkpoint": "artifacts/runs/p1/distill_ft_mixed_seed42.pt",
+   "encoder": "user encoder (additive attention) of the phone app's checkpoint",
+   "reported_in": "Sect. 5, replay and phone",
+   "inputs": {
+    "history_vectors": [
+     1,
+     "H",
+     384
+    ],
+    "history_mask": [
+     1,
+     "H"
+    ]
+   },
+   "outputs": {
+    "user_vector": [
+     1,
+     384
+    ]
+   },
+   "opset": 18
+  },
+  "reactnet_64-5-384_seed42_byte_table.f32": {
+   "bytes": 65792,
+   "sha256": "a1016aa6d9c94b3915ae3a9087c600dbb4f1a7c41b9d2959bd0dc9c3b3618c71",
+   "source": "embed of artifacts/binary_lce/reactnet_64-5-384_seed42_params.npz",
+   "shape": [
+    257,
+    64
+   ]
+  },
+  "reactnet_64-5-384_seed42_lce.tflite": {
+   "bytes": 140480,
+   "sha256": "832161133c9c29d5c62c7d08c97af10f401085e1f1e4c356b68d8041f8b5ba49",
+   "source": "artifacts/binary_lce/reactnet_64-5-384_seed42_lce.tflite",
+   "checkpoint": "artifacts/runs/binary/reactnet_64-5-384_seed42.pt",
+   "encoder": "one-bit 64-5-384 with ReActNet blocks, distilled start, English clicks",
+   "reported_in": "Sect. 5, one-bit encoder on the STM32H7B3I-DK; Fig. 6b",
+   "inputs": {
+    "embedded_bytes": [
+     1,
+     1,
+     128,
+     64
+    ],
+    "mask": [
+     1,
+     1,
+     128,
+     1
+    ]
+   },
+   "outputs": {
+    "news_embedding": [
+     1,
+     384
+    ]
+   },
+   "byte_table": "reactnet_64-5-384_seed42_byte_table.f32",
+   "converter": {
+    "tensorflow": "2.13.0",
+    "larq": "0.13.3",
+    "lce": "0.16.0"
+   }
+  }
+ }
+}

@@ -35,3 +35,8 @@ logs/
 # board firmware: fetched sources and build outputs (firmware/fetch_deps.py, firmware/nucleo_f401re/build.py)
 firmware/third_party/
 firmware/*/build/
+
+# model files of the paper (scripts/export_release.py); the checkpoint archive goes to a release, not to git
+!models/*.onnx
+!models/*.tflite
+release/

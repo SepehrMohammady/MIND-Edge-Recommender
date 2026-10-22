@@ -22,6 +22,7 @@ translations; latency and energy on a NUCLEO-F401RE, an STM32H7B3I-DK and an And
 | `scripts/` | experiments, exports, board and phone measurements, tables and figures |
 | `unas/` | adapter for the µNAS searches under the board budgets (`unas/README.md`) |
 | `firmware/` | board firmware for the 8-bit and one-bit encoders (`firmware/README.md`) |
+| `models/` | the model files that ran on the boards and the phone, their byte tables and a SHA-256 manifest (`models/README.md`) |
 | `notebooks/` | the pipeline from data to export in one notebook |
 | `paper/` | LaTeX source, PDF, tables and figures |
 | `paper/results/` | the result files behind the numbers of the paper |
@@ -43,6 +44,7 @@ python -m scripts.export_int8      # 8-bit files of those encoders and their acc
 python -m scripts.replay_app       # replay of MIND through the ranking rule of the reader app
 python -m scripts.make_figures     # figures from paper/results
 python -m scripts.check_numbers    # compares every number in paper/paper.tex with paper/results
+python -m scripts.export_release   # models/ from the run outputs (--checkpoints: archive of all checkpoints)
 ```
 
 The paper builds in `paper/` with `pdflatex paper && bibtex paper && pdflatex paper && pdflatex paper`.
@@ -70,6 +72,9 @@ Both datasets are for non-commercial research. Downloaded data (`data/`) and run
   kept for comparison; the tables of the paper come from the seeded reruns.
 
 ## Citation
+
+`CITATION.cff` describes this repository for GitHub's "Cite this repository" and for archiving. The
+paper:
 
 ```bibtex
 @misc{mind-edge-recommender2026,

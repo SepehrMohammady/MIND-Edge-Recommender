@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this code or the model files, please cite this repository. The paper is in preparation."
+type: software
+title: "MIND-Edge-Recommender: a byte-level multilingual news recommender for microcontrollers"
+abstract: >-
+  Code, board firmware, model files and result files of a byte-level multilingual news recommender,
+  evaluated on MIND and xMIND and run on STM32 microcontrollers and an Android phone.
+authors:
+  - family-names: "Mohammady"
+    given-names: "Sepehr"
+repository-code: "https://github.com/SepehrMohammady/MIND-Edge-Recommender"
+keywords:
+  - news recommendation
+  - multilingual
+  - TinyML
+  - microcontrollers
+  - neural architecture search
+  - binarized neural networks
+  - knowledge distillation
